@@ -266,86 +266,94 @@ function HeaderContainer(props: Props): JSX.Element {
             </Menu.Item>
         ), 0]);
     }
+    if (user.isStaff) {
+        menuItems.push([(
+            <Menu.SubMenu
+                disabled={organizationsFetching}
+                key='organization'
+                title='Organization'
+                icon={organizationsFetching ? <LoadingOutlined /> : <TeamOutlined />}
+            >
+                {currentOrganization ? (
+                    <Menu.Item icon={<SettingOutlined />} key='open_organization' onClick={() => history.push('/organization')} className='cvat-header-menu-open-organization'>
+                        Settings
+                    </Menu.Item>
+                ) : null}
+                <Menu.Item icon={<PlusOutlined />} key='create_organization' onClick={() => history.push('/organizations/create')} className='cvat-header-menu-create-organization'>Create</Menu.Item>
+                { organizationsList.length > 5 ? (
+                    <Menu.Item
+                        key='switch_organization'
+                        onClick={() => {
+                            Modal.confirm({
+                                title: 'Select an organization',
+                                okButtonProps: {
+                                    style: { display: 'none' },
+                                },
+                                content: (
+                                    <Select
+                                        showSearch
+                                        className='cvat-modal-organization-selector'
+                                        value={currentOrganization?.slug}
+                                        onChange={(value: string) => {
+                                            if (value === '$personal') {
+                                                resetOrganization();
+                                                return;
+                                            }
 
-    menuItems.push([(
-        <Menu.SubMenu
-            disabled={organizationsFetching}
-            key='organization'
-            title='Organization'
-            icon={organizationsFetching ? <LoadingOutlined /> : <TeamOutlined />}
-        >
-            {currentOrganization ? (
-                <Menu.Item icon={<SettingOutlined />} key='open_organization' onClick={() => history.push('/organization')} className='cvat-header-menu-open-organization'>
-                    Settings
-                </Menu.Item>
-            ) : null}
-            <Menu.Item icon={<PlusOutlined />} key='create_organization' onClick={() => history.push('/organizations/create')} className='cvat-header-menu-create-organization'>Create</Menu.Item>
-            { organizationsList.length > 5 ? (
-                <Menu.Item
-                    key='switch_organization'
-                    onClick={() => {
-                        Modal.confirm({
-                            title: 'Select an organization',
-                            okButtonProps: {
-                                style: { display: 'none' },
-                            },
-                            content: (
-                                <Select
-                                    showSearch
-                                    className='cvat-modal-organization-selector'
-                                    value={currentOrganization?.slug}
-                                    onChange={(value: string) => {
-                                        if (value === '$personal') {
-                                            resetOrganization();
-                                            return;
-                                        }
-
-                                        const [organization] = organizationsList
-                                            .filter((_organization): boolean => _organization.slug === value);
-                                        if (organization) {
-                                            setNewOrganization(organization);
-                                        }
-                                    }}
-                                >
-                                    <Select.Option value='$personal'>Personal workspace</Select.Option>
-                                    {organizationsList.map((organization: any): JSX.Element => {
-                                        const { slug } = organization;
-                                        return <Select.Option key={slug} value={slug}>{slug}</Select.Option>;
-                                    })}
-                                </Select>
-                            ),
-                        });
-                    }}
-                >
-                    Switch organization
-                </Menu.Item>
-            ) : (
-                <>
-                    <Menu.Divider />
-                    <Menu.ItemGroup>
-                        <Menu.Item
-                            className={!currentOrganization ?
-                                'cvat-header-menu-active-organization-item' : 'cvat-header-menu-organization-item'}
-                            key='$personal'
-                            onClick={resetOrganization}
-                        >
-                            Personal workspace
-                        </Menu.Item>
-                        {organizationsList.map((organization: any): JSX.Element => (
+                                            const [organization] = organizationsList
+                                                .filter((_organization): boolean => _organization.slug === value);
+                                            if (organization) {
+                                                setNewOrganization(organization);
+                                            }
+                                        }}
+                                    >
+                                        <Select.Option value='$personal'>Personal workspace</Select.Option>
+                                        {organizationsList.map((organization: any): JSX.Element => {
+                                            const { slug } = organization;
+                                            return <Select.Option key={slug} value={slug}>{slug}</Select.Option>;
+                                        })}
+                                    </Select>
+                                ),
+                            });
+                        }}
+                    >
+                        Switch organization
+                    </Menu.Item>
+                ) : (
+                    <>
+                        <Menu.Divider />
+                        <Menu.ItemGroup>
                             <Menu.Item
-                                className={currentOrganization?.slug === organization.slug ?
+                                className={!currentOrganization ?
                                     'cvat-header-menu-active-organization-item' : 'cvat-header-menu-organization-item'}
-                                key={organization.slug}
-                                onClick={() => setNewOrganization(organization)}
+                                key='$personal'
+                                onClick={resetOrganization}
                             >
-                                {organization.slug}
+                                Personal workspace
                             </Menu.Item>
-                        ))}
-                    </Menu.ItemGroup>
-                </>
-            )}
-        </Menu.SubMenu>
-    ), 10]);
+                            {organizationsList.map((organization: any): JSX.Element => (
+                                <Menu.Item
+                                    className={currentOrganization?.slug === organization.slug ?
+                                        'cvat-header-menu-active-organization-item' : 'cvat-header-menu-organization-item'}
+                                    key={organization.slug}
+                                    onClick={() => setNewOrganization(organization)}
+                                >
+                                    {organization.slug}
+                                </Menu.Item>
+                            ))}
+                        </Menu.ItemGroup>
+                    </>
+                )}
+            </Menu.SubMenu>
+        ), 10]);
+    } else {
+        // for all non-staff users, automatically open the first organization they are part of.
+        if (!organizationsFetching) {
+            if (organizationsList.length) {
+                setNewOrganization(organizationsList[0]);
+            }
+        }
+    }
 
     menuItems.push([(
         <Menu.Item

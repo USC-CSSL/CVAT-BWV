@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router';
-import { useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { Row, Col } from 'antd/lib/grid';
 import Button from 'antd/lib/button';
 import Dropdown from 'antd/lib/dropdown';
@@ -13,7 +13,7 @@ import Input from 'antd/lib/input';
 import { PlusOutlined, UploadOutlined, LoadingOutlined } from '@ant-design/icons';
 import { importActions } from 'actions/import-actions';
 import { usePrevious } from 'utils/hooks';
-import { ProjectsQuery } from 'reducers';
+import { CombinedState, ProjectsQuery } from 'reducers';
 import { SortingComponent, ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
 
 import {
@@ -24,7 +24,7 @@ const FilteringComponent = ResourceFilterHOC(
     config, localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues,
 );
 
-interface Props {
+interface TopBarProps {
     onApplyFilter(filter: string | null): void;
     onApplySorting(sorting: string | null): void;
     onApplySearch(search: string | null): void;
@@ -32,10 +32,29 @@ interface Props {
     importing: boolean;
 }
 
+interface StateToProps {
+    isOrganizationOwner: boolean
+}
+
+type Props = TopBarProps & StateToProps;
+
+function mapStateToProps(state: CombinedState): StateToProps {
+    const {
+        auth: {
+            user,
+        },
+        organizations: { fetching: organizationsFetching, current: currentOrganization },
+    } = state;
+
+    return {
+        isOrganizationOwner: !organizationsFetching && currentOrganization.owner.username === user.username
+    };
+}
+
 function TopBarComponent(props: Props): JSX.Element {
     const dispatch = useDispatch();
     const {
-        importing, query, onApplyFilter, onApplySorting, onApplySearch,
+        importing, query, onApplyFilter, onApplySorting, onApplySearch, isOrganizationOwner
     } = props;
     const [visibility, setVisibility] = useState(defaultVisibility);
     const prevImporting = usePrevious(importing);
@@ -89,6 +108,7 @@ function TopBarComponent(props: Props): JSX.Element {
                     </div>
                 </div>
                 <div>
+                    { isOrganizationOwner &&
                     <Dropdown
                         trigger={['click']}
                         overlay={(
@@ -117,10 +137,11 @@ function TopBarComponent(props: Props): JSX.Element {
                     >
                         <Button type='primary' className='cvat-create-project-dropdown' icon={<PlusOutlined />} />
                     </Dropdown>
+                    }
                 </div>
             </Col>
         </Row>
     );
 }
 
-export default React.memo(TopBarComponent);
+export default connect(mapStateToProps)(React.memo(TopBarComponent));

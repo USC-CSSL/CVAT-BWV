@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 
 import { Row, Col } from 'antd/lib/grid';
@@ -14,13 +14,14 @@ import Button from 'antd/lib/button';
 import Input from 'antd/lib/input';
 import { importActions } from 'actions/import-actions';
 import { SortingComponent, ResourceFilterHOC, defaultVisibility } from 'components/resource-sorting-filtering';
-import { TasksQuery } from 'reducers';
+import { CombinedState, TasksQuery } from 'reducers';
 import { usePrevious } from 'utils/hooks';
 import { MultiPlusIcon } from 'icons';
 import CvatDropdownMenuPaper from 'components/common/cvat-dropdown-menu-paper';
 import {
     localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues, config,
 } from './tasks-filter-configuration';
+import topBar from 'components/jobs-page/top-bar';
 
 const FilteringComponent = ResourceFilterHOC(
     config, localStorageRecentKeyword, localStorageRecentCapacity, predefinedFilterValues,
@@ -34,10 +35,29 @@ interface VisibleTopBarProps {
     importing: boolean;
 }
 
-export default function TopBarComponent(props: VisibleTopBarProps): JSX.Element {
+interface StateToProps {
+    isOrganizationOwner: boolean
+}
+
+type Props = VisibleTopBarProps & StateToProps;
+
+function mapStateToProps(state: CombinedState): StateToProps {
+    const {
+        auth: {
+            user,
+        },
+        organizations: { fetching: organizationsFetching, current: currentOrganization },
+    } = state;
+
+    return {
+        isOrganizationOwner: !organizationsFetching && currentOrganization.owner.username === user.username
+    };
+}
+
+function TopBarComponent(props: Props): JSX.Element {
     const dispatch = useDispatch();
     const {
-        importing, query, onApplyFilter, onApplySorting, onApplySearch,
+        importing, query, onApplyFilter, onApplySorting, onApplySearch, isOrganizationOwner
     } = props;
     const [visibility, setVisibility] = useState(defaultVisibility);
     const history = useHistory();
@@ -91,6 +111,7 @@ export default function TopBarComponent(props: VisibleTopBarProps): JSX.Element 
                     </div>
                 </div>
                 <div>
+                    { isOrganizationOwner &&
                     <Dropdown
                         trigger={['click']}
                         overlay={(
@@ -126,8 +147,11 @@ export default function TopBarComponent(props: VisibleTopBarProps): JSX.Element 
                     >
                         <Button type='primary' className='cvat-create-task-dropdown' icon={<PlusOutlined />} />
                     </Dropdown>
+                    }
                 </div>
             </Col>
         </Row>
     );
 }
+
+export default connect(mapStateToProps)(React.memo(TopBarComponent));

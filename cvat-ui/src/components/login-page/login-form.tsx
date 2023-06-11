@@ -74,12 +74,12 @@ function LoginFormComponent(props: Props): JSX.Element {
                 {
                     !credential && (
                         <Row>
-                            <Col className='cvat-credentials-link'>
+                            {/* <Col className='cvat-credentials-link'>
                                 <Text strong>
                                     New user?&nbsp;
                                     <Link to='/auth/register'>Create an account</Link>
                                 </Text>
-                            </Col>
+                            </Col> */}
                         </Row>
                     )
                 }

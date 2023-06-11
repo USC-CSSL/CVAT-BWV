@@ -62,10 +62,10 @@ allow {
     utils.is_admin
 }
 
-allow {
-    input.scope == utils.CREATE
-    utils.has_perm(utils.USER)
-}
+# allow {
+#     input.scope == utils.CREATE
+#     utils.has_perm(utils.USER)
+# }
 
 allow {
     input.scope == utils.CREATE
@@ -105,8 +105,8 @@ allow {
     input.resource.user.role == MAINTAINER
 }
 
-allow {
-    input.scope == utils.DELETE
-    utils.has_perm(utils.WORKER)
-    utils.is_resource_owner
-}
+# allow {
+#    input.scope == utils.DELETE
+#    utils.has_perm(utils.WORKER)
+#    utils.is_resource_owner
+# }
