@@ -161,6 +161,9 @@ ThunkAction<Promise<void>, {}, {}, AnyAction> {
         if (data.projectId) {
             description.project_id = data.projectId;
         }
+        if (data.phase) {
+            description.phase = data.phase;
+        }
         if (data.advanced.bugTracker) {
             description.bug_tracker = data.advanced.bugTracker;
         }

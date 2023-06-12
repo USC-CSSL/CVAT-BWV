@@ -562,7 +562,7 @@ class JobReadSerializer(serializers.ModelSerializer):
         fields = ('url', 'id', 'task_id', 'project_id', 'assignee',
             'dimension', 'bug_tracker', 'status', 'stage', 'state', 'mode',
             'start_frame', 'stop_frame', 'data_chunk_size', 'organization', 'data_compressed_chunk_type',
-            'updated_date', 'issues', 'labels'
+            'updated_date', 'issues', 'labels', 'phase'
         )
         read_only_fields = fields
 
@@ -909,7 +909,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Task
-        fields = ('url', 'id', 'name', 'project_id', 'mode', 'owner', 'assignee',
+        fields = ('url', 'id', 'name', 'project_id', 'mode', 'phase', 'owner', 'assignee',
             'bug_tracker', 'created_date', 'updated_date', 'overlap', 'segment_size',
             'status', 'data_chunk_size', 'data_compressed_chunk_type',
             'data_original_chunk_type', 'size', 'image_quality', 'data', 'dimension',
@@ -932,7 +932,7 @@ class TaskWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.Task
-        fields = ('url', 'id', 'name', 'project_id', 'owner_id', 'assignee_id',
+        fields = ('url', 'id', 'name', 'project_id', 'owner_id', 'phase', 'assignee_id',
             'bug_tracker', 'overlap', 'segment_size', 'labels', 'subset',
             'target_storage', 'source_storage',
         )

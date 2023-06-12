@@ -6,7 +6,7 @@
 import _ from 'lodash';
 import {
     ChunkType, DimensionType, JobStage,
-    JobState, StorageLocation, TaskMode, TaskStatus,
+    JobState, Phase, StorageLocation, TaskMode, TaskStatus,
 } from './enums';
 import { Storage } from './storage';
 
@@ -318,6 +318,7 @@ export class Job extends Session {
     public readonly bugTracker: string | null;
     public readonly mode: TaskMode;
     public readonly labels: Label[];
+    public readonly phase: Phase;
 
     public annotations: {
         get: CallableFunction;
@@ -373,6 +374,7 @@ export class Job extends Session {
             project_id: null,
             task_id: undefined,
             labels: [],
+            phase: undefined,
             dimension: undefined,
             data_compressed_chunk_type: undefined,
             data_chunk_size: undefined,
@@ -481,6 +483,9 @@ export class Job extends Session {
                 },
                 labels: {
                     get: () => [...data.labels],
+                },
+                phase: {
+                    get: () => data.phase,
                 },
                 dimension: {
                     get: () => data.dimension,
@@ -596,6 +601,7 @@ export class Task extends Session {
     public readonly organization: number | null;
     public readonly progress: { count: number; completed: number };
     public readonly jobs: Job[];
+    public readonly phase: Phase;
 
     public readonly startFrame: number;
     public readonly stopFrame: number;
@@ -687,6 +693,7 @@ export class Task extends Session {
             cloud_storage_id: undefined,
             sorting_method: undefined,
             files: undefined,
+            phase: undefined,
         };
 
         const updateTrigger = new FieldUpdateTrigger();
@@ -735,6 +742,7 @@ export class Task extends Session {
                     task_id: data.id,
                     project_id: data.project_id,
                     labels: data.labels,
+                    phase: data.phase,
                     bug_tracker: data.bug_tracker,
                     mode: data.mode,
                     dimension: data.dimension,
@@ -999,6 +1007,9 @@ export class Task extends Session {
                 },
                 progress: {
                     get: () => data.progress,
+                },
+                phase: {
+                    get: () => data.phase,
                 },
                 _internalData: {
                     get: () => data,

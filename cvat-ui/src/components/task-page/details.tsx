@@ -435,6 +435,11 @@ class DetailsComponent extends React.PureComponent<Props, State> {
             <div className='cvat-task-details'>
                 <Row justify='start' align='middle'>
                     <Col className='cvat-task-details-task-name'>{this.renderTaskName()}</Col>
+                    <Col className='cvat-task-details-task-name'>
+                        <Text>
+                            {taskInstance.phase}
+                        </Text>
+                    </Col>
                 </Row>
                 <Row justify='space-between' align='top'>
                     <Col md={8} lg={7} xl={7} xxl={6}>

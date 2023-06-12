@@ -253,3 +253,8 @@ export enum LabelType {
     MASK = 'mask',
     TAG = 'tag',
 }
+
+export enum Phase {
+    PHASE1 = 'phase 1',
+    PHASE2 = 'phase 2'
+}

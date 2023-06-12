@@ -154,6 +154,17 @@ class SortingMethod(str, Enum):
     def __str__(self):
         return self.value
 
+class Phase(str, Enum):
+    PHASE1 = 'phase1'
+    PHASE2 = 'phase2'
+
+    @classmethod
+    def choices(cls):
+        return tuple((x.value, x.name) for x in cls)
+
+    def __str__(self):
+        return self.value
+
 class AbstractArrayField(models.TextField):
     separator = ","
     converter = lambda x: x
@@ -366,6 +377,10 @@ class Task(models.Model):
     target_storage = models.ForeignKey('Storage', null=True, default=None,
         blank=True, on_delete=models.SET_NULL, related_name='+')
 
+    # added field for mola project
+    phase = models.CharField(max_length=10, choices=Phase.choices(),
+        default=Phase.PHASE1)
+
     # Extend default permission model
     class Meta:
         default_permissions = ()
@@ -509,6 +524,11 @@ class Job(models.Model):
         task = self.segment.task
         project = task.project
         return project.get_labels() if project else task.get_labels()
+
+    @property
+    def phase(self):
+        task = self.segment.task
+        return task.phase
 
     class Meta:
         default_permissions = ()

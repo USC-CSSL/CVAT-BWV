@@ -26,14 +26,19 @@ import ProjectSearchField from './project-search-field';
 import ProjectSubsetField from './project-subset-field';
 import MultiTasksProgress from './multi-task-progress';
 import AdvancedConfigurationForm, { AdvancedConfiguration, SortingMethod } from './advanced-configuration-form';
+import Select from 'antd/lib/select';
+
+const { Option } = Select;
 
 type TabName = 'local' | 'share' | 'remote' | 'cloudStorage';
+type Phase = 'phase1' | 'phase2';
 const core = getCore();
 
 export interface CreateTaskData {
     projectId: number | null;
     basic: BaseConfiguration;
     subset: string;
+    phase: Phase;
     advanced: AdvancedConfiguration;
     labels: any[];
     files: Files;
@@ -70,6 +75,7 @@ const defaultState: State = {
         name: '',
     },
     subset: '',
+    phase: 'phase1',
     advanced: {
         lfs: false,
         useZipChunks: true,
@@ -224,6 +230,11 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
             labels: value ? [] : state.labels,
         }));
     };
+
+    private handlePhaseChange = (value: Phase): void => {
+        console.log('new phase', value);
+        this.setState({ phase: value });
+    }
 
     private handleChangeBasicConfiguration = (values: BaseConfiguration): void => {
         this.setState({
@@ -572,6 +583,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                 activeFileManagerTab,
                 cloudStorageId,
                 status: 'pending',
+                phase: 'phase1',
             }
             )),
         }, resolve);
@@ -722,6 +734,36 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                 </Col>
             </>
         );
+    }
+
+    private renderPhaseBlock(): JSX.Element {
+        const { phase } = this.state;
+
+        return (
+            <>
+                <Col span={24}>
+                    <Text className='cvat-text-color'>Select Phase</Text>
+                </Col>
+                <Col span={24}>
+                    <Select
+                        virtual={false}
+                        onChange={this.handlePhaseChange}
+                        style={{width: '100%'}}
+                    >
+                        <Option
+                            value={'phase1'}
+                        >
+                            Phase 1
+                        </Option>
+                        <Option
+                            value={'phase2'}
+                        >
+                            Phase 2
+                        </Option>
+                    </Select>
+                </Col>
+            </>
+        )
     }
 
     private renderSubsetBlock(): JSX.Element | null {
@@ -947,6 +989,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                 {this.renderBasicBlock()}
                 {this.renderProjectBlock()}
                 {this.renderSubsetBlock()}
+                {this.renderPhaseBlock()}
                 {this.renderLabelsBlock()}
                 {this.renderFilesBlock()}
                 {this.renderAdvancedBlock()}

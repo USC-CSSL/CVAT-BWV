@@ -141,11 +141,16 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 <AnnotationTopBarContainer />
             </Layout.Header>
             <Layout.Content className='cvat-annotation-layout-content'>
-                {workspace === Workspace.STANDARD3D && <StandardWorkspace3DComponent />}
-                {workspace === Workspace.STANDARD && <StandardWorkspaceComponent />}
-                {workspace === Workspace.ATTRIBUTE_ANNOTATION && <AttributeAnnotationWorkspace />}
-                {workspace === Workspace.TAG_ANNOTATION && <TagAnnotationWorkspace />}
-                {workspace === Workspace.REVIEW_WORKSPACE && <ReviewAnnotationsWorkspace />}
+                { job && job.phase === 'phase2' ? <>
+                    <h2>Phase 2</h2>
+                </>: <>
+                    {workspace === Workspace.STANDARD3D && <StandardWorkspace3DComponent />}
+                    {workspace === Workspace.STANDARD && <StandardWorkspaceComponent />}
+                    {workspace === Workspace.ATTRIBUTE_ANNOTATION && <AttributeAnnotationWorkspace />}
+                    {workspace === Workspace.TAG_ANNOTATION && <TagAnnotationWorkspace />}
+                    {workspace === Workspace.REVIEW_WORKSPACE && <ReviewAnnotationsWorkspace />}
+                </>}
+
             </Layout.Content>
             <FiltersModalComponent />
             <StatisticsModalComponent />

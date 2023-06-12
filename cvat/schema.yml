@@ -7779,6 +7779,11 @@ components:
         project_id:
           type: integer
           nullable: true
+        phase:
+          enum:
+          - phase1
+          - phase2
+          type: string
         owner_id:
           type: integer
           writeOnly: true
