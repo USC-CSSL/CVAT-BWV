@@ -22,6 +22,7 @@ import { Workspace } from 'reducers';
 import { usePrevious } from 'utils/hooks';
 import './styles.scss';
 import Button from 'antd/lib/button';
+import Phase2AnnotationPage from './phase2/phase2';
 
 interface Props {
     job: any | null | undefined;
@@ -142,7 +143,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
             </Layout.Header>
             <Layout.Content className='cvat-annotation-layout-content'>
                 { job && job.phase === 'phase2' ? <>
-                    <h2>Phase 2</h2>
+                    <Phase2AnnotationPage job={job}/>
                 </>: <>
                     {workspace === Workspace.STANDARD3D && <StandardWorkspace3DComponent />}
                     {workspace === Workspace.STANDARD && <StandardWorkspaceComponent />}
