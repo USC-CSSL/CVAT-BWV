@@ -1517,6 +1517,112 @@ export class Tag extends Annotation {
     }
 }
 
+interface SelectedAudioSegment {
+    start: number;
+    end: number;
+}
+
+export interface RawAudioSelectionData {
+    id?: number;
+    clientID?: number;
+    label_id: number;
+    selected_segments: SelectedAudioSegment[];
+    group: number;
+    source: Source;
+    attributes: { spec_id: number; value: string }[];
+}
+
+export class AudioSelection extends Annotation {
+    private selected_segments: SelectedAudioSegment[];
+    public toJSON(): RawAudioSelectionData {
+        const result: RawAudioSelectionData = {
+            clientID: this.clientID,
+            label_id: this.label.id,
+            source: this.source,
+            group: 0,
+            selected_segments: this.selected_segments,
+            attributes: Object.keys(this.attributes).reduce((attributeAccumulator, attrId) => {
+                attributeAccumulator.push({
+                    spec_id: +attrId,
+                    value: this.attributes[attrId],
+                });
+
+                return attributeAccumulator;
+            }, []),
+        };
+
+        if (this.serverID !== null) {
+            result.id = this.serverID;
+        }
+
+        return result;
+    }
+
+    public get(frame: number): Omit<Required<SerializedData>,
+    'elements' | 'occluded' | 'outside' | 'rotation' | 'zOrder' |
+    'points' | 'hidden' | 'pinned' | 'keyframe' | 'shapeType' |
+    'parentID' | 'descriptions' | 'keyframes'
+    > {
+        if (frame !== this.frame) {
+            throw new ScriptingError('Received frame is not equal to the frame of the shape');
+        }
+
+        return {
+            objectType: ObjectType.TAG,
+            clientID: this.clientID,
+            serverID: this.serverID,
+            lock: this.lock,
+            attributes: { ...this.attributes },
+            label: this.label,
+            group: this.groupObject,
+            color: this.color,
+            updated: this.updated,
+            frame,
+            source: this.source,
+            ...this.withContext(frame),
+        };
+    }
+
+    public save(frame: number, data: ObjectState): ObjectState {
+        if (frame !== this.frame) {
+            throw new ScriptingError('Received frame is not equal to the frame of the tag');
+        }
+
+        if (this.lock && data.lock) {
+            return new ObjectState(this.get(frame));
+        }
+
+        const updated = data.updateFlags;
+        for (const readOnlyField of this.readOnlyFields) {
+            updated[readOnlyField] = false;
+        }
+
+        this.validateStateBeforeSave(data, updated);
+
+        // Now when all fields are validated, we can apply them
+        if (updated.label) {
+            this.saveLabel(data.label, frame);
+        }
+
+        if (updated.attributes) {
+            this.saveAttributes(data.attributes, frame);
+        }
+
+        if (updated.lock) {
+            this.saveLock(data.lock, frame);
+        }
+
+        if (updated.color) {
+            this.saveColor(data.color, frame);
+        }
+
+        this.updateTimestamp(updated);
+        updated.reset();
+
+        return new ObjectState(this.get(frame));
+    }
+}
+
 export class RectangleShape extends Shape {
     constructor(data: RawShapeData, clientID: number, color: string, injection: AnnotationInjection) {
         super(data, clientID, color, injection);

@@ -50,7 +50,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     } = state;
 
     return {
-        isOrganizationOwner: !organizationsFetching && currentOrganization.owner.username === user.username
+        isOrganizationOwner: !organizationsFetching && currentOrganization?.owner.username === user.username
     };
 }
 

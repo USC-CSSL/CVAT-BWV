@@ -102,7 +102,7 @@ function PlayerNavigation(props: Props): JSX.Element {
                         </CVATTooltip>
                     </Col>
                     <Col offset={1}>
-                        <CVATTooltip title='Create frame URL'>
+                        {/* <CVATTooltip title='Create frame URL'>
                             <LinkOutlined className='cvat-player-frame-url-icon' onClick={onURLIconClick} />
                         </CVATTooltip>
                         { (!frameDeleted) ? (
@@ -113,7 +113,7 @@ function PlayerNavigation(props: Props): JSX.Element {
                             <CVATTooltip title='Restore the frame'>
                                 <Icon className='cvat-player-restore-frame' onClick={onRestoreFrame} component={RestoreIcon} />
                             </CVATTooltip>
-                        )}
+                        )} */}
                     </Col>
                 </Row>
             </Col>

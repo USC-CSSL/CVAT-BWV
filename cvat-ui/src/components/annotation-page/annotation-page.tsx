@@ -22,7 +22,7 @@ import { Workspace } from 'reducers';
 import { usePrevious } from 'utils/hooks';
 import './styles.scss';
 import Button from 'antd/lib/button';
-import Phase2AnnotationPage from './phase2/phase2';
+import Phase2AnnotationPage from './phase2/phase2container';
 
 interface Props {
     job: any | null | undefined;

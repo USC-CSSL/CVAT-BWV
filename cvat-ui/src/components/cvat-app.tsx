@@ -463,7 +463,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                             <Route exact path='/tasks/:id' component={TaskPageComponent} />
                                             <Route exact path='/tasks/:tid/jobs/:jid' component={AnnotationPageContainer} />
                                             <Route exact path='/jobs' component={JobsPageComponent} />
-                                            <Route exact path='/cloudstorages' component={CloudStoragesPageComponent} />
+                                            {/* <Route exact path='/cloudstorages' component={CloudStoragesPageComponent} />
                                             <Route
                                                 exact
                                                 path='/cloudstorages/create'
@@ -473,16 +473,20 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                                 exact
                                                 path='/cloudstorages/update/:id'
                                                 component={UpdateCloudStoragePageComponent}
-                                            />
-                                            <Route
-                                                exact
-                                                path='/organizations/create'
-                                                component={CreateOrganizationComponent}
-                                            />
-                                            <Route exact path='/organization/webhooks' component={WebhooksPage} />
-                                            <Route exact path='/webhooks/create' component={CreateWebhookPage} />
-                                            <Route exact path='/webhooks/update/:id' component={UpdateWebhookPage} />
-                                            <Route exact path='/organization' component={OrganizationPage} />
+                                            /> */}
+                                            { user.isSuperuser &&
+                                            <>
+                                                <Route
+                                                    exact
+                                                    path='/organizations/create'
+                                                    component={CreateOrganizationComponent}
+                                                />
+                                                <Route exact path='/organization/webhooks' component={WebhooksPage} />
+                                                <Route exact path='/webhooks/create' component={CreateWebhookPage} />
+                                                <Route exact path='/webhooks/update/:id' component={UpdateWebhookPage} />
+                                                <Route exact path='/organization' component={OrganizationPage} />
+                                            </>
+                                            }
                                             { routesToRender }
                                             {isModelPluginActive && (
                                                 <Route

@@ -460,7 +460,7 @@ function HeaderContainer(props: Props): JSX.Element {
                 >
                     Jobs
                 </Button>
-                <Button
+                {/* <Button
                     className={getButtonClassName('cloudstorages')}
                     type='link'
                     value='cloudstorages'
@@ -471,7 +471,7 @@ function HeaderContainer(props: Props): JSX.Element {
                     }}
                 >
                     Cloud Storages
-                </Button>
+                </Button> */}
                 {isModelsPluginActive ? (
                     <Button
                         className={getButtonClassName('models')}

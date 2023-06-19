@@ -96,11 +96,11 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
     const withUnspecifiedType = labels.some((label: any) => label.type === 'any' && !label.hasParent);
     let rectangleControlVisible = withUnspecifiedType;
     let polygonControlVisible = withUnspecifiedType;
-    let polylineControlVisible = withUnspecifiedType;
-    let pointsControlVisible = withUnspecifiedType;
-    let ellipseControlVisible = withUnspecifiedType;
-    let cuboidControlVisible = withUnspecifiedType;
-    let maskControlVisible = withUnspecifiedType;
+    let polylineControlVisible = false;
+    let pointsControlVisible = false;
+    let ellipseControlVisible = false;
+    let cuboidControlVisible = false;
+    let maskControlVisible = false;
     let tagControlVisible = withUnspecifiedType;
     const skeletonControlVisible = labels.some((label: LabelOptColor) => label.type === 'skeleton');
     labels.forEach((label: LabelOptColor) => {

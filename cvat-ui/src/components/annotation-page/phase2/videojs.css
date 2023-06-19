@@ -1,0 +1,17 @@
+.video-js {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+
+  .video-js .vjs-modal-dialog {
+    overflow: visible;
+    width: 400px;
+    height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }

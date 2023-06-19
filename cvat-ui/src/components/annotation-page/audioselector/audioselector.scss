@@ -1,0 +1,90 @@
+.audioselector-parent {
+    position: absolute;
+    margin: auto;
+    width: 100%;
+}
+
+.audioselector-selection{
+    background: rgb(17, 0, 86);
+    position: relative;
+    height: 100%;
+}
+
+.audioselector-selector{
+    background: #444;
+    border-radius: 5px;
+    width: 90%;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 30px;
+}
+
+.audioselector-bring-down{
+    margin: auto;
+    width: 40px;
+    height: 20px;
+    border: 0 1px 1px 1px solid #d9d9d9;
+    border-radius: 0 0 2px 2px;
+    cursor: pointer;
+    background-color: #bebebe;
+}
+
+.audioselector-controls{
+    margin: auto;
+    background-color: #bebebe;
+    padding: 5px;
+    border-bottom: 1px solid #d9d9d9;
+}
+
+.audioselector-dragbars{
+    height: 45px;
+    width: 5px;
+    border-radius: 2px;
+    background-color: #ccc;
+    position: absolute;
+    cursor: col-resize;
+}
+
+.audioselector-dragbars:hover{
+    background-color: #aaa;
+}
+
+.audioselector-dragbar-left{
+    left: 0;
+    transform: translate(-50%, -5px);
+}
+
+.audioselector-dragbar-right{
+    right: 0;
+    transform: translate(50%, -5px);
+}
+
+.audioselector-curFrameHighlightContainer{
+    position: absolute;
+    width: 100%;
+}
+
+.audioselector-curFrameHighlightInnerContainer{
+    width: 90%;
+    margin: auto;
+}
+
+.audioselector-curFrameHighlight{
+    width: 2px;
+    background: #ab0000;
+    position: relative;
+    z-index: 100;
+}
+
+.audioselector-curFrameHighlight::before{
+    width: 0;
+    height: 0;
+    background: #ab0000;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #ab0000;
+    border-bottom: 5px solid transparent;
+    position: relative;
+}
+
