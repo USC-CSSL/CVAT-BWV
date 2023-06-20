@@ -108,6 +108,7 @@ export async function jobInfoGenerator(job: any): Promise<Record<string, number>
         'points count': total.points.shape + total.points.track,
         'cuboids count': total.cuboid.shape + total.cuboid.track,
         'tag count': total.tag,
+        'audioselection count': total.audioselection,
     };
 }
 
@@ -1361,9 +1362,9 @@ export function pasteShapeAsync(): ThunkAction {
                 },
             });
 
-            if (initialState.objectType === ObjectType.TAG) {
+            if (initialState.objectType === ObjectType.TAG || initialState.objectType === ObjectType.AUDIOSELECTION) {
                 const objectState = new cvat.classes.ObjectState({
-                    objectType: ObjectType.TAG,
+                    objectType: initialState.objectType,
                     label: initialState.label,
                     attributes: initialState.attributes,
                     frame: frameNumber,

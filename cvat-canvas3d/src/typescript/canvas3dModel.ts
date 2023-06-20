@@ -329,7 +329,7 @@ export class Canvas3dModelImpl extends MasterImpl implements Canvas3dModel {
         }
         if (typeof clientID === 'number') {
             const [state] = this.data.objects.filter((_state: any): boolean => _state.clientID === clientID);
-            if (!state || state.objectType === 'tag') {
+            if (!state || state.objectType === 'tag'  || state.objectType === 'audioselection') {
                 return;
             }
         }

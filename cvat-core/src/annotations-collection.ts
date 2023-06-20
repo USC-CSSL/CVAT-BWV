@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: MIT
 
 import {
-    shapeFactory, trackFactory, Track, Shape, Tag,
-    MaskShape, BasicInjection, RawShapeData, RawTrackData, RawTagData, SkeletonShape, SkeletonTrack,
+    shapeFactory, trackFactory, Track, Shape, Tag, AudioSelection,
+    MaskShape, BasicInjection, RawShapeData, RawTrackData, RawAudioSelectionData, RawTagData, SkeletonShape, SkeletonTrack,
 } from './annotations-objects';
 import AnnotationsFilter from './annotations-filter';
 import { checkObjectType } from './common';
@@ -24,12 +24,14 @@ interface RawCollection {
     tags: RawTagData[],
     shapes: RawShapeData[],
     tracks: RawTrackData[],
+    audioselections: RawAudioSelectionData[],
 }
 
 interface ImportedCollection {
     tags: Tag[],
     shapes: Shape[],
     tracks: Track[],
+    audioselections: AudioSelection[]
 }
 
 export default class Collection {
@@ -42,7 +44,8 @@ export default class Collection {
     private shapes: Record<number, Shape[]>;
     private tags: Record<number, Tag[]>;
     private tracks: Track[];
-    private objects: Record<number, Shape | Tag | Track>;
+    private audioselections: AudioSelection[];
+    private objects: Record<number, Shape | Tag | Track | AudioSelection>;
     private count: number;
     private groups: { max: number };
     private injection: BasicInjection;
@@ -65,6 +68,7 @@ export default class Collection {
         this.shapes = {}; // key is a frame
         this.tags = {}; // key is a frame
         this.tracks = [];
+        this.audioselections = [];
         this.objects = {}; // key is a client id
         this.count = 0;
         this.flush = false;
@@ -89,6 +93,7 @@ export default class Collection {
             tags: [],
             shapes: [],
             tracks: [],
+            audioselections: [],
         };
 
         for (const tag of data.tags) {
@@ -124,6 +129,15 @@ export default class Collection {
             }
         }
 
+        for (const audioselection of (data.audioselections || [])) {
+            const clientID = ++this.count;
+            const color = colors[clientID % colors.length];
+            const audioselectionModel = new AudioSelection(audioselection, clientID, color, this.injection);
+            this.audioselections.push(audioselectionModel);
+            result.audioselections.push(audioselectionModel);
+            this.objects[clientID] = audioselectionModel;
+        }
+
         return result;
     }
 
@@ -144,6 +158,8 @@ export default class Collection {
                 }, [])
                 .filter((tag) => !tag.removed)
                 .map((tag) => tag.toJSON()),
+            audioselections: this.audioselections
+                .filter(sel => !sel.removed).map(sel => sel.toJSON())
         };
 
         return data;
@@ -153,8 +169,9 @@ export default class Collection {
         const { tracks } = this;
         const shapes = this.shapes[frame] || [];
         const tags = this.tags[frame] || [];
+        const { audioselections } = this;
 
-        const objects = [].concat(tracks, shapes, tags);
+        const objects = [].concat(tracks, shapes, tags, audioselections);
         const visible = [];
 
         for (const object of objects) {
@@ -400,6 +417,7 @@ export default class Collection {
             tracks: [track],
             tags: [],
             shapes: [],
+            audioselections: []
         });
 
         // Remove other shapes
@@ -517,6 +535,7 @@ export default class Collection {
             tracks: [prev, next],
             tags: [],
             shapes: [],
+            audioselections: []
         });
 
         // Remove source object
@@ -637,6 +656,7 @@ export default class Collection {
 
             mask: { shape: 0 },
             tag: 0,
+            audioselections: 0,
             manually: 0,
             interpolated: 0,
             total: 0,
@@ -710,6 +730,8 @@ export default class Collection {
                 objectType = 'track';
             } else if (object instanceof Tag) {
                 objectType = 'tag';
+            } else if (object instanceof AudioSelection) {
+                objectType = 'audioselection';
             } else {
                 throw new ScriptingError(`Unexpected object type: "${objectType}"`);
             }
@@ -717,6 +739,10 @@ export default class Collection {
             const { name: label } = object.label;
             if (objectType === 'tag') {
                 labels[label].tag++;
+                labels[label].manually++;
+                labels[label].total++;
+            } else if (objectType === 'audioselection') {
+                labels[label].audioselection++;
                 labels[label].manually++;
                 labels[label].total++;
             } else if (objectType === 'track') {
@@ -758,6 +784,7 @@ export default class Collection {
             shapes: [],
             tracks: [],
             tags: [],
+            audioselections: [],
         };
 
         function convertAttributes(accumulator, attrID) {
@@ -796,6 +823,14 @@ export default class Collection {
                     frame: state.frame,
                     label_id: state.label.id,
                     group: 0,
+                });
+            } else if (state.objectType === 'audioselection') {
+                constructed.audioselections.push({
+                    attributes,
+                    frame: state.frame,
+                    label_id: state.label.id,
+                    group: 0,
+                    audio_selected_segments: state.audio_selected_segments
                 });
             } else {
                 checkObjectType('state occluded', state.occluded, 'boolean', null);
@@ -906,7 +941,7 @@ export default class Collection {
         // Add constructed objects to a collection
         // eslint-disable-next-line no-unsanitized/method
         const imported = this.import(constructed);
-        const importedArray = imported.tags.concat(imported.tracks).concat(imported.shapes);
+        const importedArray = imported.tags.concat(imported.tracks).concat(imported.shapes).concat(imported.audioselections);
         for (const object of importedArray) {
             if (object.shapeType === ShapeType.MASK && config.removeUnderlyingMaskPixels) {
                 (object as MaskShape).removeUnderlyingPixels(object.frame);

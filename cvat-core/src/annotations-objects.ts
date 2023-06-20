@@ -556,7 +556,7 @@ export class Shape extends Drawn {
         return result;
     }
 
-    public get(frame): { outside?: boolean } & Omit<Required<SerializedData>, 'keyframe' | 'keyframes' | 'elements' | 'outside'> {
+    public get(frame): { outside?: boolean } & Omit<Required<SerializedData>, 'keyframe' | 'keyframes' | 'elements' | 'outside' | 'audio_selected_segments'> {
         if (frame !== this.frame) {
             throw new ScriptingError('Received frame is not equal to the frame of the shape');
         }
@@ -917,7 +917,7 @@ export class Track extends Drawn {
         return result;
     }
 
-    public get(frame: number): Omit<Required<SerializedData>, 'elements'> {
+    public get(frame: number): Omit<Required<SerializedData>, 'elements' | 'audio_selected_segments'> {
         const {
             prev, next, first, last,
         } = this.boundedKeyframes(frame);
@@ -1416,6 +1416,138 @@ export class Track extends Drawn {
     }
 }
 
+interface SelectedAudioSegment {
+    start: number;
+    end: number;
+}
+
+export interface RawAudioSelectionData {
+    id?: number;
+    clientID?: number;
+    label_id: number;
+    audio_selected_segments: {start: number, end: number}[];
+    group: number;
+    source: Source;
+    attributes: { spec_id: number; value: string }[];
+    frame: number;
+}
+
+export class AudioSelection extends Annotation {
+    private audio_selected_segments: SelectedAudioSegment[];
+    constructor(data: RawAudioSelectionData, clientID: number, color: string, injection: AnnotationInjection) {
+        super(data, clientID, color, injection);
+        this.audio_selected_segments = data.audio_selected_segments
+    }
+
+    public toJSON(): RawAudioSelectionData {
+        const result: RawAudioSelectionData = {
+            clientID: this.clientID,
+            label_id: this.label.id,
+            source: this.source,
+            group: 0,
+            frame: this.frame,
+            audio_selected_segments: this.audio_selected_segments.reduce((acc, sgmt) => {
+                acc.push({
+                    start: sgmt.start,
+                    end: sgmt.end
+                })
+
+                return acc;
+            }, []),
+            attributes: Object.keys(this.attributes).reduce((attributeAccumulator, attrId) => {
+                attributeAccumulator.push({
+                    spec_id: +attrId,
+                    value: this.attributes[attrId],
+                });
+
+                return attributeAccumulator;
+            }, []),
+        };
+
+        if (this.serverID !== null) {
+            result.id = this.serverID;
+        }
+
+        return result;
+    }
+
+    public get(frame: number): Omit<Required<SerializedData>,
+    'elements' | 'occluded' | 'outside' | 'rotation' | 'zOrder' |
+    'points' | 'hidden' | 'pinned' | 'keyframe' | 'shapeType' |
+    'parentID' | 'descriptions' | 'keyframes'
+    > {
+
+        return {
+            objectType: ObjectType.AUDIOSELECTION,
+            clientID: this.clientID,
+            serverID: this.serverID,
+            lock: this.lock,
+            attributes: { ...this.attributes },
+            label: this.label,
+            group: this.groupObject,
+            color: this.color,
+            updated: this.updated,
+            frame,
+            source: this.source,
+            ...this.withContext(frame),
+            audio_selected_segments: this.audio_selected_segments.reduce((acc, sgmt) => {
+                acc.push({
+                    start: sgmt.start,
+                    end: sgmt.end
+                })
+
+                return acc;
+            }, []),
+        };
+    }
+
+    public save(frame: number, data: ObjectState): ObjectState {
+        if (frame !== this.frame) {
+            throw new ScriptingError('Received frame is not equal to the frame of the tag');
+        }
+
+        if (this.lock && data.lock) {
+            return new ObjectState(this.get(frame));
+        }
+
+        const updated = data.updateFlags;
+        for (const readOnlyField of this.readOnlyFields) {
+            updated[readOnlyField] = false;
+        }
+
+        this.validateStateBeforeSave(data, updated);
+
+        // Now when all fields are validated, we can apply them
+        if (updated.label) {
+            this.saveLabel(data.label, frame);
+        }
+
+        if (updated.attributes) {
+            this.saveAttributes(data.attributes, frame);
+        }
+
+        if (updated.lock) {
+            this.saveLock(data.lock, frame);
+        }
+
+        if (updated.color) {
+            this.saveColor(data.color, frame);
+        }
+
+        if (updated.audio_selected_segments) {
+            this.audio_selected_segments = data.audio_selected_segments.map((seg) => ({
+                start: seg.start,
+                end: seg.end
+            }));
+        }
+
+        this.updateTimestamp(updated);
+        updated.reset();
+
+        return new ObjectState(this.get(frame));
+    }
+}
+
 export interface RawTagData {
     id?: number;
     clientID?: number;
@@ -1455,113 +1587,7 @@ export class Tag extends Annotation {
     public get(frame: number): Omit<Required<SerializedData>,
     'elements' | 'occluded' | 'outside' | 'rotation' | 'zOrder' |
     'points' | 'hidden' | 'pinned' | 'keyframe' | 'shapeType' |
-    'parentID' | 'descriptions' | 'keyframes'
-    > {
-        if (frame !== this.frame) {
-            throw new ScriptingError('Received frame is not equal to the frame of the shape');
-        }
-
-        return {
-            objectType: ObjectType.TAG,
-            clientID: this.clientID,
-            serverID: this.serverID,
-            lock: this.lock,
-            attributes: { ...this.attributes },
-            label: this.label,
-            group: this.groupObject,
-            color: this.color,
-            updated: this.updated,
-            frame,
-            source: this.source,
-            ...this.withContext(frame),
-        };
-    }
-
-    public save(frame: number, data: ObjectState): ObjectState {
-        if (frame !== this.frame) {
-            throw new ScriptingError('Received frame is not equal to the frame of the tag');
-        }
-
-        if (this.lock && data.lock) {
-            return new ObjectState(this.get(frame));
-        }
-
-        const updated = data.updateFlags;
-        for (const readOnlyField of this.readOnlyFields) {
-            updated[readOnlyField] = false;
-        }
-
-        this.validateStateBeforeSave(data, updated);
-
-        // Now when all fields are validated, we can apply them
-        if (updated.label) {
-            this.saveLabel(data.label, frame);
-        }
-
-        if (updated.attributes) {
-            this.saveAttributes(data.attributes, frame);
-        }
-
-        if (updated.lock) {
-            this.saveLock(data.lock, frame);
-        }
-
-        if (updated.color) {
-            this.saveColor(data.color, frame);
-        }
-
-        this.updateTimestamp(updated);
-        updated.reset();
-
-        return new ObjectState(this.get(frame));
-    }
-}
-
-interface SelectedAudioSegment {
-    start: number;
-    end: number;
-}
-
-export interface RawAudioSelectionData {
-    id?: number;
-    clientID?: number;
-    label_id: number;
-    selected_segments: SelectedAudioSegment[];
-    group: number;
-    source: Source;
-    attributes: { spec_id: number; value: string }[];
-}
-
-export class AudioSelection extends Annotation {
-    private selected_segments: SelectedAudioSegment[];
-    public toJSON(): RawAudioSelectionData {
-        const result: RawAudioSelectionData = {
-            clientID: this.clientID,
-            label_id: this.label.id,
-            source: this.source,
-            group: 0,
-            selected_segments: this.selected_segments,
-            attributes: Object.keys(this.attributes).reduce((attributeAccumulator, attrId) => {
-                attributeAccumulator.push({
-                    spec_id: +attrId,
-                    value: this.attributes[attrId],
-                });
-
-                return attributeAccumulator;
-            }, []),
-        };
-
-        if (this.serverID !== null) {
-            result.id = this.serverID;
-        }
-
-        return result;
-    }
-
-    public get(frame: number): Omit<Required<SerializedData>,
-    'elements' | 'occluded' | 'outside' | 'rotation' | 'zOrder' |
-    'points' | 'hidden' | 'pinned' | 'keyframe' | 'shapeType' |
-    'parentID' | 'descriptions' | 'keyframes'
+    'parentID' | 'descriptions' | 'keyframes' | 'audio_selected_segments'
     > {
         if (frame !== this.frame) {
             throw new ScriptingError('Received frame is not equal to the frame of the shape');
@@ -2076,7 +2102,7 @@ export class SkeletonShape extends Shape {
         return result;
     }
 
-    public get(frame): Omit<Required<SerializedData>, 'parentID' | 'keyframe' | 'keyframes'> {
+    public get(frame): Omit<Required<SerializedData>, 'parentID' | 'keyframe' | 'keyframes' | 'audio_selected_segments'> {
         if (frame !== this.frame) {
             throw new ScriptingError('Received frame is not equal to the frame of the shape');
         }
@@ -2981,7 +3007,7 @@ export class SkeletonTrack extends Track {
         return result;
     }
 
-    public get(frame: number): Omit<Required<SerializedData>, 'parentID'> {
+    public get(frame: number): Omit<Required<SerializedData>, 'parentID' | 'audio_selected_segments'> {
         const { prev, next } = this.boundedKeyframes(frame);
         const position = this.getPosition(frame, prev, next);
         const elements = this.elements.map((element) => ({

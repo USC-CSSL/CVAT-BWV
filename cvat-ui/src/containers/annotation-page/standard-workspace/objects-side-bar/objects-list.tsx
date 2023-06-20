@@ -88,7 +88,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     objectStates.forEach((objectState: ObjectState) => {
         const { lock } = objectState;
         if (!lock) {
-            if (objectState.objectType !== ObjectType.TAG) {
+            if (objectState.objectType !== ObjectType.TAG && objectState.objectType !== ObjectType.AUDIOSELECTION) {
                 if (objectState.shapeType === ShapeType.SKELETON) {
                     objectState.elements.forEach((element: ObjectState) => {
                         statesHidden = statesHidden && (element.lock || element.hidden);
@@ -376,7 +376,7 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             SWITCH_OCCLUDED: (event: KeyboardEvent | undefined) => {
                 preventDefault(event);
                 const state = activatedState();
-                if (state && !readonly && state.objectType !== ObjectType.TAG) {
+                if (state && !readonly && state.objectType !== ObjectType.TAG && state.objectType !== ObjectType.AUDIOSELECTION) {
                     state.occluded = !state.occluded;
                     updateAnnotations([state]);
                 }
@@ -424,7 +424,7 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             TO_BACKGROUND: (event: KeyboardEvent | undefined) => {
                 preventDefault(event);
                 const state = activatedState();
-                if (state && !readonly && state.objectType !== ObjectType.TAG) {
+                if (state && !readonly && state.objectType !== ObjectType.TAG && state.objectType !== ObjectType.AUDIOSELECTION) {
                     state.zOrder = minZLayer - 1;
                     updateAnnotations([state]);
                 }
@@ -432,7 +432,7 @@ class ObjectsListContainer extends React.PureComponent<Props, State> {
             TO_FOREGROUND: (event: KeyboardEvent | undefined) => {
                 preventDefault(event);
                 const state = activatedState();
-                if (state && !readonly && state.objectType !== ObjectType.TAG) {
+                if (state && !readonly && state.objectType !== ObjectType.TAG && state.objectTYpe !== ObjectType.AUDIOSELECTION) {
                     state.zOrder = maxZLayer + 1;
                     updateAnnotations([state]);
                 }

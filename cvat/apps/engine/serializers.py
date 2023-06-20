@@ -1389,6 +1389,7 @@ class LabeledDataSerializer(serializers.Serializer):
     tags   = LabeledImageSerializer(many=True, default=[])
     shapes = LabeledShapeSerializer(many=True, default=[])
     tracks = LabeledTrackSerializer(many=True, default=[])
+    audioselections = LabeledTrackSerializer(many=True, default=[])
 
 class FileInfoSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=1024)

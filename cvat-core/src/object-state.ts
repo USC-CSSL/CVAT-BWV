@@ -24,6 +24,7 @@ interface UpdateFlags {
     color: boolean;
     hidden: boolean;
     descriptions: boolean;
+    audio_selected_segments: boolean;
     reset: () => void;
 }
 
@@ -58,6 +59,7 @@ export interface SerializedData {
         last: number | null;
     };
     elements?: SerializedData[];
+    audio_selected_segments?: {start:number, end: number}[]
     __internal: {
         save: (objectState: ObjectState) => ObjectState;
         delete: (frame: number, force: boolean) => boolean;
@@ -86,6 +88,7 @@ export default class ObjectState {
         next: number | null;
         last: number | null;
     } | null;
+    public audio_selected_segments: { start: number; end: number}[] | null;
     public label: Label;
     public color: string;
     public hidden: boolean;
@@ -167,6 +170,7 @@ export default class ObjectState {
             pinned: false,
             source: Source.MANUAL,
             keyframes: serialized.keyframes || null,
+            audio_selected_segments: serialized.audio_selected_segments || null,
             group: serialized.group || null,
             updated: serialized.updated || Date.now(),
 
@@ -354,6 +358,34 @@ export default class ObjectState {
 
                         return null;
                     },
+                },
+                audio_selected_segments: {
+                    get: () => {
+                        if (typeof data.audio_selected_segments === 'object') {
+                            return data.audio_selected_segments;
+                        }
+
+                        return null;
+                    },
+                    set: (audio_selected_segments) => {
+                        if (!Array.isArray(audio_selected_segments) || audio_selected_segments.some((s) => typeof s.start != 'number' || typeof s.end != 'number')) {
+                            throw new ArgumentError('invalid selections, type')
+                        }
+
+                        for(let i = 0; i<audio_selected_segments.length; i++) {
+                            if (audio_selected_segments[i].end <= audio_selected_segments[i].start) {
+                                throw new ArgumentError('invalid selections, end shoube > start');
+                            }
+                        }
+
+                        for(let i = 1; i<audio_selected_segments.length; i++) {
+                            if (audio_selected_segments[i].start <= audio_selected_segments[i-1].end) {
+                                throw new ArgumentError('invalid selections, start should be > previous end');
+                            }
+                        }
+
+                        this.audio_selected_segments = audio_selected_segments;
+                    }
                 },
                 occluded: {
                     get: () => {

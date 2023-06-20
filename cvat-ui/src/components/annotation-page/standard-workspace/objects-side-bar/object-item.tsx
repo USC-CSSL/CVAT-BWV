@@ -76,8 +76,8 @@ function ObjectItemComponent(props: Props): JSX.Element {
     } = props;
 
     const type =
-        objectType === ObjectType.TAG ?
-            ObjectType.TAG.toUpperCase() :
+        (objectType === ObjectType.TAG || objectType === ObjectType.AUDIOSELECTION)?
+            objectType.toUpperCase() :
             `${shapeType.toUpperCase()} ${objectType.toUpperCase()}`;
 
     const className = !activated ?

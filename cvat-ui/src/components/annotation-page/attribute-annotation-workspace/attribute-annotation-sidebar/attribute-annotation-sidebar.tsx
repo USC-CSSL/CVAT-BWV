@@ -252,7 +252,7 @@ function AttributeAnnotationSidebar(props: StateToProps & DispatchToProps): JSX.
         },
         SWITCH_OCCLUDED: (event: KeyboardEvent | undefined) => {
             preventDefault(event);
-            if (activeObjectState && activeObjectState.objectType !== ObjectType.TAG) {
+            if (activeObjectState && activeObjectState.objectType !== ObjectType.TAG && activeObjectState.objectType !== ObjectType.AUDIOSELECTION) {
                 activeObjectState.occluded = !activeObjectState.occluded;
                 updateAnnotations([activeObjectState]);
             }

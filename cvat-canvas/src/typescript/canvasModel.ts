@@ -571,7 +571,7 @@ export class CanvasModelImpl extends MasterImpl implements CanvasModel {
 
         if (typeof clientID === 'number') {
             const [state] = this.objects.filter((_state: any): boolean => _state.clientID === clientID);
-            if (!state || state.objectType === 'tag') {
+            if (!state || state.objectType === 'tag' || state.objectType === 'audioselection') {
                 return;
             }
         }

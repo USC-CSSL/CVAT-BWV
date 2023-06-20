@@ -1,31 +1,71 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './audioselector.scss';
 import LabelSelector from 'components/label-selector/label-selector';
 import { Col, Row } from 'antd/lib/grid';
 import { Canvas } from 'cvat-canvas-wrapper';
-import { CombinedState } from 'reducers';
+import { CombinedState, ObjectType } from 'reducers';
 import { Space } from 'antd';
+import { getCore, Job, ObjectState } from 'cvat-core-wrapper';
 interface Props{
     labels: any[],
     startFrame: number,
     stopFrame: number,
-    frameNumber: number
+    frameNumber: number,
+    index: number,
+    jobInstance: Job,
+
+    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void,
+    onUpdateAnnotations(states: ObjectState[]): void
+}
+
+const cvat = getCore();
+
+
+export interface Selector{
+    selections: {
+        start: number,
+        end: number;
+    }[];
+    removed: boolean;
 }
 
 
 
 export default function AudioSelectorItem (props: Props) {
-    const {startFrame, stopFrame, frameNumber, labels} = props;
-    const [bounds, setBounds] = useState([frameNumber - startFrame, Math.min(frameNumber + 40, stopFrame - startFrame)]);
+    const {
+        startFrame, stopFrame, labels,frameNumber, index, jobInstance,
+        onCreateAnnotations,
+        onUpdateAnnotations,
+    } = props;
+
+
     const [dragging, setDragging] = useState<string | null>(null);
-    const [selectedLabelID, setSelectedLabelID] = useState<number | null>(0);
+    const [selectedLabelID, setSelectedLabelID] = useState<number>(labels[0].id);
+    const [selector, setSelector] = useState<Selector | null>(null);
 
 
     const leftRef = useRef<HTMLDivElement>(null);
     const rightRef = useRef<HTMLDivElement>(null);
     const selectorRef = useRef<HTMLDivElement>(null);
 
+    useEffect(()=>{
+        const newSelector = {
+            selections: [
+                {
+                    start: frameNumber,
+                    end: Math.min(frameNumber + 40, stopFrame)
+                }
+            ],
+            removed: false,
+        }
+
+        setSelector(newSelector);
+
+
+    }, [])
+
     return (
+        selector && !selector.removed ?
         <div>
         <Row >
             <Col span={4}>
@@ -46,26 +86,41 @@ export default function AudioSelectorItem (props: Props) {
                             if (dragging === 'left') {
 
                                 // const diff = e.clientX - (leftRef.current?.getBoundingClientRect().x || 0);
-                                const newPos = (
+                                let newPos = (
                                     selectorRef.current &&
                                     (clientX - selectorBoundingRectX) / selectorBoundingRectWidth
                                     ) * (stopFrame - startFrame) + startFrame;
-                                setBounds((bound) => [Math.max(Math.min(newPos, bound[1] - 5), 0), bound[1]])
+
+                                newPos = Math.max(Math.min(newPos, selector.selections[0].end - 5), 0);
+                                setSelector({
+                                    ...selector,
+                                    selections: [{
+                                        ...selector.selections[0],
+                                        start: newPos,
+                                    }]
+                                })
                             }
                             else if (dragging === 'right') {
-                                const newPos = (
+                                let newPos = (
                                     selectorRef.current &&
                                     (clientX - selectorBoundingRectX) / selectorBoundingRectWidth
                                     ) * (stopFrame - startFrame) + startFrame;
-                                setBounds((bound) => [bound[0], Math.min(Math.max(newPos, bound[0] + 5), stopFrame - startFrame)])
+                                newPos = Math.min(Math.max(newPos, selector.selections[0].start + 5), stopFrame - startFrame)
+                                setSelector({
+                                    ...selector,
+                                    selections: [{
+                                        ...selector.selections[0],
+                                        end: newPos,
+                                    }]
+                                })
                             }
                         }
                     }}
                 >
                     <div className='audioselector-selection'
                         style={{
-                            left: `${bounds[0] * 100 / (stopFrame - startFrame)}%`,
-                            width: `${(bounds[1] - bounds[0]) * 100 / (stopFrame - startFrame)}%`
+                            left: `${selector.selections[0].start * 100 / (stopFrame - startFrame)}%`,
+                            width: `${(selector.selections[0].end - selector.selections[0].start) * 100 / (stopFrame - startFrame)}%`
                         }}
                         onMouseUp={() => setDragging(null)}
                     >
@@ -84,5 +139,5 @@ export default function AudioSelectorItem (props: Props) {
                 </div>
             </Col>
         </Row>
-    </div>);
+    </div> : <></>);
 }

@@ -39,6 +39,10 @@ export default class AnnotationsSaver {
         for (const tag of exported.tags) {
             this.initialObjects.tags[tag.id] = tag;
         }
+
+        for (const audioselection of exported.audioselections) {
+            this.initialObjects.audioselection[audioselection.id] = audioselection;
+        }
     }
 
     _resetState() {
@@ -46,6 +50,7 @@ export default class AnnotationsSaver {
             shapes: {},
             tracks: {},
             tags: {},
+            audioselections: {},
         };
     }
 
@@ -86,16 +91,19 @@ export default class AnnotationsSaver {
                 shapes: [],
                 tracks: [],
                 tags: [],
+                audioselections: [],
             },
             updated: {
                 shapes: [],
                 tracks: [],
                 tags: [],
+                audioselections: [],
             },
             deleted: {
                 shapes: [],
                 tracks: [],
                 tags: [],
+                audioselections: [],
             },
         };
 
@@ -142,6 +150,7 @@ export default class AnnotationsSaver {
             shapes: exported.shapes.map((object) => +object.id),
             tracks: exported.tracks.map((object) => +object.id),
             tags: exported.tags.map((object) => +object.id),
+            audioselections: exported.audioselections.map((object) => +object.id),
         };
 
         for (const type of Object.keys(this.initialObjects)) {
@@ -157,8 +166,8 @@ export default class AnnotationsSaver {
     }
 
     _updateCreatedObjects(saved, indexes) {
-        const savedLength = saved.tracks.length + saved.shapes.length + saved.tags.length;
-        const indexesLength = indexes.tracks.length + indexes.shapes.length + indexes.tags.length;
+        const savedLength = saved.tracks.length + saved.shapes.length + saved.tags.length + saved.audioselections.length;
+        const indexesLength = indexes.tracks.length + indexes.shapes.length + indexes.tags.length + indexes.audioselections.length;
         if (indexesLength !== savedLength) {
             throw new ScriptingError(
                 `Number of indexes is differed by number of saved objects ${indexesLength} vs ${savedLength}`,
@@ -180,12 +189,14 @@ export default class AnnotationsSaver {
             tracks: exported.tracks.map((track) => track.clientID),
             shapes: exported.shapes.map((shape) => shape.clientID),
             tags: exported.tags.map((tag) => tag.clientID),
+            audioselections: exported.audioselections.map((audioselection) => audioselection.clientID),
         };
 
         // Remove them from the request body
         exported.tracks
             .concat(exported.shapes)
             .concat(exported.tags)
+            .concat(exported.audioselections)
             .map((value) => {
                 delete value.clientID;
                 return value;

@@ -64,6 +64,7 @@ export enum ObjectType {
     TAG = 'tag',
     SHAPE = 'shape',
     TRACK = 'track',
+    AUDIOSELECTION = 'audioselection'
 }
 
 export enum ShapeType {

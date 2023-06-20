@@ -97,6 +97,7 @@ function FiltersModalComponent(): JSX.Element {
                         { value: 'shape', title: 'Shape' },
                         { value: 'track', title: 'Track' },
                         { value: 'tag', title: 'Tag' },
+                        { value: 'audioselection', title: 'AudioSelection' },
                     ],
                 },
             },

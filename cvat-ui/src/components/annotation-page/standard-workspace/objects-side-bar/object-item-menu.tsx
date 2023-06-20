@@ -272,7 +272,7 @@ export default function ItemMenu(props: Props): JSX.Element {
     return (
         <Menu className='cvat-object-item-menu' selectable={false}>
             <CreateURLItem key={MenuKeys.CREATE_URL} toolProps={props} />
-            {!readonly && objectType !== ObjectType.TAG && (
+            {!readonly && objectType !== ObjectType.TAG && objectType !== ObjectType.AUDIOSELECTION && (
                 <MakeCopyItem key={MenuKeys.COPY} toolProps={props} />
             )}
             {!readonly && <EditMaskItem key={MenuKeys.EDIT_MASK} toolProps={props} />}
@@ -283,10 +283,10 @@ export default function ItemMenu(props: Props): JSX.Element {
             {is2D && !readonly && shapeType === ShapeType.CUBOID && (
                 <ResetPerspectiveItem key={MenuKeys.RESET_PERSPECIVE} toolProps={props} />
             )}
-            {is2D && objectType !== ObjectType.TAG && (
+            {is2D && objectType !== ObjectType.TAG && objectType !== ObjectType.AUDIOSELECTION && (
                 <ToBackgroundItem key={MenuKeys.TO_BACKGROUND} toolProps={props} />
             )}
-            {is2D && !readonly && objectType !== ObjectType.TAG && (
+            {is2D && !readonly && objectType !== ObjectType.TAG && objectType !== ObjectType.AUDIOSELECTION && (
                 <ToForegroundItem key={MenuKeys.TO_FOREGROUND} toolProps={props} />
             )}
             {[ColorBy.INSTANCE, ColorBy.GROUP].includes(colorBy) && (

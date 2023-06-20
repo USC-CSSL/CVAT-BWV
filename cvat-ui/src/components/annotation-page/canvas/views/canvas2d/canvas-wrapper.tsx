@@ -848,13 +848,13 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         if (activatedStateID !== null) {
             const [activatedState] = annotations.filter((state: any): boolean => state.clientID === activatedStateID);
             if (workspace === Workspace.ATTRIBUTE_ANNOTATION) {
-                if (activatedState.objectType !== ObjectType.TAG) {
+                if (activatedState.objectType !== ObjectType.TAG && activatedState.objectType !== ObjectType.AUDIOSELECTION) {
                     canvasInstance.focus(activatedStateID, aamZoomMargin);
                 } else {
                     canvasInstance.fit();
                 }
             }
-            if (activatedState && activatedState.objectType !== ObjectType.TAG) {
+            if (activatedState && activatedState.objectType !== ObjectType.TAG && activatedState.objectType !== ObjectType.AUDIOSELECTION) {
                 canvasInstance.activate(activatedStateID, activatedAttributeID);
             }
         } else if (workspace === Workspace.ATTRIBUTE_ANNOTATION) {
@@ -870,7 +870,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         if (frameData !== null && canvasInstance) {
             canvasInstance.setup(
                 frameData,
-                frameData.deleted ? [] : annotations.filter((e) => e.objectType !== ObjectType.TAG),
+                frameData.deleted ? [] : annotations.filter((e) => e.objectType !== ObjectType.TAG && e.objectType !== ObjectType.AUDIOSELECTION),
                 curZLayer,
             );
         }

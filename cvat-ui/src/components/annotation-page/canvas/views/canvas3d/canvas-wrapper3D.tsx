@@ -449,7 +449,7 @@ const Canvas3DWrapperComponent = React.memo((props: Props): ReactElement => {
         if (frameData !== null) {
             canvasInstance.setup(
                 frameData,
-                annotations.filter((e) => e.objectType !== ObjectType.TAG),
+                annotations.filter((e) => e.objectType !== ObjectType.TAG && e.objectType !== ObjectType.AUDIOSELECTION),
             );
         }
     };

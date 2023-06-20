@@ -606,6 +606,7 @@ export enum ObjectType {
     SHAPE = 'shape',
     TRACK = 'track',
     TAG = 'tag',
+    AUDIOSELECTION = 'audioselection'
 }
 
 export enum StatesOrdering {

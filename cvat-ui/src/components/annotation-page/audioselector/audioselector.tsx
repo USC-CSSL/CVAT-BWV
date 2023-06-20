@@ -3,14 +3,20 @@ import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from
 import { connect } from 'react-redux';
 import './audioselector.scss';
 
-import { ActiveControl, CombinedState } from 'reducers';
+import { ActiveControl, CombinedState, ObjectType } from 'reducers';
 import Button from 'antd/lib/button';
 import LabelSelector from 'components/label-selector/label-selector';
 import { CaretDownOutlined, CaretUpOutlined, PlusOutlined } from '@ant-design/icons';
 import CVATTooltip from 'components/common/cvat-tooltip';
 import AudioSelectorItem from './audioselectoritem';
-import Icon from '@ant-design/icons/lib/components/Icon';
+import {Selector} from './audioselectoritem';
 import { Col, Row } from 'antd/lib/grid';
+
+import { getCore, ObjectState, Job } from 'cvat-core-wrapper';
+import {
+    createAnnotationsAsync,
+    updateAnnotationsAsync,
+} from 'actions/annotation-actions';
 
 interface StateToProps {
     canvasInstance: Canvas3d;
@@ -23,12 +29,31 @@ interface StateToProps {
     frameNumber: number;
 }
 
+interface DispatchToProps {
+    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
+    onUpdateAnnotations(states: ObjectState[]): void;
+}
+
+function mapDispatchToProps(dispatch: any): DispatchToProps {
+    return {
+        onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void {
+            dispatch(createAnnotationsAsync(sessionInstance, frame, states));
+        },
+        onUpdateAnnotations(states: ObjectState[]): void {
+            dispatch(updateAnnotationsAsync(states));
+        },
+    };
+}
+
 interface Props {
     labels: any[],
     startFrame: number,
     stopFrame: number,
     canvasInstance: Canvas3d,
     frameNumber: number,
+    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
+    onUpdateAnnotations(states: ObjectState[]): void;
+    jobInstance: Job,
 }
 
 
@@ -67,11 +92,17 @@ function mapStateToProps(state: CombinedState): StateToProps {
 function AudioSelector(props: Props): JSX.Element {
 
     const [count, setCount] = useState(0);
+
+
     const [dims, setDims] = useState([0, 0]);
     const [showControls, setShowControls] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
-    const {canvasInstance, startFrame, stopFrame, frameNumber, labels} = props;
+    const {
+        canvasInstance, startFrame, stopFrame, frameNumber, labels, jobInstance,
+        onCreateAnnotations,
+        onUpdateAnnotations,
+    } = props;
     console.log(props.canvasInstance, canvasInstance)
 
     useLayoutEffect(() => {
@@ -105,12 +136,17 @@ function AudioSelector(props: Props): JSX.Element {
                             )
                         }
                         {
-                            Array.from(Array(count)).map(() => (
+                            Array.from(Array(count)).map((_, index) => (
                                 <AudioSelectorItem
                                     labels={labels}
                                     startFrame={startFrame}
                                     stopFrame={stopFrame}
-                                    frameNumber={frameNumber} />
+                                    frameNumber={frameNumber}
+                                    index={index}
+                                    jobInstance={jobInstance}
+                                    onCreateAnnotations={onCreateAnnotations}
+                                    onUpdateAnnotations={onUpdateAnnotations}
+                                    />
                             ))
                         }
                         <CVATTooltip title={`Click to highlight a section from audio`}>
@@ -118,7 +154,9 @@ function AudioSelector(props: Props): JSX.Element {
                                 type='primary'
                                 className='cvat-add-tag-button'
                                 icon={<PlusOutlined />}
-                                onClick={() => setCount((val) => val + 1)}
+                                onClick={() => {
+                                    setCount((val) => val + 1)
+                                }}
                             />
                         </CVATTooltip>
                     </div>
@@ -134,4 +172,4 @@ function AudioSelector(props: Props): JSX.Element {
     );
 }
 
-export default connect(mapStateToProps)(AudioSelector);
+export default connect(mapStateToProps, mapDispatchToProps)(AudioSelector);

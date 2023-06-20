@@ -77,16 +77,18 @@ function LabelsListComponent(): JSX.Element {
                 if (Number.isInteger(activatedStateID)) {
                     const activatedState = states.filter((state: any) => state.clientID === activatedStateID)[0];
                     const bothAreTags = activatedState.objectType === ObjectType.TAG && label.type === ObjectType.TAG;
+                    const bothAreAudioSelections = activatedState.objectType === ObjectType.AUDIOSELECTION && label.type === ObjectType.AUDIOSELECTION;
                     const labelIsApplicable = label.type === LabelType.ANY ||
-                        activatedState.shapeType === label.type || bothAreTags;
+                        activatedState.shapeType === label.type || bothAreTags || bothAreAudioSelections;
                     if (activatedState && labelIsApplicable) {
                         activatedState.label = label;
                         dispatch(updateAnnotationsAsync([activatedState]));
                     }
                 } else {
                     const bothAreTags = activeObjectType === ObjectType.TAG && label.type === ObjectType.TAG;
+                    const bothAreAudioSelections = activeObjectType === ObjectType.AUDIOSELECTION && label.type === ObjectType.TAG;
                     const labelIsApplicable = label.type === LabelType.ANY ||
-                        activeShapeType === label.type || bothAreTags;
+                        activeShapeType === label.type || bothAreTags || bothAreAudioSelections;
                     if (labelIsApplicable) {
                         dispatch(rememberObject({ activeLabelID: labelID }));
                         message.destroy();
