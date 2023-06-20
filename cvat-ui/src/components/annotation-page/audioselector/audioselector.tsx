@@ -5,18 +5,19 @@ import './audioselector.scss';
 
 import { ActiveControl, CombinedState, ObjectType } from 'reducers';
 import Button from 'antd/lib/button';
-import LabelSelector from 'components/label-selector/label-selector';
 import { CaretDownOutlined, CaretUpOutlined, PlusOutlined } from '@ant-design/icons';
 import CVATTooltip from 'components/common/cvat-tooltip';
 import AudioSelectorItem from './audioselectoritem';
-import {Selector} from './audioselectoritem';
 import { Col, Row } from 'antd/lib/grid';
 
 import { getCore, ObjectState, Job } from 'cvat-core-wrapper';
 import {
     createAnnotationsAsync,
+    removeObject,
     updateAnnotationsAsync,
 } from 'actions/annotation-actions';
+
+const cvat = getCore();
 
 interface StateToProps {
     canvasInstance: Canvas3d;
@@ -27,11 +28,13 @@ interface StateToProps {
     stopFrame: number,
     playing: boolean,
     frameNumber: number;
+    states: any[];
 }
 
 interface DispatchToProps {
     onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
     onUpdateAnnotations(states: ObjectState[]): void;
+    onRemoveAnnotation(objectState: any): void;
 }
 
 function mapDispatchToProps(dispatch: any): DispatchToProps {
@@ -42,6 +45,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onUpdateAnnotations(states: ObjectState[]): void {
             dispatch(updateAnnotationsAsync(states));
         },
+        onRemoveAnnotation(objectState: any): void {
+            dispatch(removeObject(objectState, false));
+        }
     };
 }
 
@@ -53,7 +59,9 @@ interface Props {
     frameNumber: number,
     onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
     onUpdateAnnotations(states: ObjectState[]): void;
+    onRemoveAnnotation(objectState: any): void;
     jobInstance: Job,
+    states: any[],
 }
 
 
@@ -70,6 +78,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                     fetching: frameFetching,
                 },
             },
+            annotations: { states }
         },
     } = state;
 
@@ -83,7 +92,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
         startFrame,
         stopFrame,
         playing,
-        frameNumber
+        frameNumber,
+        states
     };
 }
 
@@ -91,7 +101,12 @@ function mapStateToProps(state: CombinedState): StateToProps {
 
 function AudioSelector(props: Props): JSX.Element {
 
-    const [count, setCount] = useState(0);
+    const [audioselections, setAudioSelections] = useState<any[]>([]);
+    const {states} = props;
+
+    useEffect(() => {
+        setAudioSelections(states.filter(((s: any)  => s.objectType === ObjectType.AUDIOSELECTION)));
+    }, [states])
 
 
     const [dims, setDims] = useState([0, 0]);
@@ -102,6 +117,7 @@ function AudioSelector(props: Props): JSX.Element {
         canvasInstance, startFrame, stopFrame, frameNumber, labels, jobInstance,
         onCreateAnnotations,
         onUpdateAnnotations,
+        onRemoveAnnotation
     } = props;
     console.log(props.canvasInstance, canvasInstance)
 
@@ -116,18 +132,18 @@ function AudioSelector(props: Props): JSX.Element {
         >
             {
                 showControls && <div className='audioselector-controls' style={{
-                    height: `${50 + 50 * count}px`
+                    height: `${50 + 50 * audioselections.length}px`
                 }}>
                     <div style={{position: 'relative'}}>
                         {
-                            count > 0 && (
+                            audioselections.length > 0 && (
                                 <div className='audioselector-curFrameHighlightContainer'>
                                     <Row>
-                                        <Col span={4}></Col>
-                                        <Col span={20}>
+                                        <Col span={6}></Col>
+                                        <Col span={18}>
                                         <div className='audioselector-curFrameHighlightInnerContainer'>
                                             <div className='audioselector-curFrameHighlight'
-                                                style={{height: `${50 * count}px`, left: `${(frameNumber * 100) / (stopFrame - startFrame)}%`}}
+                                                style={{height: `${50 * audioselections.length}px`, left: `${(frameNumber * 100) / (stopFrame - startFrame)}%`}}
                                             />
                                         </div>
                                         </Col>
@@ -136,16 +152,16 @@ function AudioSelector(props: Props): JSX.Element {
                             )
                         }
                         {
-                            Array.from(Array(count)).map((_, index) => (
+                            audioselections.map((audioselection) => (
                                 <AudioSelectorItem
                                     labels={labels}
                                     startFrame={startFrame}
                                     stopFrame={stopFrame}
                                     frameNumber={frameNumber}
-                                    index={index}
+                                    selectionObject={audioselection}
                                     jobInstance={jobInstance}
-                                    onCreateAnnotations={onCreateAnnotations}
                                     onUpdateAnnotations={onUpdateAnnotations}
+                                    onRemoveAnnotation={onRemoveAnnotation}
                                     />
                             ))
                         }
@@ -155,7 +171,18 @@ function AudioSelector(props: Props): JSX.Element {
                                 className='cvat-add-tag-button'
                                 icon={<PlusOutlined />}
                                 onClick={() => {
-                                    setCount((val) => val + 1)
+                                    const objectState = new cvat.classes.ObjectState({
+                                        objectType: ObjectType.AUDIOSELECTION,
+                                        label: labels.filter((label: any) => label.id === labels[0].id)[0],
+                                        frame: frameNumber,
+                                        audio_selected_segments: [
+                                            {
+                                                start: frameNumber,
+                                                end: Math.min(frameNumber + 40, stopFrame)
+                                            }
+                                        ]
+                                    });
+                                    onCreateAnnotations(jobInstance, frameNumber, [objectState]);
                                 }}
                             />
                         </CVATTooltip>

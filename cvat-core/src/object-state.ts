@@ -144,6 +144,8 @@ export default class ObjectState {
                 this.hidden = false;
                 this.descriptions = false;
 
+                this.audio_selected_segments = false;
+
                 return reset;
             },
             writable: false,
@@ -361,7 +363,7 @@ export default class ObjectState {
                 },
                 audio_selected_segments: {
                     get: () => {
-                        if (typeof data.audio_selected_segments === 'object') {
+                        if (data.audio_selected_segments?.length) {
                             return data.audio_selected_segments;
                         }
 
@@ -384,7 +386,8 @@ export default class ObjectState {
                             }
                         }
 
-                        this.audio_selected_segments = audio_selected_segments;
+                        data.audio_selected_segments = audio_selected_segments;
+                        data.updateFlags.audio_selected_segments = true;
                     }
                 },
                 occluded: {

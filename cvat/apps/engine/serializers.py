@@ -1332,6 +1332,17 @@ class LabeledImageSerializerFromDB(serializers.BaseSerializer):
 
         return convert_tag(instance)
 
+class LabeledAudioSerializerFromDB(serializers.BaseSerializer):
+    # Use this serializer to export data from the database
+    # Because default DRF serializer is too slow on huge collections
+    def to_representation(self, instance):
+        def convert_audioselection(audioselection):
+            result = _convert_annotation(audioselection, ['id', 'label_id', 'frame', 'group', 'source', 'audio_selected_segments'])
+            result['attributes'] = _convert_attributes(audioselection['labeledaudioattributeval_set'])
+            return result
+
+        return convert_audioselection(instance)
+
 class LabeledShapeSerializerFromDB(serializers.BaseSerializer):
     # Use this serializer to export data from the database
     # Because default DRF serializer is too slow on huge collections
@@ -1384,12 +1395,18 @@ class SubLabeledTrackSerializer(AnnotationSerializer):
 class LabeledTrackSerializer(SubLabeledTrackSerializer):
     elements = SubLabeledTrackSerializer(many=True, required=False)
 
+class AudioSegmentSerializer(serializers.Serializer):
+    start = serializers.IntegerField()
+    end = serializers.IntegerField()
+
+class LabeledAudioSelectionSerializer(AnnotationSerializer):
+    audio_selected_segments = AudioSegmentSerializer(many=True, default=[])
 class LabeledDataSerializer(serializers.Serializer):
     version = serializers.IntegerField(default=0) # TODO: remove
     tags   = LabeledImageSerializer(many=True, default=[])
     shapes = LabeledShapeSerializer(many=True, default=[])
     tracks = LabeledTrackSerializer(many=True, default=[])
-    audioselections = LabeledTrackSerializer(many=True, default=[])
+    audioselections = LabeledAudioSelectionSerializer(many=True, default=[])
 
 class FileInfoSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=1024)

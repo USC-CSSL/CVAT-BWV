@@ -23,6 +23,7 @@ class AnnotationIR:
             self.tags = getattr(data, 'tags', []) or data['tags']
             self.shapes = getattr(data, 'shapes', []) or data['shapes']
             self.tracks = getattr(data, 'tracks', []) or data['tracks']
+            self.audioselections = getattr(data, 'audioselections', []) or data['audioselections']
 
     def add_tag(self, tag):
         self.tags.append(tag)
@@ -33,6 +34,9 @@ class AnnotationIR:
     def add_track(self, track):
         self.tracks.append(track)
 
+    def add_audioselections(self, audioselection):
+        self.audioselections.append(audioselection)
+
     @property
     def data(self):
         return {
@@ -40,6 +44,7 @@ class AnnotationIR:
             'tags': self.tags,
             'shapes': self.shapes,
             'tracks': self.tracks,
+            'audioselections': self.audioselections,
         }
 
     def __getitem__(self, key):
@@ -54,6 +59,7 @@ class AnnotationIR:
         self.tags = data['tags']
         self.shapes = data['shapes']
         self.tracks = data['tracks']
+        self.audioselections = data['audioselections']
 
     def serialize(self):
         serializer = LabeledDataSerializer(data=self.data)
@@ -145,6 +151,7 @@ class AnnotationIR:
         self.tags = []
         self.shapes = []
         self.tracks = []
+        self.audioselections = []
 
 class AnnotationManager:
     def __init__(self, data):

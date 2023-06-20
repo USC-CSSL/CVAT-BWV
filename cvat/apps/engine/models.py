@@ -200,6 +200,14 @@ class FloatArrayField(AbstractArrayField):
 class IntArrayField(AbstractArrayField):
     converter = int
 
+class AudioSegmentArrayField(AbstractArrayField):
+    converter = lambda _, x: {
+        'start': int(x.split(':')[0]),
+        'end': int(x.split(':')[1])
+    }
+    def get_prep_value(self, value):
+        return self.separator.join(map(lambda x: f"{x['start']}:{x['end']}", value))
+
 class Data(models.Model):
     chunk_size = models.PositiveIntegerField(null=True)
     size = models.PositiveIntegerField(default=0)
@@ -702,6 +710,12 @@ class LabeledImage(Annotation):
 
 class LabeledImageAttributeVal(AttributeVal):
     image = models.ForeignKey(LabeledImage, on_delete=models.CASCADE)
+
+class LabeledAudio(Annotation):
+    audio_selected_segments = AudioSegmentArrayField(default=[])
+
+class LabeledAudioAttributeVal(AttributeVal):
+    audio = models.ForeignKey(LabeledAudio, on_delete=models.CASCADE)
 
 class LabeledShape(Annotation, Shape):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='elements')

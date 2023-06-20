@@ -41,7 +41,7 @@ export default class AnnotationsSaver {
         }
 
         for (const audioselection of exported.audioselections) {
-            this.initialObjects.audioselection[audioselection.id] = audioselection;
+            this.initialObjects.audioselections[audioselection.id] = audioselection;
         }
     }
 
@@ -124,6 +124,10 @@ export default class AnnotationsSaver {
             'spec_id',
             'source',
             'outside',
+            'audio_selected_segments',
+            // bit weird how replacer of JSON.stringify works with nested array
+            'start',
+            'end'
         ];
 
         // Find created and updated objects
@@ -132,6 +136,7 @@ export default class AnnotationsSaver {
                 if (object.id in this.initialObjects[type]) {
                     const exportedHash = JSON.stringify(object, keys);
                     const initialHash = JSON.stringify(this.initialObjects[type][object.id], keys);
+                    console.log(exportedHash, initialHash)
                     if (exportedHash !== initialHash) {
                         splitted.updated[type].push(object);
                     }

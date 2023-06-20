@@ -1502,9 +1502,6 @@ export class AudioSelection extends Annotation {
     }
 
     public save(frame: number, data: ObjectState): ObjectState {
-        if (frame !== this.frame) {
-            throw new ScriptingError('Received frame is not equal to the frame of the tag');
-        }
 
         if (this.lock && data.lock) {
             return new ObjectState(this.get(frame));

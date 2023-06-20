@@ -359,6 +359,46 @@ class JobAnnotation:
 
         self.ir_data.tags = tags
 
+    def _save_audioselections_to_db(self, audioselections):
+        db_audioselections = []
+        db_attr_vals = []
+        for audioselection in audioselections:
+            attributes = audioselection.pop("attributes", [])
+            db_audioselection = models.LabeledAudio(job=self.db_job, **audioselection)
+
+            self._validate_label_for_existence(db_audioselection.label_id)
+
+            for attr in attributes:
+                db_attr_val = models.LabeledAudioAttributeVal(**attr)
+
+                self._validate_attribute_for_existence(db_attr_val, db_audioselection.label_id, "all")
+
+                db_attr_val.audioselection_id = len(db_audioselections)
+                db_attr_vals.append(db_attr_val)
+
+            db_audioselections.append(db_audioselection)
+            audioselection["attributes"] = attributes
+
+        db_audioselections = bulk_create(
+            db_model=models.LabeledAudio,
+            objects=db_audioselections,
+            flt_param={"job_id": self.db_job.id}
+        )
+
+        for db_attr_val in db_attr_vals:
+            db_attr_val.audioselection_id = db_audioselections[db_attr_val.audioselection_id].id
+
+        bulk_create(
+            db_model=models.LabeledAudioAttributeVal,
+            objects=db_attr_vals,
+            flt_param={}
+        )
+
+        for audioselection, db_audioselection in zip(audioselections, db_audioselections):
+            audioselection["id"] = db_audioselection.id
+
+        self.ir_data.audioselections = audioselections
+
     def _set_updated_date(self):
         db_task = self.db_job.segment.task
         db_task.updated_date = timezone.now()
@@ -369,6 +409,7 @@ class JobAnnotation:
         self._save_tags_to_db(data["tags"])
         self._save_shapes_to_db(data["shapes"])
         self._save_tracks_to_db(data["tracks"])
+        self._save_audioselections_to_db(data["audioselections"])
 
         return self.ir_data.tags or self.ir_data.shapes or self.ir_data.tracks
 
@@ -394,16 +435,20 @@ class JobAnnotation:
             deleted_shapes += self.db_job.labeledimage_set.all().delete()[0]
             deleted_shapes += self.db_job.labeledshape_set.all().delete()[0]
             deleted_shapes += self.db_job.labeledtrack_set.all().delete()[0]
+            deleted_shapes += self.db_job.labeledaudio_set.all().delete()[0]
         else:
             labeledimage_ids = [image["id"] for image in data["tags"]]
             labeledshape_ids = [shape["id"] for shape in data["shapes"]]
             labeledtrack_ids = [track["id"] for track in data["tracks"]]
+            labeledaudio_ids = [track["id"] for track in data["audioselections"]]
             labeledimage_set = self.db_job.labeledimage_set
             labeledimage_set = labeledimage_set.filter(pk__in=labeledimage_ids)
             labeledshape_set = self.db_job.labeledshape_set
             labeledshape_set = labeledshape_set.filter(pk__in=labeledshape_ids)
             labeledtrack_set = self.db_job.labeledtrack_set
             labeledtrack_set = labeledtrack_set.filter(pk__in=labeledtrack_ids)
+            labeledaudio_set = self.db_job.labeledaudio_set
+            labeledaudio_set = labeledaudio_set.filter(pk__in=labeledaudio_ids)
 
             # It is not important for us that data had some "invalid" objects
             # which were skipped (not actually deleted). The main idea is to
@@ -411,10 +456,12 @@ class JobAnnotation:
             self.ir_data.tags = data['tags']
             self.ir_data.shapes = data['shapes']
             self.ir_data.tracks = data['tracks']
+            self.ir_data.audioselections = data['audioselections']
 
             deleted_shapes += labeledimage_set.delete()[0]
             deleted_shapes += labeledshape_set.delete()[0]
             deleted_shapes += labeledtrack_set.delete()[0]
+            deleted_shapes += labeledaudio_set.delete()[0]
 
         if deleted_shapes:
             self._set_updated_date()
@@ -465,6 +512,42 @@ class JobAnnotation:
 
         serializer = serializers.LabeledImageSerializerFromDB(db_tags, many=True)
         self.ir_data.tags = serializer.data
+
+    def _init_audioselections_from_db(self):
+        db_audioselections = self.db_job.labeledaudio_set.prefetch_related(
+            "label",
+            "labeledaudioattributeval_set"
+        ).values(
+            'id',
+            'frame',
+            'label_id',
+            'group',
+            'source',
+            'audio_selected_segments',
+            'labeledaudioattributeval__spec_id',
+            'labeledaudioattributeval__value',
+            'labeledaudioattributeval__id',
+        ).order_by('frame')
+
+        db_audioselections = _merge_table_rows(
+            rows=db_audioselections,
+            keys_for_merge={
+                "labeledaudioattributeval_set": [
+                    'labeledaudioattributeval__spec_id',
+                    'labeledaudioattributeval__value',
+                    'labeledaudioattributeval__id',
+                ],
+            },
+            field_id='id',
+        )
+
+        for db_audioselection in db_audioselections:
+            self._extend_attributes(db_audioselection.labeledaudioattributeval_set,
+                self.db_attributes[db_audioselection.label_id]["all"].values())
+
+        serializer = serializers.LabeledAudioSerializerFromDB(db_audioselections, many=True)
+        self.ir_data.audioselections = serializer.data
+
 
     def _init_shapes_from_db(self):
         db_shapes = self.db_job.labeledshape_set.prefetch_related(
@@ -621,6 +704,7 @@ class JobAnnotation:
         self._init_shapes_from_db()
         self._init_tracks_from_db()
         self._init_version_from_db()
+        self._init_audioselections_from_db()
 
     @property
     def data(self):

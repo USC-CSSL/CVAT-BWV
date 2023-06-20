@@ -6,66 +6,44 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { CombinedState, ObjectType } from 'reducers';
 import { Space } from 'antd';
 import { getCore, Job, ObjectState } from 'cvat-core-wrapper';
+import { number } from 'prop-types';
+import DeleteOutlined from '@ant-design/icons/lib/icons/DeleteOutlined';
 interface Props{
     labels: any[],
     startFrame: number,
     stopFrame: number,
     frameNumber: number,
-    index: number,
     jobInstance: Job,
-
-    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void,
+    selectionObject: {
+        audio_selected_segments: {start: number, end: number}[]
+    },
+    onRemoveAnnotation(objectState: any): void;
     onUpdateAnnotations(states: ObjectState[]): void
 }
 
 const cvat = getCore();
 
 
-export interface Selector{
-    selections: {
-        start: number,
-        end: number;
-    }[];
-    removed: boolean;
-}
-
 
 
 export default function AudioSelectorItem (props: Props) {
     const {
-        startFrame, stopFrame, labels,frameNumber, index, jobInstance,
-        onCreateAnnotations,
-        onUpdateAnnotations,
+        startFrame, stopFrame, labels, frameNumber, jobInstance, selectionObject,
+        onUpdateAnnotations, onRemoveAnnotation
     } = props;
 
 
     const [dragging, setDragging] = useState<string | null>(null);
     const [selectedLabelID, setSelectedLabelID] = useState<number>(labels[0].id);
-    const [selector, setSelector] = useState<Selector | null>(null);
 
 
     const leftRef = useRef<HTMLDivElement>(null);
     const rightRef = useRef<HTMLDivElement>(null);
     const selectorRef = useRef<HTMLDivElement>(null);
 
-    useEffect(()=>{
-        const newSelector = {
-            selections: [
-                {
-                    start: frameNumber,
-                    end: Math.min(frameNumber + 40, stopFrame)
-                }
-            ],
-            removed: false,
-        }
-
-        setSelector(newSelector);
-
-
-    }, [])
 
     return (
-        selector && !selector.removed ?
+        selectionObject.audio_selected_segments.length ?
         <div>
         <Row >
             <Col span={4}>
@@ -74,7 +52,12 @@ export default function AudioSelectorItem (props: Props) {
                 </Space>
 
             </Col>
-            <Col span={20}>
+            <Col span={2}>
+                <Space>
+                    <DeleteOutlined onClick={() => onRemoveAnnotation(selectionObject)}/>
+                </Space>
+            </Col>
+            <Col span={18}>
                 <div className='audioselector-selector'
                     ref={selectorRef}
                     onMouseUp={() => setDragging(null)}
@@ -91,36 +74,38 @@ export default function AudioSelectorItem (props: Props) {
                                     (clientX - selectorBoundingRectX) / selectorBoundingRectWidth
                                     ) * (stopFrame - startFrame) + startFrame;
 
-                                newPos = Math.max(Math.min(newPos, selector.selections[0].end - 5), 0);
-                                setSelector({
-                                    ...selector,
-                                    selections: [{
-                                        ...selector.selections[0],
-                                        start: newPos,
-                                    }]
-                                })
+                                newPos = Math.max(Math.round(Math.min(newPos, selectionObject.audio_selected_segments[0].end - 5)), 0);
+
+                                selectionObject.audio_selected_segments = [{
+                                    start: newPos,
+                                    end: selectionObject.audio_selected_segments[0].end
+                                }];
+                                onUpdateAnnotations([selectionObject])
+
                             }
                             else if (dragging === 'right') {
                                 let newPos = (
                                     selectorRef.current &&
                                     (clientX - selectorBoundingRectX) / selectorBoundingRectWidth
                                     ) * (stopFrame - startFrame) + startFrame;
-                                newPos = Math.min(Math.max(newPos, selector.selections[0].start + 5), stopFrame - startFrame)
-                                setSelector({
-                                    ...selector,
-                                    selections: [{
-                                        ...selector.selections[0],
-                                        end: newPos,
-                                    }]
-                                })
+                                newPos = Math.min(Math.round(Math.max(newPos,  selectionObject.audio_selected_segments[0].start + 5)), stopFrame - startFrame)
+                                selectionObject.audio_selected_segments = [{
+                                    start: selectionObject.audio_selected_segments[0].start,
+                                    end: newPos
+                                }];
+                                onUpdateAnnotations([selectionObject])
                             }
                         }
                     }}
                 >
                     <div className='audioselector-selection'
                         style={{
-                            left: `${selector.selections[0].start * 100 / (stopFrame - startFrame)}%`,
-                            width: `${(selector.selections[0].end - selector.selections[0].start) * 100 / (stopFrame - startFrame)}%`
+                            left: `${selectionObject.audio_selected_segments[0].start * 100 / (stopFrame - startFrame)}%`,
+                            width: `${
+                                (
+                                    selectionObject.audio_selected_segments[0].end - selectionObject.audio_selected_segments[0].start
+                                ) * 100 / (stopFrame - startFrame)
+                            }%`
                         }}
                         onMouseUp={() => setDragging(null)}
                     >
