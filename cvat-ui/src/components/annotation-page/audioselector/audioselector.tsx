@@ -139,8 +139,8 @@ function AudioSelector(props: Props): JSX.Element {
                             audioselections.length > 0 && (
                                 <div className='audioselector-curFrameHighlightContainer'>
                                     <Row>
-                                        <Col span={6}></Col>
-                                        <Col span={18}>
+                                        <Col span={4}></Col>
+                                        <Col span={20}>
                                         <div className='audioselector-curFrameHighlightInnerContainer'>
                                             <div className='audioselector-curFrameHighlight'
                                                 style={{height: `${50 * audioselections.length}px`, left: `${(frameNumber * 100) / (stopFrame - startFrame)}%`}}
@@ -165,10 +165,12 @@ function AudioSelector(props: Props): JSX.Element {
                                     />
                             ))
                         }
-                        <CVATTooltip title={`Click to highlight a section from audio`}>
+                        <div style={{display: 'flex'}}>
+                        <CVATTooltip title={`Click to highlight a section from audio`} >
                             <Button
                                 type='primary'
                                 className='cvat-add-tag-button'
+                                style={{margin: 'auto'}}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
                                     const objectState = new cvat.classes.ObjectState({
@@ -186,6 +188,7 @@ function AudioSelector(props: Props): JSX.Element {
                                 }}
                             />
                         </CVATTooltip>
+                        </div>
                     </div>
                 </div>
             }

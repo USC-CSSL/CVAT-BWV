@@ -12,12 +12,13 @@ import {
     EditOutlined, BuildOutlined, ExclamationCircleOutlined,
 } from '@ant-design/icons';
 
-import { SerializedLabel, SerializedAttribute } from 'cvat-core-wrapper';
+import { SerializedLabel, SerializedAttribute, LabelType } from 'cvat-core-wrapper';
 import RawViewer from './raw-viewer';
 import ConstructorViewer from './constructor-viewer';
 import ConstructorCreator from './constructor-creator';
 import ConstructorUpdater from './constructor-updater';
 import { idGenerator, LabelOptColor } from './common';
+import config from 'config';
 
 enum ConstructorMode {
     SHOW = 'SHOW',
@@ -41,6 +42,7 @@ interface LabelsEditorState {
 export default class LabelsEditor extends React.PureComponent<LabelsEditorProps, LabelsEditorState> {
     public constructor(props: LabelsEditorProps) {
         super(props);
+
 
         this.state = {
             savedLabels: [],
@@ -215,7 +217,7 @@ export default class LabelsEditor extends React.PureComponent<LabelsEditorProps,
             savedLabels, unsavedLabels, constructorMode, labelForUpdate, creatorType,
         } = this.state;
         const savedAndUnsavedLabels = [...savedLabels, ...unsavedLabels];
-
+        console.log(savedAndUnsavedLabels, constructorMode)
         return (
             <Tabs
                 defaultActiveKey='2'

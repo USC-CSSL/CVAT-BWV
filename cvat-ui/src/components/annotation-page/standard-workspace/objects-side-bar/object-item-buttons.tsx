@@ -288,7 +288,7 @@ function ItemButtonsComponent(props: Props): JSX.Element {
         return <div />;
     }
 
-    if (objectType === ObjectType.TAG) {
+    if (objectType === ObjectType.TAG || objectType === ObjectType.AUDIOSELECTION) {
         return (
             <Row align='middle' justify='space-around'>
                 <Col span={20} style={{ textAlign: 'center' }}>

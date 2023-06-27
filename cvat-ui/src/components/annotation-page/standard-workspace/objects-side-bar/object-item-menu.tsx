@@ -271,12 +271,12 @@ export default function ItemMenu(props: Props): JSX.Element {
 
     return (
         <Menu className='cvat-object-item-menu' selectable={false}>
-            <CreateURLItem key={MenuKeys.CREATE_URL} toolProps={props} />
+            {/* <CreateURLItem key={MenuKeys.CREATE_URL} toolProps={props} /> */}
             {!readonly && objectType !== ObjectType.TAG && objectType !== ObjectType.AUDIOSELECTION && (
                 <MakeCopyItem key={MenuKeys.COPY} toolProps={props} />
             )}
-            {!readonly && <EditMaskItem key={MenuKeys.EDIT_MASK} toolProps={props} />}
-            {!readonly && <PropagateItem key={MenuKeys.PROPAGATE} toolProps={props} />}
+            {!readonly && objectType !== ObjectType.AUDIOSELECTION && <EditMaskItem key={MenuKeys.EDIT_MASK} toolProps={props} />}
+            {!readonly && objectType !== ObjectType.AUDIOSELECTION && <PropagateItem key={MenuKeys.PROPAGATE} toolProps={props} />}
             {is2D && !readonly && [ShapeType.POLYGON, ShapeType.POLYLINE, ShapeType.CUBOID].includes(shapeType) && (
                 <SwitchOrientationItem key={MenuKeys.SWITCH_ORIENTATION} toolProps={props} />
             )}

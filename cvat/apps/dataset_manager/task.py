@@ -527,7 +527,7 @@ class JobAnnotation:
             'labeledaudioattributeval__spec_id',
             'labeledaudioattributeval__value',
             'labeledaudioattributeval__id',
-        ).order_by('frame')
+        ).order_by('id')
 
         db_audioselections = _merge_table_rows(
             rows=db_audioselections,

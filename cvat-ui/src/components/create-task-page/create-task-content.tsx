@@ -15,7 +15,7 @@ import Alert from 'antd/lib/alert';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ValidateErrorEntity } from 'rc-field-form/lib/interface';
 import { StorageLocation } from 'reducers';
-import { getCore, Storage } from 'cvat-core-wrapper';
+import { getCore, LabelType, Storage } from 'cvat-core-wrapper';
 import LabelsEditor from 'components/labels-editor/labels-editor';
 import FileManagerComponent, { Files } from 'components/file-manager/file-manager';
 import { RemoteFile } from 'components/file-manager/remote-browser';
@@ -27,6 +27,8 @@ import ProjectSubsetField from './project-subset-field';
 import MultiTasksProgress from './multi-task-progress';
 import AdvancedConfigurationForm, { AdvancedConfiguration, SortingMethod } from './advanced-configuration-form';
 import Select from 'antd/lib/select';
+import config from 'config';
+import { idGenerator } from 'components/labels-editor/common';
 
 const { Option } = Select;
 
@@ -92,7 +94,32 @@ const defaultState: State = {
         useProjectSourceStorage: true,
         useProjectTargetStorage: true,
     },
-    labels: [],
+    labels: [{
+        id: idGenerator(),
+        name: 'Police',
+        type: LabelType.ANY,
+        color: config.NEW_LABEL_COLOR,
+        attributes: [{
+            name: 'number',
+            input_type: 'number',
+            mutable: false,
+            values: ['1', '20', '1'],
+
+        }]
+    },
+    {
+        id: idGenerator(),
+        name: 'Citizen',
+        type: LabelType.ANY,
+        color: config.NEW_LABEL_COLOR,
+        attributes: [{
+            name: 'number',
+            input_type: 'number',
+            mutable: false,
+            values: ['1', '20', '1'],
+
+        }]
+    }],
     files: {
         local: [],
         share: [],
@@ -753,12 +780,12 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                         <Option
                             value={'phase1'}
                         >
-                            Phase 1
+                            Tag Extraction (Phase 1)
                         </Option>
                         <Option
                             value={'phase2'}
                         >
-                            Phase 2
+                            Tag Assignment Annotation (Phase 2)
                         </Option>
                     </Select>
                 </Col>

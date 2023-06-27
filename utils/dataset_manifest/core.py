@@ -58,6 +58,7 @@ class VideoStreamReader:
 
     @staticmethod
     def _get_video_stream(container):
+        print('CONTAINER STREAMS', container.streams)
         video_stream = next(stream for stream in container.streams if stream.type == 'video')
         video_stream.thread_type = 'AUTO'
         return video_stream

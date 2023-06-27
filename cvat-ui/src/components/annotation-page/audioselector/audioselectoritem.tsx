@@ -16,6 +16,7 @@ interface Props{
     jobInstance: Job,
     selectionObject: {
         audio_selected_segments: {start: number, end: number}[]
+        label: any
     },
     onRemoveAnnotation(objectState: any): void;
     onUpdateAnnotations(states: ObjectState[]): void
@@ -28,13 +29,12 @@ const cvat = getCore();
 
 export default function AudioSelectorItem (props: Props) {
     const {
-        startFrame, stopFrame, labels, frameNumber, jobInstance, selectionObject,
+        startFrame, stopFrame, labels, selectionObject,
         onUpdateAnnotations, onRemoveAnnotation
     } = props;
 
 
     const [dragging, setDragging] = useState<string | null>(null);
-    const [selectedLabelID, setSelectedLabelID] = useState<number>(labels[0].id);
 
 
     const leftRef = useRef<HTMLDivElement>(null);
@@ -46,18 +46,22 @@ export default function AudioSelectorItem (props: Props) {
         selectionObject.audio_selected_segments.length ?
         <div>
         <Row >
-            <Col span={4}>
-                <Space>
-                    <LabelSelector labels={labels} value={selectedLabelID} onChange={(value: any) => setSelectedLabelID(value.id)}/>
+            <Col span={3}>
+                <div style={{display: 'flex', height: '100%'}}>
+                <Space style={{margin: 'auto'}}>
+                    <LabelSelector labels={labels} value={selectionObject.label.id} onChange={(label: any) => {
+                        selectionObject.label = label;
+                        onUpdateAnnotations([selectionObject])
+                    }}/>
                 </Space>
-
+                </div>
             </Col>
-            <Col span={2}>
-                <Space>
-                    <DeleteOutlined onClick={() => onRemoveAnnotation(selectionObject)}/>
-                </Space>
+            <Col span={1}>
+                <div style={{display: 'flex', height: '100%'}}>
+                    <DeleteOutlined style={{margin: 'auto'}} onClick={() => onRemoveAnnotation(selectionObject)}/>
+                </div>
             </Col>
-            <Col span={18}>
+            <Col span={20}>
                 <div className='audioselector-selector'
                     ref={selectorRef}
                     onMouseUp={() => setDragging(null)}
