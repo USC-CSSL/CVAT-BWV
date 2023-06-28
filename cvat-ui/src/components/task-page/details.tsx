@@ -437,7 +437,7 @@ class DetailsComponent extends React.PureComponent<Props, State> {
                     <Col className='cvat-task-details-task-name'>{this.renderTaskName()}</Col>
                     <Col className='cvat-task-details-task-name'>
                         <Text>
-                            {taskInstance.phase}
+                            {/* {taskInstance.phase} */}
                         </Text>
                     </Col>
                 </Row>

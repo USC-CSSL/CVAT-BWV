@@ -100,7 +100,7 @@ const defaultState: State = {
         type: LabelType.ANY,
         color: '#4aa7ff',
         attributes: [{
-            name: 'number',
+            name: 'identifier',
             input_type: 'number',
             mutable: false,
             values: ['1', '20', '1'],
@@ -113,7 +113,7 @@ const defaultState: State = {
         type: LabelType.ANY,
         color: '#f2d25c',
         attributes: [{
-            name: 'number',
+            name: 'identifier',
             input_type: 'number',
             mutable: false,
             values: ['1', '20', '1'],
