@@ -141,8 +141,7 @@ export default function AnnotationTopBarComponent(props: Props): JSX.Element {
                 onFinishDraw={onFinishDraw}
                 onSwitchToolsBlockerState={onSwitchToolsBlockerState}
             />
-            {jobInstance.phase == 'phase2'?
-                <></>:<Col className='cvat-annotation-header-player-group'>
+            <Col className='cvat-annotation-header-player-group'>
                 <Row align='middle'>
                     <PlayerButtons
                         playing={playing}
@@ -182,7 +181,7 @@ export default function AnnotationTopBarComponent(props: Props): JSX.Element {
                         switchNavigationBlocked={switchNavigationBlocked}
                     />
                 </Row>
-            </Col>}
+            </Col>
 
             <RightGroup
                 workspace={workspace}

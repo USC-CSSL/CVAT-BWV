@@ -1122,6 +1122,15 @@ export function updateAnnotationsAsync(statesToUpdate: any[]): ThunkAction {
     };
 }
 
+export function lockAllAnnotations(): ThunkAction {
+    return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
+        const state: CombinedState = getStore().getState();
+        const objs = state.annotation.annotations.states;
+        objs.forEach((obj) => obj.lock = true);
+        dispatch(updateAnnotationsAsync(objs));
+    }
+}
+
 export function createAnnotationsAsync(sessionInstance: any, frame: number, statesToCreate: any[]): ThunkAction {
     return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
         try {

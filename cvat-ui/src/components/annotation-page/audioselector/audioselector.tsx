@@ -62,6 +62,7 @@ interface Props {
     onRemoveAnnotation(objectState: any): void;
     jobInstance: Job,
     states: any[],
+    isPhase2: boolean;
 }
 
 
@@ -109,21 +110,16 @@ function AudioSelector(props: Props): JSX.Element {
     }, [states])
 
 
-    const [dims, setDims] = useState([0, 0]);
     const [showControls, setShowControls] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
     const {
-        canvasInstance, startFrame, stopFrame, frameNumber, labels, jobInstance,
+        startFrame, stopFrame, frameNumber, labels, jobInstance,
         onCreateAnnotations,
         onUpdateAnnotations,
-        onRemoveAnnotation
+        onRemoveAnnotation,
+        isPhase2,
     } = props;
-    console.log(props.canvasInstance, canvasInstance)
-
-    useLayoutEffect(() => {
-        setDims([ref.current?.offsetWidth || 0, ref.current?.offsetHeight || 0]);
-      }, []);
 
     return (
         <div
@@ -165,6 +161,7 @@ function AudioSelector(props: Props): JSX.Element {
                                     />
                             ))
                         }
+                        {!isPhase2 &&
                         <div style={{display: 'flex'}}>
                         <CVATTooltip title={`Click to highlight a section from audio`} >
                             <Button
@@ -173,22 +170,27 @@ function AudioSelector(props: Props): JSX.Element {
                                 style={{margin: 'auto'}}
                                 icon={<PlusOutlined />}
                                 onClick={() => {
+                                    const label = labels.filter((label: any) => label.id === labels[0].id)[0];
+                                    const attrId = label.attributes[0]?.id;
                                     const objectState = new cvat.classes.ObjectState({
                                         objectType: ObjectType.AUDIOSELECTION,
-                                        label: labels.filter((label: any) => label.id === labels[0].id)[0],
+                                        label:label,
                                         frame: frameNumber,
                                         audio_selected_segments: [
                                             {
                                                 start: frameNumber,
                                                 end: Math.min(frameNumber + 40, stopFrame)
                                             }
-                                        ]
+                                        ],
+                                        attributes: {
+                                            [attrId]: `1`,
+                                        }
                                     });
                                     onCreateAnnotations(jobInstance, frameNumber, [objectState]);
                                 }}
                             />
                         </CVATTooltip>
-                        </div>
+                        </div>}
                     </div>
                 </div>
             }

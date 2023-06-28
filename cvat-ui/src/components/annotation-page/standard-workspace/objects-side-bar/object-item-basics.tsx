@@ -99,7 +99,7 @@ function ItemTopComponent(props: Props): JSX.Element {
     return (
         <Row align='middle'>
             <Col span={10}>
-                <Text style={{ fontSize: 12 }}>{clientID}</Text>
+                {/* <Text style={{ fontSize: 12 }}>{clientID}</Text> */}
                 <br />
                 <Text
                     type='secondary'

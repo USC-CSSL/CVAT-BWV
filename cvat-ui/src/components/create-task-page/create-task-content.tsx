@@ -98,7 +98,7 @@ const defaultState: State = {
         id: idGenerator(),
         name: 'Police',
         type: LabelType.ANY,
-        color: config.NEW_LABEL_COLOR,
+        color: '#4aa7ff',
         attributes: [{
             name: 'number',
             input_type: 'number',
@@ -111,7 +111,7 @@ const defaultState: State = {
         id: idGenerator(),
         name: 'Citizen',
         type: LabelType.ANY,
-        color: config.NEW_LABEL_COLOR,
+        color: '#f2d25c',
         attributes: [{
             name: 'number',
             input_type: 'number',
@@ -752,14 +752,14 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
         const { projectId } = this.state;
 
         return (
-            <>
+            <div style={{display:'none'}}>
                 <Col span={24}>
                     <Text className='cvat-text-color'>Project</Text>
                 </Col>
                 <Col span={24}>
                     <ProjectSearchField onSelect={this.handleProjectIdChange} value={projectId} />
                 </Col>
-            </>
+            </div>
         );
     }
 
@@ -767,7 +767,7 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
         const { phase } = this.state;
 
         return (
-            <>
+            <div style={{display: 'none'}}>
                 <Col span={24}>
                     <Text className='cvat-text-color'>Select Phase</Text>
                 </Col>
@@ -780,16 +780,16 @@ class CreateTaskContent extends React.PureComponent<Props & RouteComponentProps,
                         <Option
                             value={'phase1'}
                         >
-                            Tag Extraction (Phase 1)
+                            Tagging & Objective Annotations (Phase 1)
                         </Option>
                         <Option
                             value={'phase2'}
                         >
-                            Tag Assignment Annotation (Phase 2)
+                            Subjective Annotations (Phase 2)
                         </Option>
                     </Select>
                 </Col>
-            </>
+            </div>
         )
     }
 

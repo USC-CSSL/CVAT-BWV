@@ -424,7 +424,7 @@ function HeaderContainer(props: Props): JSX.Element {
         <Layout.Header className='cvat-header'>
             <div className='cvat-left-header'>
                 <Icon className='cvat-logo-icon' component={CVATLogo} />
-                <Button
+                {/* <Button
                     className={getButtonClassName('projects')}
                     type='link'
                     value='projects'
@@ -435,7 +435,7 @@ function HeaderContainer(props: Props): JSX.Element {
                     }}
                 >
                     Projects
-                </Button>
+                </Button> */}
                 <Button
                     className={getButtonClassName('tasks')}
                     type='link'

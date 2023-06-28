@@ -26,6 +26,7 @@ const core = getCore();
 interface StateToProps {
     jobInstance: any;
     stopFrame: number;
+    isOrganizationOwner: boolean;
 }
 
 interface DispatchToProps {
@@ -45,11 +46,18 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 instance: { stopFrame },
             },
         },
+        auth: {
+            user,
+        },
+        organizations: {
+            current: currentOrganization,
+        }
     } = state;
 
     return {
         jobInstance,
         stopFrame,
+        isOrganizationOwner: currentOrganization?.owner.username === user.username
     };
 }
 
@@ -89,6 +97,7 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
         setForceExitAnnotationFlag,
         saveAnnotations,
         updateJob,
+        isOrganizationOwner
     } = props;
 
     const onClickMenu = (params: MenuInfo): void => {
@@ -104,7 +113,7 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             jobInstance.stage = JobStage.ACCEPTANCE;
             jobInstance.state = core.enums.JobState.COMPLETED;
             updateJob(jobInstance);
-            history.push(`/tasks/${jobInstance.taskId}`);
+            // history.push(`/tasks/${jobInstance.taskId}`);
         } else if (action === Actions.OPEN_TASK) {
             history.push(`/tasks/${jobInstance.taskId}`);
         } else if (action.startsWith('state:')) {
@@ -125,6 +134,7 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             saveAnnotations={saveAnnotations}
             jobInstance={jobInstance}
             stopFrame={stopFrame}
+            isOrganizationOwner={isOrganizationOwner}
         />
     );
 }

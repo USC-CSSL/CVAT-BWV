@@ -29,6 +29,7 @@ interface Props {
     removeAnnotations(startnumber: number, endnumber: number, delTrackKeyframesOnly:boolean): void;
     setForceExitAnnotationFlag(forceExit: boolean): void;
     saveAnnotations(jobInstance: any, afterSave?: () => void): void;
+    isOrganizationOwner: boolean;
 }
 
 export enum Actions {
@@ -49,6 +50,7 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
         removeAnnotations,
         setForceExitAnnotationFlag,
         saveAnnotations,
+        isOrganizationOwner
     } = props;
 
     const jobStage = jobInstance.stage;
@@ -213,10 +215,12 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
                     <Text className={computeClassName(JobState.COMPLETED)}>{JobState.COMPLETED}</Text>
                 </Menu.Item>
             </Menu.SubMenu>
+            {isOrganizationOwner && <>
             {[JobStage.ANNOTATION, JobStage.REVIEW].includes(jobStage) ?
                 <Menu.Item key={Actions.FINISH_JOB}>Finish the job</Menu.Item> : null}
             {jobStage === JobStage.ACCEPTANCE ?
                 <Menu.Item key={Actions.RENEW_JOB}>Renew the job</Menu.Item> : null}
+            </>}
         </Menu>
     );
 }
