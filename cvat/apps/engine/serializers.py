@@ -1401,6 +1401,9 @@ class AudioSegmentSerializer(serializers.Serializer):
 
 class LabeledAudioSelectionSerializer(AnnotationSerializer):
     audio_selected_segments = AudioSegmentSerializer(many=True, default=[])
+    attributes = AttributeValSerializer(many=True,
+        source="labeledaudioattributeval_set", default=[])
+
 class LabeledDataSerializer(serializers.Serializer):
     version = serializers.IntegerField(default=0) # TODO: remove
     tags   = LabeledImageSerializer(many=True, default=[])

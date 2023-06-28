@@ -373,7 +373,7 @@ class JobAnnotation:
 
                 self._validate_attribute_for_existence(db_attr_val, db_audioselection.label_id, "all")
 
-                db_attr_val.audioselection_id = len(db_audioselections)
+                db_attr_val.audio_id = len(db_audioselections)
                 db_attr_vals.append(db_attr_val)
 
             db_audioselections.append(db_audioselection)
@@ -386,7 +386,7 @@ class JobAnnotation:
         )
 
         for db_attr_val in db_attr_vals:
-            db_attr_val.audioselection_id = db_audioselections[db_attr_val.audioselection_id].id
+            db_attr_val.audio_id = db_audioselections[db_attr_val.audio_id].id
 
         bulk_create(
             db_model=models.LabeledAudioAttributeVal,
@@ -857,7 +857,9 @@ def put_job_data(pk, data):
 @plugin_decorator
 @transaction.atomic
 def patch_job_data(pk, data, action):
+    # print('DATA', data)
     annotation = JobAnnotation(pk)
+    # print('ANNOTATION', annotation)
     if action == PatchAction.CREATE:
         annotation.create(data)
     elif action == PatchAction.UPDATE:
