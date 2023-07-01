@@ -671,6 +671,10 @@ export interface AnnotationState {
             delay: number;
             changeTime: number | null;
         };
+        audio: {
+            data: any | null;
+            fetching: boolean;
+        };
         navigationBlocked: boolean;
         playing: boolean;
         frameAngles: number[];

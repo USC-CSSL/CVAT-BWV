@@ -197,6 +197,8 @@ export enum AnnotationActionTypes {
     RESTORE_FRAME_SUCCESS = 'RESTORE_FRAME_SUCCESS',
     RESTORE_FRAME_FAILED = 'RESTORE_FRAME_FAILED',
     UPDATE_BRUSH_TOOLS_CONFIG = 'UPDATE_BRUSH_TOOLS_CONFIG',
+    FETCH_AUDIO_SUCCESS = 'FETCH_AUDIO_SUCCESS',
+    FETCH_AUDIO_FAILED = 'FETCH_AUDIO_FAILED',
 }
 
 export function saveLogsAsync(): ThunkAction {
@@ -574,6 +576,28 @@ export function confirmCanvasReady(): AnyAction {
     return {
         type: AnnotationActionTypes.CONFIRM_CANVAS_READY,
         payload: {},
+    };
+}
+
+export function fetchAudioAsync(): ThunkAction {
+    return async (dispatch: ActionCreator<Dispatch>, getState: () => CombinedState): Promise<void> => {
+        const state: CombinedState = getState();
+        const { instance: job } = state.annotation.job;
+
+        try {
+            const audioData = await job.audio.get();
+            dispatch({
+                type: AnnotationActionTypes.FETCH_AUDIO_SUCCESS,
+                payload: {
+                    audioData,
+                },
+            });
+        } catch(error) {
+            dispatch({
+                type: AnnotationActionTypes.FETCH_AUDIO_FAILED,
+            })
+        }
+
     };
 }
 

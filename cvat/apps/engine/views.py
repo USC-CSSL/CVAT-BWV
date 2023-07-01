@@ -557,7 +557,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
 class DataChunkGetter:
     def __init__(self, data_type, data_num, data_quality, task_dim):
-        possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image')
+        possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image', 'audio')
         possible_quality_values = ('compressed', 'original')
 
         if not data_type or data_type not in possible_data_type_values:
@@ -598,6 +598,10 @@ class DataChunkGetter:
                 # Follow symbol links if the chunk is a link on a real image otherwise
                 # mimetype detection inside sendfile will work incorrectly.
                 path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality))
+                return sendfile(request, path)
+            if self.type == 'audio':
+
+                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-encoded.m4a')
                 return sendfile(request, path)
 
             elif self.type == 'frame' or self.type == 'preview':

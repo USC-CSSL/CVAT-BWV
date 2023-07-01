@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import { ArgumentError } from './exceptions';
-import { HistoryActions } from './enums';
+import { HistoryActions, JobStage } from './enums';
 import { Storage } from './storage';
 import loggerStorage from './logger-storage';
 import serverProxy from './server-proxy';
@@ -185,6 +185,11 @@ export function implementJob(Job) {
         }
         return null;
     };
+
+    Job.prototype.audio.get.implementation = async function () {
+        const audioData = await serverProxy.audio.get(this.id);
+        return audioData;
+    }
 
     // TODO: Check filter for annotations
     Job.prototype.annotations.get.implementation = async function (frame, allTracks, filters) {

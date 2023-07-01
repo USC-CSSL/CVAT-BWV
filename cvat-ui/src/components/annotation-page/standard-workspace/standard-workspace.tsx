@@ -17,6 +17,7 @@ import IssueAggregatorComponent from 'components/annotation-page/review/issues-a
 import RemoveConfirmComponent from 'components/annotation-page/standard-workspace/remove-confirm';
 import PropagateConfirmComponent from 'components/annotation-page/standard-workspace/propagate-confirm';
 import AudioSelector from '../audioselector/audioselector';
+import AudioPlaybackComponent from './audio-playback';
 import { CombinedState } from 'reducers';
 import { connect } from 'react-redux';
 import QuestionAnnotation from './objects-side-bar/question-annotation';
@@ -40,7 +41,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
 }
 function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
     const { isPhase2 } = props;
-    return (
+    return (<>
+        <AudioPlaybackComponent />
         <Layout hasSider className='cvat-standard-workspace'>
             {!isPhase2 &&
             <ControlsSideBarContainer />
@@ -56,7 +58,7 @@ function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
             <CanvasPointContextMenuComponent />
             <IssueAggregatorComponent />
             <RemoveConfirmComponent />
-        </Layout>
+        </Layout></>
     );
 }
 

@@ -2161,6 +2161,30 @@ async function receiveWebhookEvents(type: WebhookSourceType): Promise<string[]> 
     }
 }
 
+async function fetchAudio(jid) {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.get(`${backendAPI}/jobs/${jid}/data`, {
+            params: {
+                ...enableOrganization(),
+                quality: 'compressed',
+                type: 'audio',
+                number: '0',
+            },
+            responseType: 'arraybuffer',
+        });
+        return response.data;
+    } catch(errorData) {
+        throw generateError({
+            message: '',
+            response: {
+                ...errorData.response,
+                data: String.fromCharCode.apply(null, new Uint8Array(errorData.response.data)),
+            },
+        });
+    }
+}
+
 export default Object.freeze({
     server: Object.freeze({
         setAuthData,
@@ -2229,6 +2253,10 @@ export default Object.freeze({
         saveMeta,
         getPreview,
         getImageContext,
+    }),
+
+    audio: Object.freeze({
+        get: fetchAudio,
     }),
 
     annotations: Object.freeze({

@@ -445,6 +445,14 @@ class VideoReader(IMediaReader):
 
         return self._decode(container)
 
+    def get_audio_packets(self):
+        container = self._get_av_container()
+        packets = []
+        for packet in container.demux():
+            if packet.stream.type == 'audio':
+                packets.append(packet)
+        return packets
+
     def get_progress(self, pos):
         duration = self._get_duration()
         return pos / duration if duration else None
@@ -674,6 +682,9 @@ class Mpeg4ChunkWriter(IChunkWriter):
         quality = round(51 * (100 - quality) / 99)
         super().__init__(quality)
         self._output_fps = 25
+        self._sample_rate = 44100
+        self._audio_codec = 'aac'
+        self._samples_per_frame = self._sample_rate // self._output_fps
         try:
             codec = av.codec.Codec('libopenh264', 'w')
             self._codec_name = codec.name
@@ -706,6 +717,31 @@ class Mpeg4ChunkWriter(IChunkWriter):
         video_stream.options = options
 
         return container, video_stream
+
+    def _create_audio_container(self, path, rate, f='mp4'):
+
+        container = av.open(path, 'w',format=f)
+        stream = container.add_stream(self._audio_codec, rate=rate)
+
+        return container, stream
+
+    def save_audio(self, packets, path):
+        output_container, stream = self._create_audio_container(
+            path=path+'-encoded.m4a',
+            rate=self._sample_rate,
+        )
+
+        for ipacket in packets:
+            for frame in ipacket.decode():
+                for opacket in stream.encode(frame):
+                    frame.pts = None
+                    frame.time_base = None
+                    output_container.mux(opacket)
+
+        for packet in stream.encode():
+            output_container.mux(packet)
+
+        output_container.close()
 
     def save_as_chunk(self, images, chunk_path):
         if not images:

@@ -70,6 +70,10 @@ const defaultState: AnnotationState = {
             delay: 0,
             changeTime: null,
         },
+        audio: {
+            data: null,
+            fetching: false,
+        },
         playing: false,
         frameAngles: [],
         navigationBlocked: false,
@@ -305,6 +309,32 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     },
                 },
             };
+        }
+        case AnnotationActionTypes.FETCH_AUDIO_SUCCESS: {
+            const { audioData } = action.payload;
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    audio: {
+                        ...state.player.audio,
+                        fetching: false,
+                        data: audioData
+                    }
+                }
+            }
+        }
+        case AnnotationActionTypes.FETCH_AUDIO_FAILED: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    audio: {
+                        ...state.player.audio,
+                        fetching: false,
+                    }
+                }
+            }
         }
         case AnnotationActionTypes.ROTATE_FRAME: {
             const { offset, angle, rotateAll } = action.payload;

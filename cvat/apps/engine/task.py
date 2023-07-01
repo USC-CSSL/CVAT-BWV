@@ -918,6 +918,12 @@ def _create_thread(
     if db_data.storage_method == models.StorageMethodChoice.FILE_SYSTEM or not settings.USE_CACHE:
         counter = itertools.count()
         generator = itertools.groupby(extractor, lambda x: next(counter) // db_data.chunk_size)
+        if isinstance(extractor, MEDIA_TYPES['video']['extractor']):
+            packets = extractor.get_audio_packets()
+            original_chunk_writer.save_audio(packets, db_data.get_original_chunk_path(0))
+            packets = extractor.get_audio_packets()
+            original_chunk_writer.save_audio(packets, db_data.get_compressed_chunk_path(0))
+
         for chunk_idx, chunk_data in generator:
             chunk_data = list(chunk_data)
             original_chunk_path = db_data.get_original_chunk_path(chunk_idx)

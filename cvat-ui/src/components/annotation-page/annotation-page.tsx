@@ -68,6 +68,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
         }
     }, [job, fetching]);
 
+
     useEffect(() => {
         if (prevFetching && !fetching && !prevJob && job) {
             const latestFrame = localStorage.getItem(`Job_${job.id}_frame`);
