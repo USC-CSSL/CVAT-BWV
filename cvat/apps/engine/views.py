@@ -851,7 +851,7 @@ class TaskViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
                     data[optional_field] = serializer.validated_data[optional_field]
 
             data['use_zip_chunks'] = serializer.validated_data['use_zip_chunks']
-            data['use_cache'] = serializer.validated_data['use_cache']
+            data['use_cache'] = False
             data['copy_data'] = serializer.validated_data['copy_data']
             if data['use_cache']:
                 self._object.data.storage_method = StorageMethodChoice.CACHE

@@ -61,7 +61,7 @@ const initialValues: AdvancedConfiguration = {
     imageQuality: 70,
     lfs: false,
     useZipChunks: true,
-    useCache: true,
+    useCache: false,
     copyData: false,
     sortingMethod: SortingMethod.LEXICOGRAPHICAL,
     useProjectSourceStorage: true,
@@ -459,7 +459,7 @@ class AdvancedConfigurationForm extends React.PureComponent<Props> {
 
     private renderCreateTaskMethod(): JSX.Element {
         return (
-            <Space>
+            <Space style={{display: 'none'}}>
                 <Form.Item
                     name='useCache'
                     valuePropName='checked'
