@@ -1,4 +1,4 @@
-import { fetchAudioAsync } from 'actions/annotation-actions';
+import { fetchAudioAsync, fetchAudioPreviewAsync } from 'actions/annotation-actions';
 import React, { useEffect, useState } from 'react';
 import {connect} from 'react-redux';
 import { CombinedState } from 'reducers';
@@ -6,7 +6,7 @@ import { CombinedState } from 'reducers';
 interface StateToProps {
     audioData: any,
     audioFetching: boolean;
-    frameFetching: boolean;
+    canvasIsReady: boolean;
     playing: boolean
     frameNumber: number;
     startFrame: number;
@@ -16,6 +16,7 @@ interface StateToProps {
 
 interface DispatchToProps {
     fetchAudio: () => void;
+    fetchPreview: () => void;
 }
 
 
@@ -37,9 +38,11 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 playing,
                 frame: {
                     number: frameNumber,
-                    fetching: frameFetching,
                 },
             },
+            canvas: {
+                ready: canvasIsReady
+            }
         },
         settings: {
             player: {
@@ -50,7 +53,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         audioData,
         audioFetching,
-        frameFetching,
+        canvasIsReady,
         playing,
         frameNumber,
         startFrame,
@@ -62,19 +65,21 @@ function mapStateToProps(state: CombinedState): StateToProps {
 function mapDispatchToProps(dispatch: any): DispatchToProps {
     return {
         fetchAudio: (): void => dispatch(fetchAudioAsync()),
+        fetchPreview: (): void => dispatch(fetchAudioPreviewAsync()),
     }
 }
 
 const audioCtx = new AudioContext();
 
 function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
-    const { fetchAudio, audioData, audioFetching, frameNumber, startFrame, stopFrame, playing , frameSpeed, frameFetching} = props;
+    const { fetchAudio, audioData, audioFetching, frameNumber, startFrame, stopFrame, playing , frameSpeed, fetchPreview} = props;
 
     const [audioSource, setAudioSource] = useState<AudioBufferSourceNode | null>(null);
     const [buffer, setBuffer] = useState<AudioBuffer | null>(null);
     useEffect(() => {
         if (!audioData && !audioFetching) {
             fetchAudio();
+            fetchPreview();
         }
     }, []);
 
@@ -104,7 +109,6 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
 
     useEffect(() => {
         if (audioSource && playing && buffer) {
-
             const videoDuration = (stopFrame - startFrame) / frameSpeed;
             const audioDuration = buffer.duration;
             audioSource.buffer = buffer;
@@ -120,8 +124,6 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
             }
         }
     }, [audioSource]);
-
-
 
     return <></>
 }

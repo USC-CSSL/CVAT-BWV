@@ -2185,6 +2185,30 @@ async function fetchAudio(jid) {
     }
 }
 
+async function fetchAudioPreview(jid) {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.get(`${backendAPI}/jobs/${jid}/data`, {
+            params: {
+                ...enableOrganization(),
+                quality: 'compressed',
+                type: 'waveform',
+                number: '0',
+            },
+            responseType: 'json',
+        });
+        return response.data;
+    } catch(errorData) {
+        throw generateError({
+            message: '',
+            response: {
+                ...errorData.response,
+                data: errorData.response.data,
+            },
+        });
+    }
+}
+
 export default Object.freeze({
     server: Object.freeze({
         setAuthData,
@@ -2257,6 +2281,7 @@ export default Object.freeze({
 
     audio: Object.freeze({
         get: fetchAudio,
+        preview: fetchAudioPreview,
     }),
 
     annotations: Object.freeze({

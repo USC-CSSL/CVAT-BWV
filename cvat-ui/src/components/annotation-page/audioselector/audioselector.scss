@@ -5,7 +5,7 @@
 }
 
 .audioselector-selection{
-    background: rgb(17, 0, 86);
+    background: #110056aa;
     position: relative;
     height: 100%;
 }
@@ -41,13 +41,14 @@
     height: 45px;
     width: 5px;
     border-radius: 2px;
-    background-color: #ccc;
+    background-color: #444;
     position: absolute;
     cursor: col-resize;
+    z-index: 999;
 }
 
 .audioselector-dragbars:hover{
-    background-color: #aaa;
+    background-color: #333;
 }
 
 .audioselector-dragbar-left{

@@ -557,7 +557,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
 class DataChunkGetter:
     def __init__(self, data_type, data_num, data_quality, task_dim):
-        possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image', 'audio')
+        possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image', 'audio', 'waveform')
         possible_quality_values = ('compressed', 'original')
 
         if not data_type or data_type not in possible_data_type_values:
@@ -603,6 +603,12 @@ class DataChunkGetter:
 
                 path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-encoded.m4a')
                 return sendfile(request, path)
+            if self.type == 'waveform':
+                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-waveformvals')
+                data = []
+                with open(path, 'r') as f:
+                    data = f.readlines()
+                return HttpResponse(data, content_type='application/json')
 
             elif self.type == 'frame' or self.type == 'preview':
                 if not (start <= self.number <= stop):

@@ -29,6 +29,7 @@ interface StateToProps {
     playing: boolean,
     frameNumber: number;
     states: any[];
+    audioPreview: number[];
 }
 
 interface DispatchToProps {
@@ -63,6 +64,7 @@ interface Props {
     jobInstance: Job,
     states: any[],
     isPhase2: boolean;
+    audioPreview: number[]
 }
 
 
@@ -78,6 +80,9 @@ function mapStateToProps(state: CombinedState): StateToProps {
                     delay: frameDelay,
                     fetching: frameFetching,
                 },
+                audio: {
+                    preview: audioPreview
+                }
             },
             annotations: { states }
         },
@@ -94,7 +99,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
         stopFrame,
         playing,
         frameNumber,
-        states
+        states,
+        audioPreview
     };
 }
 
@@ -113,13 +119,42 @@ function AudioSelector(props: Props): JSX.Element {
     const [showControls, setShowControls] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
+    const [imageData, setImageData] = useState('');
+
     const {
         startFrame, stopFrame, frameNumber, labels, jobInstance,
         onCreateAnnotations,
         onUpdateAnnotations,
         onRemoveAnnotation,
         isPhase2,
+        audioPreview,
     } = props;
+
+    useEffect(() => {
+        if (audioPreview.length) {
+            const offScreenCVS = document.createElement('canvas');
+            const offScreenCTX = offScreenCVS.getContext("2d");
+            const mx = Math.max(...audioPreview);
+            offScreenCVS.width = 2048;
+            offScreenCVS.height = 64;
+
+            const num = audioPreview.length;
+            const eachSize = offScreenCVS.width / num;
+
+            for (let i = 0; i < num; i++) {
+                const height = (audioPreview[i]) / mx * (offScreenCVS.height / 2);
+                offScreenCTX?.beginPath();
+
+                offScreenCTX?.moveTo(i * eachSize, (offScreenCVS.height/2));
+                offScreenCTX?.lineTo(i * eachSize  + eachSize / 2, (offScreenCVS.height / 2) - height);
+                offScreenCTX?.lineTo(i * eachSize  + eachSize, (offScreenCVS.height / 2));
+                offScreenCTX?.lineTo(i * eachSize  + eachSize / 2, (offScreenCVS.height / 2)  + height);
+                offScreenCTX?.fill();
+            }
+
+            setImageData(offScreenCVS.toDataURL());
+        }
+    }, [audioPreview])
 
     return (
         <div
@@ -158,6 +193,7 @@ function AudioSelector(props: Props): JSX.Element {
                                     jobInstance={jobInstance}
                                     onUpdateAnnotations={onUpdateAnnotations}
                                     onRemoveAnnotation={onRemoveAnnotation}
+                                    imageData={imageData}
                                     />
                             ))
                         }

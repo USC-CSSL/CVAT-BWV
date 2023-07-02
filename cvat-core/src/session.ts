@@ -246,6 +246,13 @@ function buildDuplicatedAPI(prototype) {
                     );
                     return result;
                 },
+                async preview() {
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.audio.preview,
+                    );
+                    return result;
+                },
             }
         }),
         logger: Object.freeze({
@@ -372,6 +379,7 @@ export class Job extends Session {
 
     public audio: {
         get: CallableFunction;
+        preview: CallableFunction;
     }
 
     public logger: {
@@ -567,6 +575,7 @@ export class Job extends Session {
 
         this.audio = {
             get: Object.getPrototypeOf(this).audio.get.bind(this),
+            preview: Object.getPrototypeOf(this).audio.preview.bind(this),
         }
 
         this.logger = {

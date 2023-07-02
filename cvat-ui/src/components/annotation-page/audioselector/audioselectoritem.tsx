@@ -19,7 +19,8 @@ interface Props{
         label: any
     },
     onRemoveAnnotation(objectState: any): void;
-    onUpdateAnnotations(states: ObjectState[]): void
+    onUpdateAnnotations(states: ObjectState[]): void;
+    imageData: string;
 }
 
 const cvat = getCore();
@@ -29,7 +30,7 @@ const cvat = getCore();
 
 export default function AudioSelectorItem (props: Props) {
     const {
-        startFrame, stopFrame, labels, selectionObject,
+        startFrame, stopFrame, labels, selectionObject, imageData,
         onUpdateAnnotations, onRemoveAnnotation
     } = props;
 
@@ -64,6 +65,11 @@ export default function AudioSelectorItem (props: Props) {
             <Col span={20}>
                 <div className='audioselector-selector'
                     ref={selectorRef}
+                    style={{
+                        background: `#ddd url("${imageData}")`,
+                        backgroundSize: '100% 100%',
+                        backgroundRepeat: 'no-repeat',
+                    }}
                     onMouseUp={() => setDragging(null)}
                     onMouseMove={(e)=>{
                         if (dragging && selectorRef.current) {

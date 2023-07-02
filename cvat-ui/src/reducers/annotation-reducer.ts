@@ -73,6 +73,7 @@ const defaultState: AnnotationState = {
         audio: {
             data: null,
             fetching: false,
+            preview: [],
         },
         playing: false,
         frameAngles: [],
@@ -332,6 +333,19 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     audio: {
                         ...state.player.audio,
                         fetching: false,
+                    }
+                }
+            }
+        }
+        case AnnotationActionTypes.FETCH_AUDIO_PREVIEW_SUCCESS: {
+            const { audioPreview } = action.payload;
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    audio: {
+                        ...state.player.audio,
+                        preview: audioPreview
                     }
                 }
             }

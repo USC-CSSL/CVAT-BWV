@@ -191,6 +191,11 @@ export function implementJob(Job) {
         return audioData;
     }
 
+    Job.prototype.audio.preview.implementation = async function () {
+        const data = await serverProxy.audio.preview(this.id);
+        return data;
+    }
+
     // TODO: Check filter for annotations
     Job.prototype.annotations.get.implementation = async function (frame, allTracks, filters) {
         if (!Array.isArray(filters)) {

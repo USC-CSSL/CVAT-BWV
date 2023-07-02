@@ -674,6 +674,7 @@ export interface AnnotationState {
         audio: {
             data: any | null;
             fetching: boolean;
+            preview: number[];
         };
         navigationBlocked: boolean;
         playing: boolean;

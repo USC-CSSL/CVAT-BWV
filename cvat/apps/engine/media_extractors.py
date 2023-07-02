@@ -9,6 +9,7 @@ import zipfile
 import io
 import itertools
 import struct
+import json
 from enum import IntEnum
 from abc import ABC, abstractmethod
 from contextlib import closing
@@ -731,8 +732,12 @@ class Mpeg4ChunkWriter(IChunkWriter):
             rate=self._sample_rate,
         )
 
+        values = []
+
         for ipacket in packets:
             for frame in ipacket.decode():
+                arr = frame.to_ndarray()[0]
+                values.append(sum([abs(arr[i]) for i in range(len(arr))]) / len(arr))
                 for opacket in stream.encode(frame):
                     frame.pts = None
                     frame.time_base = None
@@ -740,6 +745,9 @@ class Mpeg4ChunkWriter(IChunkWriter):
 
         for packet in stream.encode():
             output_container.mux(packet)
+
+        with open(path + '-waveformvals', 'w') as f:
+            f.write(json.dumps(values))
 
         output_container.close()
 
