@@ -2618,7 +2618,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
         const withID = content.includes('id');
         const withAttr = content.includes('attributes');
         const withLabel = content.includes('label');
-        const withSource = content.includes('source');
+        const withSource = false;
         const withDescriptions = content.includes('descriptions');
         const textFontSize = this.configuration.textFontSize || 12;
         const {
@@ -2644,7 +2644,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
 
         return this.adoptedText
             .text((block): void => {
-                block.tspan(`${withLabel ? label.name : ''} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
+                block.tspan(`${withLabel && source !== 'auto' ? label.name : ''} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
                     'text-transform': 'uppercase',
                 });
                 if (withDescriptions) {

@@ -55,8 +55,15 @@ function DetectorRunner(props: Props): JSX.Element {
         models, withCleanup, labels, dimension, runInference,
     } = props;
 
-    const [modelID, setModelID] = useState<string | null>(null);
-    const [mapping, setMapping] = useState<MappedLabelsList>({});
+    const [modelID, setModelID] = useState<string | null>(models[0].id);
+    const [mapping, setMapping] = useState<MappedLabelsList>({
+        'person': {
+            name: labels[0].name,
+            attributes: matchAttributes(
+                labels[0].name.attributes, models[0].attributes[labels[0].name],
+            ),
+        }
+    });
     const [threshold, setThreshold] = useState<number>(0.5);
     const [distance, setDistance] = useState<number>(50);
     const [cleanup, setCleanup] = useState<boolean>(false);
@@ -226,7 +233,7 @@ function DetectorRunner(props: Props): JSX.Element {
 
     return (
         <div className='cvat-run-model-content'>
-            <Row align='middle'>
+            {/* <Row align='middle'>
                 <Col span={4}>Model:</Col>
                 <Col span={20}>
                     <Select
@@ -235,19 +242,27 @@ function DetectorRunner(props: Props): JSX.Element {
                         style={{ width: '100%' }}
                         onChange={(_modelID: string): void => {
                             const chosenModel = models.filter((_model): boolean => _model.id === _modelID)[0];
-                            const defaultMapping = labels.reduce(
-                                (acc: MappedLabelsList, label: LabelInterface): MappedLabelsList => {
-                                    if (chosenModel.labels.includes(label.name)) {
-                                        acc[label.name] = {
-                                            name: label.name,
-                                            attributes: matchAttributes(
-                                                label.attributes, chosenModel.attributes[label.name],
-                                            ),
-                                        };
-                                    }
-                                    return acc;
-                                }, {},
-                            );
+                            // const defaultMapping = labels.reduce(
+                            //     (acc: MappedLabelsList, label: LabelInterface): MappedLabelsList => {
+                            //         if (chosenModel.labels.includes(label.name)) {
+                            //             acc[label.name] = {
+                            //                 name: label.name,
+                            //                 attributes: matchAttributes(
+                            //                     label.attributes, chosenModel.attributes[label.name],
+                            //                 ),
+                            //             };
+                            //         }
+                            //         return acc;
+                            //     }, {},
+                            // );
+                            const defaultMapping = {
+                                'person': {
+                                    name: labels[0].name,
+                                    attributes: matchAttributes(
+                                        labels[0].name.attributes, chosenModel.attributes[labels[0].name],
+                                    ),
+                                }
+                            }
                             setMapping(defaultMapping);
                             setMatch({ model: null, task: null });
                             setAttrMatch({});
@@ -263,8 +278,8 @@ function DetectorRunner(props: Props): JSX.Element {
                         )}
                     </Select>
                 </Col>
-            </Row>
-            {canHaveMapping &&
+            </Row> */}
+            {canHaveMapping && false &&
                 Object.keys(mapping).length ?
                 Object.keys(mapping).map((modelLabel: string) => {
                     const label = labels
@@ -343,7 +358,7 @@ function DetectorRunner(props: Props): JSX.Element {
                         </React.Fragment>
                     );
                 }) : null}
-            {canHaveMapping && !!taskLabels.length && !!modelLabels.length ? (
+            {canHaveMapping && false && !!taskLabels.length && !!modelLabels.length ? (
                 <>
                     <Row justify='start' align='middle'>
                         <Col span={10}>
@@ -360,7 +375,7 @@ function DetectorRunner(props: Props): JSX.Element {
                     </Row>
                 </>
             ) : null}
-            {convertMasksToPolygonsAvailable && (
+            {convertMasksToPolygonsAvailable && false && (
                 <div className='detector-runner-convert-masks-to-polygons-wrapper'>
                     <Switch
                         checked={convertMasksToPolygons}

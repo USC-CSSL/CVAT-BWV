@@ -1303,20 +1303,20 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                         </Text>
                     </Col>
                 </Row>
-                <Tabs type='card' tabBarGutter={8}>
-                    <Tabs.TabPane key='interactors' tab='Interactors'>
+                {/* <Tabs type='card' tabBarGutter={8}> */}
+                    {/* <Tabs.TabPane key='interactors' tab='Interactors'>
                         {this.renderMasksConvertingBlock()}
                         {this.renderLabelBlock()}
                         {this.renderInteractorBlock()}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane key='detectors' tab='Detectors'>
+                    </Tabs.TabPane> */}
+                    {/* <Tabs.TabPane key='detectors' tab='Detectors'> */}
                         {this.renderDetectorBlock()}
-                    </Tabs.TabPane>
-                    <Tabs.TabPane key='trackers' tab='Trackers'>
+                    {/* </Tabs.TabPane> */}
+                    {/* <Tabs.TabPane key='trackers' tab='Trackers'>
                         {this.renderLabelBlock()}
                         {this.renderTrackerBlock()}
-                    </Tabs.TabPane>
-                </Tabs>
+                    </Tabs.TabPane> */}
+                {/* </Tabs> */}
             </div>
         );
     }
