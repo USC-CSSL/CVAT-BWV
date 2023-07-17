@@ -1848,7 +1848,10 @@ export class CanvasViewImpl implements CanvasView, Listener {
         const { colorBy, shapeOpacity, outlinedBorders } = configuration;
         let shapeColor = '';
 
-        if (colorBy === ColorBy.INSTANCE) {
+        if (state.source === 'auto_unlabeled' || state.source === 'manual_unlabeled') {
+            shapeColor = '#cdcdcd';
+        }
+        else if (colorBy === ColorBy.INSTANCE) {
             shapeColor = state.color;
         } else if (colorBy === ColorBy.GROUP) {
             shapeColor = state.group.color;
@@ -1998,7 +2001,8 @@ export class CanvasViewImpl implements CanvasView, Listener {
                 drawnState.label.id !== state.label.id ||
                 drawnState.group.id !== state.group.id ||
                 drawnState.group.color !== state.group.color ||
-                drawnState.color !== state.color
+                drawnState.color !== state.color ||
+                drawnState.source !== state.source
             ) {
                 // update shape color if necessary
                 if (shape) {
@@ -2618,7 +2622,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
         const withID = content.includes('id');
         const withAttr = content.includes('attributes');
         const withLabel = content.includes('label');
-        const withSource = false;
+        const withSource = content.includes('source');
         const withDescriptions = content.includes('descriptions');
         const textFontSize = this.configuration.textFontSize || 12;
         const {
@@ -2644,7 +2648,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
 
         return this.adoptedText
             .text((block): void => {
-                block.tspan(`${withLabel && source !== 'auto' ? label.name : ''} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
+                block.tspan(`${withLabel && !(['auto_unlabeled', 'manual_unlabeled'].includes(source)) ? label.name : ''} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
                     'text-transform': 'uppercase',
                 });
                 if (withDescriptions) {

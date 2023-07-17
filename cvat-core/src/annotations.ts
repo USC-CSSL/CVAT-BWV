@@ -82,6 +82,18 @@ export async function getAnnotations(session, frame, allTracks, filters) {
     return cache.get(session).collection.get(frame, allTracks, filters);
 }
 
+export async function getAllAnnotations(session, curFrame) {
+    const sessionType = session instanceof Task ? 'task' : 'job';
+    const cache = getCache(sessionType);
+
+    if (cache.has(session)) {
+        return cache.get(session).collection.getAll(curFrame);
+    }
+
+    await getAnnotationsFromServer(session);
+    return cache.get(session).collection.getAll(curFrame);
+}
+
 export async function saveAnnotations(session, onUpdate) {
     const sessionType = session instanceof Task ? 'task' : 'job';
     const cache = getCache(sessionType);

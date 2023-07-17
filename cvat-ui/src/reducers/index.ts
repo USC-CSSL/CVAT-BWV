@@ -697,6 +697,7 @@ export interface AnnotationState {
         collapsed: Record<number, boolean>;
         collapsedAll: boolean;
         states: any[];
+        allStates: any[];
         filters: any[];
         resetGroupFlag: boolean;
         history: {

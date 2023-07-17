@@ -81,6 +81,8 @@ export enum ShapeType {
 export enum Source {
     MANUAL = 'manual',
     AUTO = 'auto',
+    AUTO_UNLABELED = 'auto_unlabeled',
+    MANUAL_UNLABELED = 'manual_unlabeled'
 }
 
 export enum LogType {

@@ -78,6 +78,15 @@ function buildDuplicatedAPI(prototype) {
                     return result;
                 },
 
+                async getAll(frame) {
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.annotations.getAll,
+                        frame,
+                    );
+                    return result;
+                },
+
                 async search(filters, frameFrom, frameTo) {
                     const result = await PluginRegistry.apiWrapper.call(
                         this,
@@ -341,6 +350,7 @@ export class Job extends Session {
 
     public annotations: {
         get: CallableFunction;
+        getAll: CallableFunction;
         put: CallableFunction;
         save: CallableFunction;
         merge: CallableFunction;
@@ -537,6 +547,7 @@ export class Job extends Session {
         // So, we need return it
         this.annotations = {
             get: Object.getPrototypeOf(this).annotations.get.bind(this),
+            getAll: Object.getPrototypeOf(this).annotations.getAll.bind(this),
             put: Object.getPrototypeOf(this).annotations.put.bind(this),
             save: Object.getPrototypeOf(this).annotations.save.bind(this),
             merge: Object.getPrototypeOf(this).annotations.merge.bind(this),
@@ -643,6 +654,7 @@ export class Task extends Session {
 
     public annotations: {
         get: CallableFunction;
+        getAll: CallableFunction;
         put: CallableFunction;
         save: CallableFunction;
         merge: CallableFunction;
@@ -1054,6 +1066,7 @@ export class Task extends Session {
         // So, we need return it
         this.annotations = {
             get: Object.getPrototypeOf(this).annotations.get.bind(this),
+            getAll: Object.getPrototypeOf(this).annotations.getAll.bind(this),
             put: Object.getPrototypeOf(this).annotations.put.bind(this),
             save: Object.getPrototypeOf(this).annotations.save.bind(this),
             merge: Object.getPrototypeOf(this).annotations.merge.bind(this),

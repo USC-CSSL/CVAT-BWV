@@ -25,6 +25,7 @@ interface UpdateFlags {
     hidden: boolean;
     descriptions: boolean;
     audio_selected_segments: boolean;
+    source: boolean;
     reset: () => void;
 }
 
@@ -204,6 +205,10 @@ export default class ObjectState {
                 },
                 source: {
                     get: () => data.source,
+                    set: (source) => {
+                        data.updateFlags.source = true;
+                        data.source = source;
+                    },
                 },
                 clientID: {
                     get: () => data.clientID,
@@ -489,7 +494,7 @@ export default class ObjectState {
             }),
         );
 
-        if ([Source.MANUAL, Source.AUTO].includes(serialized.source)) {
+        if ([Source.MANUAL, Source.AUTO, Source.AUTO_UNLABELED, Source.MANUAL_UNLABELED].includes(serialized.source)) {
             data.source = serialized.source;
         }
         if (typeof serialized.zOrder === 'number') {

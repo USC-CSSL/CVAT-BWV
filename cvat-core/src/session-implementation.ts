@@ -25,7 +25,7 @@ import { Label } from './labels';
 import { SerializedLabel } from './server-response-types';
 import { checkObjectType } from './common';
 import {
-    getAnnotations, putAnnotations, saveAnnotations,
+    getAnnotations, getAllAnnotations, putAnnotations, saveAnnotations,
     hasUnsavedChanges, searchAnnotations, searchEmptyFrame,
     mergeAnnotations, splitAnnotations, groupAnnotations,
     clearAnnotations, selectObject, annotationsStatistics,
@@ -215,6 +215,22 @@ export function implementJob(Job) {
         if (frame in deletedFrames) {
             return [];
         }
+
+        return annotationsData;
+    };
+
+    Job.prototype.annotations.getAll.implementation = async function (frame) {
+
+        if (!Number.isInteger(frame)) {
+            throw new ArgumentError('The frame argument must be an integer');
+        }
+
+        if (frame < this.startFrame || frame > this.stopFrame) {
+            throw new ArgumentError(`Frame ${frame} does not exist in the job`);
+        }
+
+        const deletedFrames = await getDeletedFrames('job', this.id);
+        const annotationsData = (await getAllAnnotations(this, frame)).filter((obj) => (!(obj.frame in deletedFrames)));
 
         return annotationsData;
     };
@@ -668,6 +684,22 @@ export function implementTask(Task) {
         }
 
         return result;
+    };
+
+    Task.prototype.annotations.getAll.implementation = async function (frame) {
+
+        if (!Number.isInteger(frame)) {
+            throw new ArgumentError('The frame argument must be an integer');
+        }
+
+        if (frame < this.startFrame || frame > this.stopFrame) {
+            throw new ArgumentError(`Frame ${frame} does not exist in the task`);
+        }
+
+        const deletedFrames = await getDeletedFrames('task', this.id);
+        const annotationsData = (await getAllAnnotations(this, frame)).filter((obj) => (!(obj.frame in deletedFrames)));
+
+        return annotationsData;
     };
 
     Task.prototype.annotations.search.implementation = function (filters, frameFrom, frameTo) {

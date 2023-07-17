@@ -200,6 +200,48 @@ export default class Collection {
         return objectStates;
     }
 
+    getAll(curFrame): ObjectState[] {
+        // curFrame is *not* utilized for getting only the annotations on that frame,
+        // but instead to get the state of frame-variable annotations (tracks for eg) on
+        // that frame. The return value contains all visible annotations on all frame numbers.
+        const tracks = this.tracks
+            .filter(track => !track.removed)
+            .map((track) => track.get(curFrame));
+        // get shapes from all frames
+        const shapes = Object.keys(this.shapes).reduce((acc, frame) =>
+            (acc.concat(
+                this.shapes[frame]
+                    .filter(shape => !shape.removed).map((obj: Shape) => obj.get(parseInt(frame)))
+            ))
+        , []);
+        // get tags from all frames
+        const tags = Object.keys(this.tags).reduce((acc, frame) =>
+            (acc.concat(this.tags[frame]
+                .filter(tag => !tag.removed)
+                .map((obj: Tag) => obj.get(parseInt(frame)))))
+        , []);
+        const audioselections = this.audioselections
+            .filter(audsel => !audsel.removed)
+            .map((audsel) => audsel.get(curFrame));;
+
+        const objects = [].concat(tracks, shapes, tags, audioselections);
+        const visible = [];
+
+        for (const object of objects) {
+
+            visible.push(object);
+        }
+
+        const objectStates = [];
+
+        visible.forEach((stateData) => {
+            const objectState = new ObjectState(stateData);
+            objectStates.push(objectState);
+        });
+
+        return objectStates;
+    }
+
     _mergeInternal(objectsForMerge: (Track | Shape)[], shapeType: ShapeType, label: Label): RawTrackData {
         const keyframes: Record<number, RawTrackData['shapes'][0]> = {}; // frame: position
         const elements = {}; // element_sublabel_id: [element], each sublabel will be merged recursively

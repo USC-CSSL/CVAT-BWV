@@ -18,6 +18,7 @@ import LabelsList from 'components/annotation-page/standard-workspace/objects-si
 import { collapseSidebar as collapseSidebarAction } from 'actions/annotation-actions';
 import AppearanceBlock from 'components/annotation-page/appearance-block';
 import IssuesListComponent from 'components/annotation-page/standard-workspace/objects-side-bar/issues-list';
+import AllObjectsList from './all-objects-list';
 
 interface OwnProps {
     objectsList: JSX.Element;
@@ -99,11 +100,19 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
 
             <Tabs type='card' defaultActiveKey='objects' className='cvat-objects-sidebar-tabs'>
                 <Tabs.TabPane tab={<Text strong>Objects</Text>} key='objects'>
-                    {objectsList}
+                    <Tabs type='card' defaultActiveKey='curframe' className='cvat-objects-sidebar-tabs'>
+                        <Tabs.TabPane tab={<Text strong>Current</Text>} key='curframe'>
+                            {objectsList}
+                        </Tabs.TabPane>
+                        <Tabs.TabPane tab={<Text strong>All</Text>} key='allframes'>
+                            <AllObjectsList />
+                        </Tabs.TabPane>
+                    </Tabs>
                 </Tabs.TabPane>
                 <Tabs.TabPane forceRender tab={<Text strong>Labels</Text>} key='labels'>
                     <LabelsList />
                 </Tabs.TabPane>
+
 
                 {is2D ? (
                     <Tabs.TabPane tab={<Text strong>Issues</Text>} key='issues'>

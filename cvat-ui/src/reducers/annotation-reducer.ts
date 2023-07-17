@@ -95,6 +95,7 @@ const defaultState: AnnotationState = {
         collapsed: {},
         collapsedAll: true,
         states: [],
+        allStates: [],
         filters: [],
         resetGroupFlag: false,
         history: {
@@ -144,6 +145,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             const {
                 job,
                 states,
+                allStates,
                 openTime,
                 frameNumber: number,
                 frameFilename: filename,
@@ -188,6 +190,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                     filters,
                     zLayer: {
                         min: minZ,
@@ -378,7 +381,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.SAVE_ANNOTATIONS_SUCCESS: {
-            const { states } = action.payload;
+            const { states, allStates } = action.payload;
             const { activatedStateID } = state.annotations;
 
             return {
@@ -386,6 +389,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                     activatedStateID: updateActivatedStateID(states, activatedStateID),
                     saving: {
                         ...state.annotations.saving,
@@ -621,14 +625,18 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             const {
                 history, states: updatedStates, minZ, maxZ,
             } = action.payload;
-            const { states: prevStates } = state.annotations;
+            const { states: prevStates, allStates: prevAllStates } = state.annotations;
             const nextStates = [...prevStates];
+            const nextAllStates = [...prevAllStates];
 
             const clientIDs = prevStates.map((prevState: any): number => prevState.clientID);
+            const cliendIDsAllStates = prevAllStates.map((prevState: any): number => prevState.clientID);
             for (const updatedState of updatedStates) {
                 const index = clientIDs.indexOf(updatedState.clientID);
+                const indexAllStates = cliendIDsAllStates.indexOf(updatedState.clientID)
                 if (index !== -1) {
                     nextStates[index] = updatedState;
+                    nextAllStates[indexAllStates] = updatedState;
                 }
             }
 
@@ -645,40 +653,44 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                         cur: clamp(state.annotations.zLayer.cur, minZLayer, maxZLayer),
                     },
                     states: nextStates,
+                    allStates: nextAllStates,
                     history,
                 },
             };
         }
         case AnnotationActionTypes.UPDATE_ANNOTATIONS_FAILED: {
-            const { states } = action.payload;
+            const { states, allStates } = action.payload;
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                 },
             };
         }
         case AnnotationActionTypes.CREATE_ANNOTATIONS_SUCCESS: {
-            const { states, history } = action.payload;
+            const { states, history, allStates } = action.payload;
 
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                     history,
                 },
             };
         }
         case AnnotationActionTypes.MERGE_ANNOTATIONS_SUCCESS: {
-            const { states, history } = action.payload;
+            const { states, allStates, history } = action.payload;
 
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                     history,
                 },
             };
@@ -702,24 +714,26 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
             };
         }
         case AnnotationActionTypes.GROUP_ANNOTATIONS_SUCCESS: {
-            const { states, history } = action.payload;
+            const { states, allStates, history } = action.payload;
 
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
                     states,
+                    allStates,
                     history,
                 },
             };
         }
         case AnnotationActionTypes.SPLIT_ANNOTATIONS_SUCCESS: {
-            const { states, history } = action.payload;
+            const { states, allStates, history } = action.payload;
 
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
+                    allStates,
                     states,
                     history,
                 },
@@ -769,6 +783,9 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     history,
                     activatedStateID: null,
                     states: state.annotations.states.filter(
+                        (_objectState: any) => _objectState.clientID !== objectState.clientID,
+                    ),
+                    allStates: state.annotations.allStates.filter(
                         (_objectState: any) => _objectState.clientID !== objectState.clientID,
                     ),
                 },
@@ -952,13 +969,14 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         // Added Remove Annotations
         case AnnotationActionTypes.REMOVE_JOB_ANNOTATIONS_SUCCESS: {
             const { history } = action.payload;
-            const { states } = action.payload;
+            const { states, allStates } = action.payload;
             return {
                 ...state,
                 annotations: {
                     ...state.annotations,
                     history,
                     states,
+                    allStates,
                     activatedStateID: null,
                     collapsed: {},
                 },
@@ -1004,7 +1022,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         case AnnotationActionTypes.UNDO_ACTION_SUCCESS: {
             const { activatedStateID } = state.annotations;
             const {
-                history, states, minZ, maxZ,
+                history, states, minZ, maxZ, allStates,
             } = action.payload;
 
             return {
@@ -1013,6 +1031,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     ...state.annotations,
                     activatedStateID: updateActivatedStateID(states, activatedStateID),
                     states,
+                    allStates,
                     history,
                     zLayer: {
                         min: minZ,
@@ -1025,7 +1044,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
         case AnnotationActionTypes.FETCH_ANNOTATIONS_SUCCESS: {
             const { activatedStateID } = state.annotations;
             const {
-                states, history, minZ, maxZ,
+                states, history, minZ, maxZ, allStates,
             } = action.payload;
 
             return {
@@ -1034,6 +1053,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     ...state.annotations,
                     activatedStateID: updateActivatedStateID(states, activatedStateID),
                     states,
+                    allStates,
                     history,
                     zLayer: {
                         min: minZ,
@@ -1213,6 +1233,7 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     ...state.annotations,
                     history: action.payload.history,
                     states: action.payload.states,
+                    allStates: action.payload.allStates,
                 },
                 canvas: {
                     ...state.canvas,

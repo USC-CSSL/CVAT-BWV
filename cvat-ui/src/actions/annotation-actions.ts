@@ -262,6 +262,7 @@ export function fetchAnnotationsAsync(): ThunkAction {
                 filters, frame, showAllInterpolationTracks, jobInstance,
             } = receiveAnnotationsParameters();
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await jobInstance.annotations.getAll(frame);
             const history = await jobInstance.actions.get();
             const [minZ, maxZ] = computeZRange(states);
 
@@ -269,6 +270,7 @@ export function fetchAnnotationsAsync(): ThunkAction {
                 type: AnnotationActionTypes.FETCH_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                     history,
                     minZ,
                     maxZ,
@@ -332,12 +334,14 @@ export function removeAnnotationsAsync(
             await jobInstance.actions.clear();
             const history = await jobInstance.actions.get();
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await jobInstance.annotations.getAll(frame);
 
             dispatch({
                 type: AnnotationActionTypes.REMOVE_JOB_ANNOTATIONS_SUCCESS,
                 payload: {
                     history,
                     states,
+                    allStates,
                 },
             });
         } catch (error) {
@@ -764,6 +768,7 @@ export function undoActionAsync(sessionInstance: any, frame: number): ThunkActio
             await sessionInstance.actions.undo();
             const history = await sessionInstance.actions.get();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const frameData = await sessionInstance.frames.get(frame);
             const [minZ, maxZ] = computeZRange(states);
             await undoLog.close();
@@ -773,6 +778,7 @@ export function undoActionAsync(sessionInstance: any, frame: number): ThunkActio
                 payload: {
                     history,
                     states,
+                    allStates,
                     minZ,
                     maxZ,
                     frameData,
@@ -815,6 +821,7 @@ export function redoActionAsync(sessionInstance: any, frame: number): ThunkActio
             await sessionInstance.actions.redo();
             const history = await sessionInstance.actions.get();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const [minZ, maxZ] = computeZRange(states);
             const frameData = await sessionInstance.frames.get(frame);
             await redoLog.close();
@@ -823,6 +830,7 @@ export function redoActionAsync(sessionInstance: any, frame: number): ThunkActio
                 payload: {
                     history,
                     states,
+                    allStates,
                     minZ,
                     maxZ,
                     frameData,
@@ -974,6 +982,7 @@ export function getJobAsync(
                 });
             }
             const states = await job.annotations.get(frameNumber, showAllInterpolationTracks, filters);
+            const allStates = await job.annotations.getAll(frameNumber);
             const issues = await job.issues();
             const [minZ, maxZ] = computeZRange(states);
             const colors = [...cvat.enums.colors];
@@ -988,6 +997,7 @@ export function getJobAsync(
                     job,
                     issues,
                     states,
+                    allStates,
                     frameNumber,
                     frameFilename: frameData.filename,
                     relatedFiles: frameData.relatedFiles,
@@ -1035,6 +1045,7 @@ export function saveAnnotationsAsync(sessionInstance: any, afterSave?: () => voi
 
             const { frame } = receiveAnnotationsParameters();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             if (typeof afterSave === 'function') {
                 afterSave();
             }
@@ -1048,6 +1059,7 @@ export function saveAnnotationsAsync(sessionInstance: any, afterSave?: () => voi
                 type: AnnotationActionTypes.SAVE_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                 },
             });
         } catch (error) {
@@ -1155,11 +1167,13 @@ export function updateAnnotationsAsync(statesToUpdate: any[]): ThunkAction {
             });
         } catch (error) {
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await jobInstance.annotations.getAll(frame);
             dispatch({
                 type: AnnotationActionTypes.UPDATE_ANNOTATIONS_FAILED,
                 payload: {
                     error,
                     states,
+                    allStates,
                 },
             });
         }
@@ -1181,12 +1195,14 @@ export function createAnnotationsAsync(sessionInstance: any, frame: number, stat
             const { filters, showAllInterpolationTracks } = receiveAnnotationsParameters();
             await sessionInstance.annotations.put(statesToCreate);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const history = await sessionInstance.actions.get();
 
             dispatch({
                 type: AnnotationActionTypes.CREATE_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                     history,
                 },
             });
@@ -1207,12 +1223,14 @@ export function mergeAnnotationsAsync(sessionInstance: any, frame: number, state
             const { filters, showAllInterpolationTracks } = receiveAnnotationsParameters();
             await sessionInstance.annotations.merge(statesToMerge);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const history = await sessionInstance.actions.get();
 
             dispatch({
                 type: AnnotationActionTypes.MERGE_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                     history,
                 },
             });
@@ -1248,12 +1266,14 @@ export function groupAnnotationsAsync(sessionInstance: any, frame: number, state
 
             await sessionInstance.annotations.group(statesToGroup, reset);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const history = await sessionInstance.actions.get();
 
             dispatch({
                 type: AnnotationActionTypes.GROUP_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                     history,
                 },
             });
@@ -1274,12 +1294,14 @@ export function splitAnnotationsAsync(sessionInstance: any, frame: number, state
         try {
             await sessionInstance.annotations.split(stateToSplit, frame);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
+            const allStates = await sessionInstance.annotations.getAll(frame);
             const history = await sessionInstance.actions.get();
 
             dispatch({
                 type: AnnotationActionTypes.SPLIT_ANNOTATIONS_SUCCESS,
                 payload: {
                     states,
+                    allStates,
                     history,
                 },
             });
@@ -1614,6 +1636,7 @@ export function deleteFrameAsync(frame: number): ThunkAction {
                     data: await jobInstance.frames.get(frame),
                     history: await jobInstance.actions.get(),
                     states: await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters),
+                    allStates: await jobInstance.annotations.getAll(frame),
                 },
             });
 
@@ -1664,6 +1687,7 @@ export function restoreFrameAsync(frame: number): ThunkAction {
                     data: await jobInstance.frames.get(frame),
                     history: await jobInstance.actions.get(),
                     states: await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters),
+                    allStates: await jobInstance.annotations.getAll(frame),
                 },
             });
         } catch (error) {

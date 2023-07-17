@@ -5,6 +5,7 @@
 
 import React, { useCallback } from 'react';
 import Text from 'antd/lib/typography/Text';
+import Button from 'antd/lib/button/button';
 import Collapse from 'antd/lib/collapse';
 
 import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
@@ -25,6 +26,7 @@ interface Props {
     labelID: number;
     locked: boolean;
     elements: any[];
+    source: string;
     color: string;
     colorBy: ColorBy;
     labels: any[];
@@ -39,6 +41,7 @@ interface Props {
     toForeground(): void;
     remove(): void;
     changeLabel(label: any): void;
+    changeUnlabeledToLabeled(): void;
     changeColor(color: string): void;
     resetCuboidPerspective(): void;
     edit(): void;
@@ -57,6 +60,7 @@ function ObjectItemComponent(props: Props): JSX.Element {
         color,
         colorBy,
         elements,
+        source,
         attributes,
         labels,
         normalizedKeyMap,
@@ -69,6 +73,7 @@ function ObjectItemComponent(props: Props): JSX.Element {
         toForeground,
         remove,
         changeLabel,
+        changeUnlabeledToLabeled,
         changeColor,
         resetCuboidPerspective,
         edit,
@@ -97,6 +102,7 @@ function ObjectItemComponent(props: Props): JSX.Element {
                 className={className}
                 style={{ backgroundColor: `${color}88` }}
             >
+                {(source === 'auto_unlabeled' || source === 'manual_unlabeled')  &&  <Text>⚠️ UNLABELED</Text>}
                 <ItemBasics
                     jobInstance={jobInstance}
                     readonly={readonly}
@@ -137,6 +143,9 @@ function ObjectItemComponent(props: Props): JSX.Element {
                         parentID={null}
                     />
                 )}
+                { (source === 'auto_unlabeled' || source === 'manual_unlabeled')  &&
+                <Button onClick={changeUnlabeledToLabeled}>Assign Label</Button>
+                }
                 {!!elements.length && (
                     <>
                         <Collapse className='cvat-objects-sidebar-state-item-elements-collapse'>
