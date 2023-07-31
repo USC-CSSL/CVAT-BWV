@@ -96,7 +96,7 @@ const defaultState: State = {
     },
     labels: [{
         id: idGenerator(),
-        name: 'Police',
+        name: 'person:Police',
         type: LabelType.ANY,
         color: '#4aa7ff',
         attributes: [{
@@ -109,9 +109,49 @@ const defaultState: State = {
     },
     {
         id: idGenerator(),
-        name: 'Citizen',
+        name: 'person:Police - Primary officer',
+        type: LabelType.ANY,
+        color: '#4aa7ff',
+        attributes: [{
+            name: 'identifier',
+            input_type: 'number',
+            mutable: false,
+            values: ['1', '20', '1'],
+
+        }]
+    },
+    {
+        id: idGenerator(),
+        name: 'person:Civilian',
         type: LabelType.ANY,
         color: '#f2d25c',
+        attributes: [{
+            name: 'identifier',
+            input_type: 'number',
+            mutable: false,
+            values: ['1', '20', '1'],
+
+        }]
+    },
+    {
+        id: idGenerator(),
+        name: 'car:Police Car',
+        type: LabelType.ANY,
+        color: '#040720',
+        attributes: [{
+            name: 'identifier',
+            input_type: 'number',
+            mutable: false,
+            values: ['1', '20', '1'],
+
+        }]
+    },
+    ,
+    {
+        id: idGenerator(),
+        name: 'car:Civilian Car',
+        type: LabelType.ANY,
+        color: '#008000',
         attributes: [{
             name: 'identifier',
             input_type: 'number',

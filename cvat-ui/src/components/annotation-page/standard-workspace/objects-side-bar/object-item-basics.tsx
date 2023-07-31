@@ -34,6 +34,7 @@ interface Props {
     toBackgroundShortcut: string;
     toForegroundShortcut: string;
     removeShortcut: string;
+    isUnlabeled: boolean;
     changeColor(color: string): void;
     changeLabel(label: any): void;
     copy(): void;
@@ -67,6 +68,7 @@ function ItemTopComponent(props: Props): JSX.Element {
         toBackgroundShortcut,
         toForegroundShortcut,
         removeShortcut,
+        isUnlabeled,
         changeColor,
         changeLabel,
         copy,
@@ -117,6 +119,7 @@ function ItemTopComponent(props: Props): JSX.Element {
                         labels={labels}
                         value={labelID}
                         onChange={changeLabel}
+                        isUnlabeled={isUnlabeled}
                         className='cvat-objects-sidebar-state-item-label-selector'
                     />
                 </CVATTooltip>

@@ -52,6 +52,7 @@
     background: $header-color;
     box-sizing: border-box;
     border: none;
+    height: 100%;
 
     .ant-tabs-nav {
         &::before {
@@ -74,6 +75,13 @@
         .ant-tabs-tab.ant-tabs-tab-active {
             background: $objects-bar-tabs-color;
         }
+    }
+}
+
+.cvat-inner-tabs{
+    .ant-tabs-content-holder {
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 }
 

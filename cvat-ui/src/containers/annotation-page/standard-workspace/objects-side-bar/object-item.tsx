@@ -251,20 +251,15 @@ class ObjectItemContainer extends React.PureComponent<Props> {
         const { objectState, readonly } = this.props;
         if (!readonly) {
             objectState.label = label;
+            if (objectState.source === 'auto_unlabeled') {
+                objectState.source = 'auto';
+            }
+            else if (objectState.source === 'manual_unlabeled') {
+                objectState.source = 'manual';
+            }
             this.commit();
         }
     };
-
-    private changeUnlabeledToLabeled = (): void => {
-        const {objectState} = this.props;
-        if (objectState.source === 'auto_unlabeled') {
-            objectState.source = 'auto';
-        }
-        else if (objectState.source === 'manual_unlabeled') {
-            objectState.source = 'manual';
-        }
-        this.commit();
-    }
 
     private switchCuboidOrientation = (): void => {
         function cuboidOrientationIsLeft(points: number[]): boolean {
@@ -364,7 +359,6 @@ class ObjectItemContainer extends React.PureComponent<Props> {
                 toForeground={this.toForeground}
                 changeColor={this.changeColor}
                 changeLabel={this.changeLabel}
-                changeUnlabeledToLabeled={this.changeUnlabeledToLabeled}
                 edit={this.edit}
                 resetCuboidPerspective={() => this.resetCuboidPerspective()}
             />

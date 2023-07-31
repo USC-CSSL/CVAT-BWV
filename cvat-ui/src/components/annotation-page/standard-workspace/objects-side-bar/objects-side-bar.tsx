@@ -100,7 +100,7 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
 
             <Tabs type='card' defaultActiveKey='objects' className='cvat-objects-sidebar-tabs'>
                 <Tabs.TabPane tab={<Text strong>Objects</Text>} key='objects'>
-                    <Tabs type='card' defaultActiveKey='curframe' className='cvat-objects-sidebar-tabs'>
+                    <Tabs type='card' defaultActiveKey='curframe' className='cvat-objects-sidebar-tabs cvat-inner-tabs'>
                         <Tabs.TabPane tab={<Text strong>Current</Text>} key='curframe'>
                             {objectsList}
                         </Tabs.TabPane>

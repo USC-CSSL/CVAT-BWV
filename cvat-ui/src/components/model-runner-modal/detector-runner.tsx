@@ -56,11 +56,19 @@ function DetectorRunner(props: Props): JSX.Element {
     } = props;
 
     const [modelID, setModelID] = useState<string | null>(models[0].id);
+    const personLabel = labels.filter(label => label.name.startsWith('person:'))[0];
+    const carLabel = labels.filter(label => label.name.startsWith('car:'))[0];
     const [mapping, setMapping] = useState<MappedLabelsList>({
         'person': {
-            name: labels[0].name,
+            name: personLabel.name,
             attributes: matchAttributes(
-                labels[0].name.attributes, models[0].attributes[labels[0].name],
+                personLabel.name.attributes, models[0].attributes[personLabel.name],
+            ),
+        },
+        'car': {
+            name: carLabel.name,
+            attributes: matchAttributes(
+                carLabel.name.attributes, models[0].attributes[carLabel.name],
             ),
         }
     });

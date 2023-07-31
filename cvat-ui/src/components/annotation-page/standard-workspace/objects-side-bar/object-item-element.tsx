@@ -8,6 +8,7 @@ import { activateObject } from 'actions/annotation-actions';
 import ObjectButtonsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-buttons';
 import ItemDetailsContainer from 'containers/annotation-page/standard-workspace/objects-side-bar/object-item-details';
 import { getColor } from './shared';
+import getLabelDisplayName from 'utils/label-display';
 
 interface OwnProps {
     parentID: number;
@@ -49,7 +50,7 @@ function ObjectItemElementComponent(props: OwnProps): JSX.Element {
                 style={{ fontSize: 10 }}
                 className='cvat-objects-sidebar-state-item-object-type-text'
             >
-                {`${element.label.name} [${element.shapeType.toUpperCase()}]`}
+                {`${getLabelDisplayName(element.label.name)} [${element.shapeType.toUpperCase()}]`}
             </Text>
             <ObjectButtonsContainer readonly={readonly} clientID={element.clientID} />
             {!!element.label.attributes.length && (

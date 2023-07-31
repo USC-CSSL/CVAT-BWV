@@ -9,6 +9,7 @@ import Text from 'antd/lib/typography/Text';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ColorBy, CombinedState, ObjectType } from 'reducers';
+import getLabelDisplayName from 'utils/label-display';
 import { ThunkDispatch } from 'utils/redux';
 import { getColor } from './shared';
 interface StateToProps {
@@ -76,7 +77,7 @@ function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Ele
                         </Text>
                         <br/>
                         <Text>
-                            Label: {['auto_unlabeled', 'manual_unlabeled'].includes(state.source) ? 'Unlabeled': state.label.name}
+                            Label: {['auto_unlabeled', 'manual_unlabeled'].includes(state.source) ? 'Unlabeled '+state.label.name.split(':')[0]: getLabelDisplayName(state.label.name)}
                         </Text>
                         <br/>
 

@@ -41,7 +41,6 @@ interface Props {
     toForeground(): void;
     remove(): void;
     changeLabel(label: any): void;
-    changeUnlabeledToLabeled(): void;
     changeColor(color: string): void;
     resetCuboidPerspective(): void;
     edit(): void;
@@ -73,7 +72,6 @@ function ObjectItemComponent(props: Props): JSX.Element {
         toForeground,
         remove,
         changeLabel,
-        changeUnlabeledToLabeled,
         changeColor,
         resetCuboidPerspective,
         edit,
@@ -93,6 +91,10 @@ function ObjectItemComponent(props: Props): JSX.Element {
         activate();
     }, []);
 
+    const isUnlabeled = (source === 'auto_unlabeled' || source === 'manual_unlabeled');
+    const labelName = labels.filter(label => label.id === labelID)[0].name;
+    const labelType = labelName.split(':')[0];
+
     return (
         <div style={{ display: 'flex', marginBottom: '1px' }}>
             <div className='cvat-objects-sidebar-state-item-color' style={{ background: `${color}` }} />
@@ -102,20 +104,21 @@ function ObjectItemComponent(props: Props): JSX.Element {
                 className={className}
                 style={{ backgroundColor: `${color}88` }}
             >
-                {(source === 'auto_unlabeled' || source === 'manual_unlabeled')  &&  <Text>⚠️ UNLABELED</Text>}
+                {isUnlabeled  &&  <Text>⚠️ UNLABELED {labelType.toUpperCase()}</Text>}
                 <ItemBasics
                     jobInstance={jobInstance}
                     readonly={readonly}
                     serverID={serverID}
                     clientID={clientID}
                     labelID={labelID}
-                    labels={labels}
+                    labels={!isUnlabeled ? labels : labels.filter(label => label.name.startsWith(labelType))}
                     shapeType={shapeType}
                     objectType={objectType}
                     color={color}
                     colorBy={colorBy}
                     type={type}
                     locked={locked}
+                    isUnlabeled={isUnlabeled}
                     copyShortcut={normalizedKeyMap.COPY_SHAPE}
                     pasteShortcut={normalizedKeyMap.PASTE_SHAPE}
                     propagateShortcut={normalizedKeyMap.PROPAGATE_OBJECT}
@@ -136,16 +139,13 @@ function ObjectItemComponent(props: Props): JSX.Element {
                     edit={edit}
                 />
                 <ObjectButtonsContainer readonly={readonly} clientID={clientID} />
-                {!!attributes.length && (
+                {!!attributes.length && !isUnlabeled && (
                     <ItemDetailsContainer
                         readonly={readonly}
                         clientID={clientID}
                         parentID={null}
                     />
                 )}
-                { (source === 'auto_unlabeled' || source === 'manual_unlabeled')  &&
-                <Button onClick={changeUnlabeledToLabeled}>Assign Label</Button>
-                }
                 {!!elements.length && (
                     <>
                         <Collapse className='cvat-objects-sidebar-state-item-elements-collapse'>

@@ -6,19 +6,21 @@ import React, { useEffect, useState } from 'react';
 import Select, { SelectProps } from 'antd/lib/select';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { OptionData, OptionGroupData } from 'rc-select/lib/interface';
+import getLabelDisplayName from 'utils/label-display';
 
 interface Props extends SelectProps<string> {
     labels: any[];
     value: any | number | null;
+    isUnlabeled: boolean;
     onChange: (label: any) => void;
     onEnterPress?: (labelID: number) => void;
 }
 
 export default function LabelSelector(props: Props): JSX.Element {
     const {
-        labels, value, onChange, onEnterPress, ...rest
+        labels, value, isUnlabeled, onChange, onEnterPress, ...rest
     } = props;
-    const dynamicProps = value ?
+    const dynamicProps = value && !isUnlabeled ?
         {
             value: typeof value === 'number' ? value : value.id,
         } :
@@ -49,7 +51,7 @@ export default function LabelSelector(props: Props): JSX.Element {
 
                 return false;
             }}
-            defaultValue={labels[0].id}
+            defaultValue={isUnlabeled ? 'Unlabeled' : labels[0].id}
             onChange={(newValue: string) => {
                 const [label] = labels.filter((_label: any): boolean => _label.id === +newValue);
                 if (label) {
@@ -66,7 +68,7 @@ export default function LabelSelector(props: Props): JSX.Element {
         >
             {labels.map((label: any) => (
                 <Select.Option title={label.name} key={label.id} value={label.id}>
-                    {label.name}
+                    {getLabelDisplayName(label.name)}
                 </Select.Option>
             ))}
         </Select>
