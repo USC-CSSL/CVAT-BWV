@@ -56,6 +56,7 @@ import { reviewActions } from 'actions/review-actions';
 
 import ImageSetupsContent from './image-setups-content';
 import BrushTools from './brush-tools';
+import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
 
 const cvat = getCore();
 const MAX_DISTANCE_TO_OPEN_SHAPE = 50;
@@ -587,7 +588,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         const label = state.label || jobInstance.labels.filter((label: any) => label.id === activeLabelID)[0];
         state.label = label;
         state.attributes = {
-            [label.attributes && label.attributes[0].id]: (state.attributes && state.attributes[label.attributes[0]?.id] || '1'),
+            [label.attributes && label.attributes[0].id]: (state.attributes && state.attributes[label.attributes[0]?.id] || getAutoIncrementedIdentifierAttr(label)),
         };
         state.frame = frame;
         state.rotation = state.rotation || 0;

@@ -26,6 +26,7 @@ import { shift } from 'utils/math';
 import { Canvas, CanvasMode } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { filterApplicableLabels } from 'utils/filter-applicable-labels';
+import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
 
 interface OwnProps {
     readonly: boolean;
@@ -250,14 +251,26 @@ class ObjectItemContainer extends React.PureComponent<Props> {
     private changeLabel = (label: any): void => {
         const { objectState, readonly } = this.props;
         if (!readonly) {
+            const oldAttrId = objectState.label.attributes[0].id;
             objectState.label = label;
-            if (objectState.source === 'auto_unlabeled') {
-                objectState.source = 'auto';
+
+            if (objectState.source === 'auto_unlabeled' || objectState.source === 'manual_unlabeled') {
+                if (objectState.source === 'auto_unlabeled') {
+                    objectState.source = 'auto';
+                }
+                else if (objectState.source === 'manual_unlabeled') {
+                    objectState.source = 'manual';
+                }
+
+                objectState.attributes = {
+                    [label.attributes[0].id]: getAutoIncrementedIdentifierAttr(label).toString()
+                }
+
+                if (oldAttrId != label.attributes[0].id) delete objectState.attributes[oldAttrId];
             }
-            else if (objectState.source === 'manual_unlabeled') {
-                objectState.source = 'manual';
-            }
+
             this.commit();
+
         }
     };
 
