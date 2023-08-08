@@ -2648,7 +2648,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
 
         return this.adoptedText
             .text((block): void => {
-                block.tspan(`${withLabel && !(['auto_unlabeled', 'manual_unlabeled'].includes(source)) ? label.name : ''} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
+                block.tspan(`${withLabel && !(['auto_unlabeled', 'manual_unlabeled'].includes(source)) ? label.name : label.name.split(':')[0]} ${/*withID ? clientID : ''*/ ''} ${withSource ? `(${source})` : ''}`).style({
                     'text-transform': 'uppercase',
                 });
                 if (withDescriptions) {
@@ -2662,7 +2662,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
                             .addClass('cvat_canvas_text_description');
                     }
                 }
-                if (withAttr) {
+                if (withAttr && !(['auto_unlabeled', 'manual_unlabeled'].includes(source)) ) {
                     for (const attrID of Object.keys(attributes)) {
                         const value = attributes[attrID] === undefinedAttrValue ? '' : attributes[attrID];
                         block

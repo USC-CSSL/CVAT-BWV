@@ -16,6 +16,9 @@ import {
     removeObject,
     updateAnnotationsAsync,
 } from 'actions/annotation-actions';
+import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
+import Popover from 'antd/lib/popover';
+import AudioSelectorPopover from './audioselectorpopover';
 
 const cvat = getCore();
 
@@ -111,6 +114,9 @@ function AudioSelector(props: Props): JSX.Element {
     const [audioselections, setAudioSelections] = useState<any[]>([]);
     const {states} = props;
 
+    const [newAudioSelectorPopoverOpen, setNewAudioSelectorPopoverOpen] = useState(false);
+
+
     useEffect(() => {
         setAudioSelections(states.filter(((s: any)  => s.objectType === ObjectType.AUDIOSELECTION)));
     }, [states])
@@ -129,6 +135,10 @@ function AudioSelector(props: Props): JSX.Element {
         isPhase2,
         audioPreview,
     } = props;
+
+    const personLabels = labels.filter(label => label.name.startsWith('person:'));
+
+    const [newAudioSelectorLabel, setNewAudioSelectorLabel] = useState<any>(null);
 
     useEffect(() => {
         if (audioPreview.length) {
@@ -185,7 +195,7 @@ function AudioSelector(props: Props): JSX.Element {
                         {
                             audioselections.map((audioselection) => (
                                 <AudioSelectorItem
-                                    labels={labels}
+                                    labels={personLabels}
                                     startFrame={startFrame}
                                     stopFrame={stopFrame}
                                     frameNumber={frameNumber}
@@ -199,7 +209,7 @@ function AudioSelector(props: Props): JSX.Element {
                         }
                         {!isPhase2 &&
                         <div style={{display: 'flex'}}>
-                        <CVATTooltip title={`Click to highlight a section from audio`} >
+                        {/* <CVATTooltip title={`Click to highlight a section from audio`} >
                             <Button
                                 type='primary'
                                 className='cvat-add-tag-button'
@@ -219,13 +229,64 @@ function AudioSelector(props: Props): JSX.Element {
                                             }
                                         ],
                                         attributes: {
-                                            [attrId]: `1`,
+                                            [attrId]: getAutoIncrementedIdentifierAttr(label).toString(),
                                         }
                                     });
                                     onCreateAnnotations(jobInstance, frameNumber, [objectState]);
                                 }}
                             />
-                        </CVATTooltip>
+                        </CVATTooltip> */}
+                        <Popover
+                                overlayClassName='cvat-add-audioselection-popover'
+                                placement='right'
+                                trigger="click"
+                                visible={newAudioSelectorPopoverOpen}
+                                onVisibleChange={(visible) => {
+                                    setNewAudioSelectorPopoverOpen(visible);
+                                }}
+
+                                content={
+                                    <AudioSelectorPopover
+                                        selectedLabelID={newAudioSelectorLabel && newAudioSelectorLabel.id}
+                                        onChangeLabel={(val) => {
+                                            setNewAudioSelectorLabel(val);
+                                        }}
+                                        labels={personLabels}
+                                        jobInstance={jobInstance}
+                                        onAdd={()=> {
+                                            if (newAudioSelectorLabel) {
+                                                const label = newAudioSelectorLabel;
+                                                const attrId = label.attributes[0]?.id;
+                                                const objectState = new cvat.classes.ObjectState({
+                                                    objectType: ObjectType.AUDIOSELECTION,
+                                                    label:label,
+                                                    frame: frameNumber,
+                                                    audio_selected_segments: [
+                                                        {
+                                                            start: frameNumber,
+                                                            end: Math.min(frameNumber + 40, stopFrame)
+                                                        }
+                                                    ],
+                                                    attributes: {
+                                                        [attrId]: getAutoIncrementedIdentifierAttr(label).toString(),
+                                                    }
+                                                });
+                                                onCreateAnnotations(jobInstance, frameNumber, [objectState]);
+                                                setNewAudioSelectorLabel(null);
+                                                setNewAudioSelectorPopoverOpen(false);
+                                            }
+
+                                        }
+                                        }
+                                    ></AudioSelectorPopover>
+                                }
+                            >
+                                <Button
+                                type='primary'
+                                className='cvat-add-tag-button'
+                                style={{margin: 'auto'}}
+                                icon={<PlusOutlined />}></Button>
+                        </Popover>
                         </div>}
                     </div>
                 </div>

@@ -11,6 +11,7 @@ import getLabelDisplayName from 'utils/label-display';
 interface Props extends SelectProps<string> {
     labels: any[];
     value: any | number | null;
+    defaultUnselectedValue?: string;
     isUnlabeled: boolean;
     onChange: (label: any) => void;
     onEnterPress?: (labelID: number) => void;
@@ -18,7 +19,7 @@ interface Props extends SelectProps<string> {
 
 export default function LabelSelector(props: Props): JSX.Element {
     const {
-        labels, value, isUnlabeled, onChange, onEnterPress, ...rest
+        labels, value, isUnlabeled, defaultUnselectedValue, onChange, onEnterPress, ...rest
     } = props;
     const dynamicProps = value && !isUnlabeled ?
         {
@@ -51,7 +52,7 @@ export default function LabelSelector(props: Props): JSX.Element {
 
                 return false;
             }}
-            defaultValue={isUnlabeled ? 'Unlabeled' : labels[0].id}
+            defaultValue={isUnlabeled ? (defaultUnselectedValue || 'Unlabeled') : labels[0].id}
             onChange={(newValue: string) => {
                 const [label] = labels.filter((_label: any): boolean => _label.id === +newValue);
                 if (label) {

@@ -137,7 +137,7 @@ const defaultState: State = {
         id: idGenerator(),
         name: 'car:Police Car',
         type: LabelType.ANY,
-        color: '#040720',
+        color: '#374f6b',
         attributes: [{
             name: 'identifier',
             input_type: 'number',
