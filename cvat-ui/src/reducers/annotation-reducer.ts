@@ -17,6 +17,7 @@ import {
     AnnotationState,
     ContextMenuType,
     JobStage,
+    ModalMode,
     ObjectType,
     ShapeType,
     Workspace,
@@ -119,6 +120,11 @@ const defaultState: AnnotationState = {
     },
     propagate: {
         visible: false,
+    },
+    modal: {
+        visible: false,
+        mode: ModalMode.NONE,
+        people: [],
     },
     colors: [],
     sidebarCollapsed: false,
@@ -738,6 +744,18 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     history,
                 },
             };
+        }
+        case AnnotationActionTypes.MODAL_UPDATE: {
+            const { visible, mode, people, peopleFrames } = action.payload;
+
+            return {
+                ...state,
+                modal: {
+                    visible,
+                    mode,
+                    people,
+                }
+            }
         }
         case AnnotationActionTypes.ACTIVATE_OBJECT: {
             const { activatedStateID, activatedElementID, activatedAttributeID } = action.payload;

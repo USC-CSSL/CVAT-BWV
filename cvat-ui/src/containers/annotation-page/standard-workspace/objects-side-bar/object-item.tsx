@@ -16,6 +16,7 @@ import {
     activateObject as activateObjectAction,
     switchPropagateVisibility as switchPropagateVisibilityAction,
     removeObject as removeObjectAction,
+    modalUpdateAsync
 } from 'actions/annotation-actions';
 import {
     ActiveControl, CombinedState, ColorBy, ShapeType,
@@ -44,7 +45,7 @@ interface StateToProps {
     colorBy: ColorBy;
     ready: boolean;
     activeControl: ActiveControl;
-    activatedElementID: number | null;
+    //activatedElementID: number | null;
     minZLayer: number;
     maxZLayer: number;
     normalizedKeyMap: Record<string, string>;
@@ -59,6 +60,7 @@ interface DispatchToProps {
     copyShape: (objectState: any) => void;
     switchPropagateVisibility: (visible: boolean) => void;
     changeGroupColor(group: number, color: string): void;
+    showPersonModal(people: any[], mode: string): void;
 }
 
 function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
@@ -125,6 +127,13 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         changeGroupColor(group: number, color: string): void {
             dispatch(changeGroupColorAsync(group, color));
         },
+        showPersonModal(people: any[], mode: string): void {
+            dispatch(modalUpdateAsync({
+                people,
+                visible: true,
+                mode
+            }))
+        }
     };
 }
 
@@ -249,9 +258,12 @@ class ObjectItemContainer extends React.PureComponent<Props> {
     };
 
     private changeLabel = (label: any): void => {
-        const { objectState, readonly } = this.props;
+        const { objectState, readonly, showPersonModal } = this.props;
         if (!readonly) {
+            // for the identitity attribute only
             const oldAttrId = objectState.label.attributes[0].id;
+            const newAttrId = label.attributes[0].id;
+
             objectState.label = label;
 
             if (objectState.source === 'auto_unlabeled' || objectState.source === 'manual_unlabeled') {
@@ -263,13 +275,27 @@ class ObjectItemContainer extends React.PureComponent<Props> {
                 }
 
                 objectState.attributes = {
-                    [label.attributes[0].id]: getAutoIncrementedIdentifierAttr(label).toString()
+
+                    [newAttrId]: getAutoIncrementedIdentifierAttr(label).toString()
                 }
 
-                if (oldAttrId != label.attributes[0].id) delete objectState.attributes[oldAttrId];
+                if (oldAttrId != newAttrId) delete objectState.attributes[oldAttrId];
+                Object.keys(objectState.attributes).forEach(key => {
+                    if (key != oldAttrId && key != newAttrId) {
+                        // delete all attr except identity attribute
+                        delete objectState.attributes[key];
+                    }
+                })
             }
 
+
             this.commit();
+            if (label.name.startsWith('person:')) {
+                showPersonModal([{
+                    clientID: objectState.clientID,
+                    frameNumber: objectState.frame
+                }], 'person_demographics');
+            }
 
         }
     };

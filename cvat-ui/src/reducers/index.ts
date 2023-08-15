@@ -626,6 +626,14 @@ export enum Rotation {
     CLOCKWISE90,
 }
 
+export enum ModalMode {
+    NONE = 'none',
+    PERSON_DEMOGRAPHICS = 'person_demographics',
+    BEFORE_SAVE = 'before_save',
+    SIMILAR_FACE = 'similar_face',
+    FACE_SELECTION = 'face_selection'
+}
+
 export interface AnnotationState {
     activities: {
         loads: {
@@ -725,6 +733,14 @@ export interface AnnotationState {
     };
     propagate: {
         visible: boolean;
+    };
+    modal: {
+        visible: boolean;
+        mode: ModalMode;
+        people: {
+            clientID: number;
+            frameImage: any;
+        }[];
     };
     colors: any[];
     filtersPanelVisible: boolean;

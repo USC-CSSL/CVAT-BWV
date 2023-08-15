@@ -24,6 +24,7 @@ interface StateToProps {
     frameNumber: number;
     fetching: boolean;
     workspace: Workspace;
+    modal: any
 }
 
 interface DispatchToProps {
@@ -45,6 +46,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
                     number: frameNumber,
                 },
             },
+            modal,
         },
     } = state;
 
@@ -53,6 +55,7 @@ function mapStateToProps(state: CombinedState, own: OwnProps): StateToProps {
         fetching,
         workspace,
         frameNumber,
+        modal
     };
 }
 

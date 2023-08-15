@@ -99,25 +99,76 @@ const defaultState: State = {
         name: 'person:Police',
         type: LabelType.ANY,
         color: '#4aa7ff',
-        attributes: [{
+        attributes: [
+        {
             name: 'identifier',
             input_type: 'number',
             mutable: false,
             values: ['1', '20', '1'],
 
-        }]
+        },
+        {
+            name: 'demographics.race',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                'White',
+                'Black or African American',
+                'American Indian or Alaska Native',
+                'Asian',
+                'Native Hawaiian or Other Pacific Islander'
+            ],
+        },
+        {
+            name: 'demographics.age',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                '<18',
+                '18-30',
+                '30-45',
+                '45-65',
+                '65+'
+            ],
+        }
+        ]
     },
     {
         id: idGenerator(),
         name: 'person:Police - Primary officer',
         type: LabelType.ANY,
         color: '#4aa7ff',
-        attributes: [{
+        attributes: [
+            {
             name: 'identifier',
             input_type: 'number',
             mutable: false,
             values: ['1', '20', '1'],
 
+        },
+        {
+            name: 'demographics.race',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                'White',
+                'Black or African American',
+                'American Indian or Alaska Native',
+                'Asian',
+                'Native Hawaiian or Other Pacific Islander'
+            ],
+        },
+        {
+            name: 'demographics.age',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                '<18',
+                '18-30',
+                '30-45',
+                '45-65',
+                '65+'
+            ],
         }]
     },
     {
@@ -125,12 +176,37 @@ const defaultState: State = {
         name: 'person:Civilian',
         type: LabelType.ANY,
         color: '#f2d25c',
-        attributes: [{
+        attributes: [
+        {
             name: 'identifier',
             input_type: 'number',
             mutable: false,
             values: ['1', '20', '1'],
 
+        },
+        {
+            name: 'demographics.race',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                'White',
+                'Black or African American',
+                'American Indian or Alaska Native',
+                'Asian',
+                'Native Hawaiian or Other Pacific Islander'
+            ],
+        },
+        {
+            name: 'demographics.age',
+            input_type: 'select',
+            mutable: false,
+            values: [
+                '<18',
+                '18-30',
+                '30-45',
+                '45-65',
+                '65+'
+            ],
         }]
     },
     {

@@ -164,6 +164,11 @@ export function implementJob(Job) {
         return result;
     };
 
+    Job.prototype.frames.getImage.implementation = async function (frameId) {
+        const result = await serverProxy.frames.getImage(this.id, frameId);
+        return result;
+    };
+
     Job.prototype.frames.search.implementation = async function (filters, frameFrom, frameTo) {
         if (typeof filters !== 'object') {
             throw new ArgumentError('Filters should be an object');

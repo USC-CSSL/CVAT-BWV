@@ -199,7 +199,8 @@ export enum AnnotationActionTypes {
     UPDATE_BRUSH_TOOLS_CONFIG = 'UPDATE_BRUSH_TOOLS_CONFIG',
     FETCH_AUDIO_SUCCESS = 'FETCH_AUDIO_SUCCESS',
     FETCH_AUDIO_FAILED = 'FETCH_AUDIO_FAILED',
-    FETCH_AUDIO_PREVIEW_SUCCESS = 'FETCH_AUDIO_PREVIEW_SUCCESS'
+    FETCH_AUDIO_PREVIEW_SUCCESS = 'FETCH_AUDIO_PREVIEW_SUCCESS',
+    MODAL_UPDATE = 'MODAL_UPDATE',
 }
 
 export function saveLogsAsync(): ThunkAction {
@@ -219,6 +220,38 @@ export function saveLogsAsync(): ThunkAction {
             });
         }
     };
+}
+
+export function modalUpdateAsync(update: any): ThunkAction {
+    return async (dispatch: ActionCreator<Dispatch>, getState: () => CombinedState): Promise<void> => {
+
+
+        const state: CombinedState = getState();
+        const { instance: job } = state.annotation.job;
+
+        const { people } = update;
+
+        // add frame images to people array
+        const modifiedPeople = await Promise.all(people.map(async (person: any) => {
+            const data = await job.frames.getImage(person.frameNumber);
+            return {
+                clientID: person.clientID,
+                frameImage: data
+            }
+        }));
+
+        const modifiedUpdate = {
+            ...update,
+            people: modifiedPeople
+        };
+
+        dispatch({
+            type: AnnotationActionTypes.MODAL_UPDATE,
+            payload: {
+                ...modifiedUpdate,
+            }
+        });
+    }
 }
 
 export function changeWorkspace(workspace: Workspace): AnyAction {

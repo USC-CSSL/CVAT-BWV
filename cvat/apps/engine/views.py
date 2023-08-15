@@ -557,7 +557,14 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
 class DataChunkGetter:
     def __init__(self, data_type, data_num, data_quality, task_dim):
-        possible_data_type_values = ('chunk', 'frame', 'preview', 'context_image', 'audio', 'waveform')
+        possible_data_type_values = (
+            'chunk',
+            'frame',
+            'preview',
+            'context_image',
+            'audio',
+            'waveform',
+        )
         possible_quality_values = ('compressed', 'original')
 
         if not data_type or data_type not in possible_data_type_values:

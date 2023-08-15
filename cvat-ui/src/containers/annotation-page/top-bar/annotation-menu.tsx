@@ -16,6 +16,7 @@ import {
     saveAnnotationsAsync,
     setForceExitAnnotationFlag as setForceExitAnnotationFlagAction,
     removeAnnotationsAsync as removeAnnotationsAsyncAction,
+    modalUpdateAsync,
 } from 'actions/annotation-actions';
 import { exportActions } from 'actions/export-actions';
 import { importActions } from 'actions/import-actions';
@@ -26,6 +27,7 @@ const core = getCore();
 interface StateToProps {
     jobInstance: any;
     stopFrame: number;
+    objectStates: any[];
     isOrganizationOwner: boolean;
 }
 
@@ -36,6 +38,7 @@ interface DispatchToProps {
     setForceExitAnnotationFlag(forceExit: boolean): void;
     saveAnnotations(jobInstance: any, afterSave?: () => void): void;
     updateJob(jobInstance: any): void;
+    showBeforeSubmitModal(people: any[]): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -45,6 +48,9 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 instance: jobInstance,
                 instance: { stopFrame },
             },
+            annotations: {
+                states
+            }
         },
         auth: {
             user,
@@ -57,6 +63,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         jobInstance,
         stopFrame,
+        objectStates: states,
         isOrganizationOwner: currentOrganization?.owner.username === user.username
     };
 }
@@ -81,6 +88,13 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         updateJob(jobInstance: any): void {
             dispatch(updateJobAsync(jobInstance));
         },
+        showBeforeSubmitModal(people: any[]): void {
+            dispatch(modalUpdateAsync({
+                people,
+                visible: true,
+                mode: 'before_save',
+            }))
+        }
     };
 }
 
@@ -97,7 +111,9 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
         setForceExitAnnotationFlag,
         saveAnnotations,
         updateJob,
-        isOrganizationOwner
+        isOrganizationOwner,
+        objectStates,
+        showBeforeSubmitModal
     } = props;
 
     const onClickMenu = (params: MenuInfo): void => {
@@ -110,9 +126,17 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             updateJob(jobInstance);
             window.location.reload();
         } else if (action === Actions.FINISH_JOB) {
-            jobInstance.stage = JobStage.ACCEPTANCE;
-            jobInstance.state = core.enums.JobState.COMPLETED;
-            updateJob(jobInstance);
+            // jobInstance.stage = JobStage.ACCEPTANCE;
+            // jobInstance.state = core.enums.JobState.COMPLETED;
+            // updateJob(jobInstance);
+            const people = objectStates.filter(state => {
+                if (state.label.name.startsWith('person:')) {
+                    return true;
+                }
+                return false;
+            });
+            showBeforeSubmitModal(people);
+
             // history.push(`/tasks/${jobInstance.taskId}`);
         } else if (action === Actions.OPEN_TASK) {
             history.push(`/tasks/${jobInstance.taskId}`);

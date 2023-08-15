@@ -2209,6 +2209,34 @@ async function fetchAudioPreview(jid) {
     }
 }
 
+async function fetchFrameImage(jid, frameNumber) {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.get(`${backendAPI}/jobs/${jid}/data`, {
+            params: {
+                ...enableOrganization(),
+                quality: 'compressed',
+                type: 'frame',
+                number: frameNumber,
+            },
+            responseType: 'arraybuffer',
+        });
+        const blob = new Blob(
+            [response.data],
+            { type: response.headers['content-type'] }
+          )
+        return blob;
+    } catch(errorData) {
+        throw generateError({
+            message: '',
+            response: {
+                ...errorData.response,
+                data: errorData.response.data,
+            },
+        });
+    }
+}
+
 export default Object.freeze({
     server: Object.freeze({
         setAuthData,
@@ -2277,6 +2305,7 @@ export default Object.freeze({
         saveMeta,
         getPreview,
         getImageContext,
+        getImage: fetchFrameImage,
     }),
 
     audio: Object.freeze({

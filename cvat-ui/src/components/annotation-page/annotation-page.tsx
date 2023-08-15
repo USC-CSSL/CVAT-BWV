@@ -16,6 +16,7 @@ import StandardWorkspaceComponent from 'components/annotation-page/standard-work
 import StandardWorkspace3DComponent from 'components/annotation-page/standard3D-workspace/standard3D-workspace';
 import TagAnnotationWorkspace from 'components/annotation-page/tag-annotation-workspace/tag-annotation-workspace';
 import FiltersModalComponent from 'components/annotation-page/top-bar/filters-modal';
+import PersonQuestionModalComponent from 'components/annotation-page/person-question-modal/person-question-modal';
 import StatisticsModalComponent from 'components/annotation-page/top-bar/statistics-modal';
 import AnnotationTopBarContainer from 'containers/annotation-page/top-bar/top-bar';
 import { Workspace } from 'reducers';
@@ -154,6 +155,7 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
             </Layout.Content>
             <FiltersModalComponent />
             <StatisticsModalComponent />
+            <PersonQuestionModalComponent/>
         </Layout>
     );
 }

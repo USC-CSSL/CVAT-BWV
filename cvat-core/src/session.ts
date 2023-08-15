@@ -242,6 +242,14 @@ function buildDuplicatedAPI(prototype) {
                     );
                     return result;
                 },
+                async getImage(frameId) {
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.frames.getImage,
+                        frameId,
+                    );
+                    return result;
+                },
             },
             writable: true,
         }),
@@ -385,6 +393,7 @@ export class Job extends Session {
         preview: CallableFunction;
         contextImage: CallableFunction;
         search: CallableFunction;
+        getImage: CallableFunction;
     };
 
     public audio: {
@@ -582,6 +591,7 @@ export class Job extends Session {
             preview: Object.getPrototypeOf(this).frames.preview.bind(this),
             search: Object.getPrototypeOf(this).frames.search.bind(this),
             contextImage: Object.getPrototypeOf(this).frames.contextImage.bind(this),
+            getImage: Object.getPrototypeOf(this).frames.getImage.bind(this),
         };
 
         this.audio = {
@@ -689,6 +699,7 @@ export class Task extends Session {
         preview: CallableFunction;
         contextImage: CallableFunction;
         search: CallableFunction;
+        getImage: CallableFunction;
     };
 
     public logger: {
@@ -1100,6 +1111,7 @@ export class Task extends Session {
             ranges: Object.getPrototypeOf(this).frames.ranges.bind(this),
             preview: Object.getPrototypeOf(this).frames.preview.bind(this),
             contextImage: Object.getPrototypeOf(this).frames.contextImage.bind(this),
+            getImage: Object.getPrototypeOf(this).frames.getImage.bind(this),
             search: Object.getPrototypeOf(this).frames.search.bind(this),
         };
 

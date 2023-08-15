@@ -44,7 +44,7 @@ function ItemAttributesComponent(props: Props): JSX.Element {
 
     return (
         <Row>
-                    {attributes.map(
+                    {attributes.filter(attr => !attr.name.startsWith('demographics.')).map(
                         (attribute: any): JSX.Element => (
                             <Row
                                 key={attribute.id}
