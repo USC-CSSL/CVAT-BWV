@@ -49,7 +49,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 instance: { stopFrame },
             },
             annotations: {
-                states
+                allStates
             }
         },
         auth: {
@@ -63,7 +63,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         jobInstance,
         stopFrame,
-        objectStates: states,
+        objectStates: allStates,
         isOrganizationOwner: currentOrganization?.owner.username === user.username
     };
 }
@@ -134,7 +134,10 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
                     return true;
                 }
                 return false;
-            });
+            }).map((person => ({
+                clientID: person.clientID,
+                frameNumber: person.frame
+            })));
             showBeforeSubmitModal(people);
 
             // history.push(`/tasks/${jobInstance.taskId}`);

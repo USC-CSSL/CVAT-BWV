@@ -249,7 +249,7 @@ class Annotation {
             for (const attrID of Object.keys(data.attributes)) {
                 const value = data.attributes[attrID];
                 if (attrID in labelAttributes) {
-                    if (!validateAttributeValue(value, labelAttributes[attrID])) {
+                    if (value !== '' && !validateAttributeValue(value, labelAttributes[attrID])) {
                         throw new ArgumentError(
                             `Trying to save an attribute attribute with id ${attrID} and invalid value ${value}`,
                         );

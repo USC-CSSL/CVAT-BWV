@@ -1,4 +1,4 @@
-import { Modal, Select } from 'antd';
+import { Modal, Select, Tabs } from 'antd';
 import Text from 'antd/lib/typography/Text';
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { connect } from 'react-redux';
@@ -6,6 +6,7 @@ import { CombinedState } from 'reducers';
 import { Col, Row } from 'antd/lib/grid';
 import { ObjectState } from 'cvat-core-wrapper';
 import { modalUpdateAsync, updateAnnotationsAsync } from 'actions/annotation-actions';
+import getLabelDisplayName from 'utils/label-display';
 
 interface Props {
 };
@@ -13,6 +14,17 @@ interface Props {
 const keyToLongQuestion = {
     race: 'What is their perceived race?',
     age: 'What is their perceived age?',
+    sescar: 'What is the perceived socio-economic status as evidenced by their car make/model/condition?',
+    sesclothing: 'What is the perceived socio-economic status as evidenced by their clothing?',
+    gender: 'What is their perceived gender?',
+    height: 'What is their perceived height?',
+    bodytype: 'What is their perceived body type?',
+    homelessness: 'Does CX exhibit any signs of homeless circumstances (eg the car is full of living material)?',
+    foreignaccent: 'Does CX/POX have a non-American accent?',
+    regionalaccent: 'Does CX/POX have a regional American accent?',
+    lgbtq: 'Is CX/POX perceived to be a part of the LGBTQ community?',
+    dui: 'Does CX/POX exhibit any signs of being under the influence of drugs or alcohol?',
+    specialneeds: 'Does CX/POX exhibit any signs of special needs (e.g. physical disabilities, blindness, autism, etc. as defined in the special needs training)?'
 };
 
 interface StateToProps {
@@ -34,7 +46,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 people
             },
             annotations: {
-                states
+                allStates
             }
         },
     } = state;
@@ -42,7 +54,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         visible,
         mode,
-        states: states.filter(state => people.map(person => person.clientID).includes(state.clientID)),
+        states: allStates.filter(state => people.map(person => person.clientID).includes(state.clientID)),
         people,
     };
 }
@@ -142,7 +154,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
     }, []);
 
     return (
-      <Modal visible={visible} onOk={() => modalUpdate({
+      <Modal visible={visible} width={'80%'} onOk={() => modalUpdate({
         visible: false,
         people: [],
       })} >
@@ -170,9 +182,13 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                         })))
                                     }
                                     onChange={(val) => {
-                                        states[0].attributes[attr.id] = val;
+                                        states[0].attributes = {
+                                            ...states[0].attributes,
+                                            [attr.id]: val
+                                        };
                                         onUpdateAnnotations([states[0]]);
                                     }}
+                                    value={states[0].attributes[attr.id]}
                                     style={{width: '100%'}}
                                     />
 
@@ -183,10 +199,74 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                     ))}
                     </Col>
                     <Col span={6}>
-                        {croppedImages[0] && <img  style={{width: '100%'}} src={croppedImages[0]}></img>}
+                        {croppedImages[0] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[0]}></img>}
                     </Col>
                 </Row>
             )}
+
+            {
+                mode === 'before_save' && (
+                    <Tabs
+                        type='card'
+                        tabBarStyle={{ marginBottom: '0px' }}
+                    >
+                        {states.map((state, idx) => (
+                            <Tabs.TabPane
+                            tab={(
+                                <span>
+                                    <Text>{getLabelDisplayName(state.label.name)} {state.attributes[state.label.attributes[0].id]}</Text>
+                                </span>
+                            )}
+                            key={state.clientID}
+                        >
+                            <Row>
+                                <Col span={18}>
+                                {states[0].label.attributes
+                                .filter((attr: any) => attr.name.startsWith('demographics.'))
+                                .map((attr: any) => (
+
+                                    <div>
+                                        <div>
+                                            <Text>{keyToLongQuestion[attr.name.split('demographics.')[1]]}</Text>
+                                        </div>
+                                        <div>
+                                            {
+                                                attr.inputType === 'select' &&
+
+                                                <Select
+                                                options={
+                                                    attr.values.map(((val: string) => ({
+                                                        label: val,
+                                                        value: val
+                                                    })))
+                                                }
+                                                onChange={(val) => {
+                                                    state.attributes = {
+                                                        ...state.attributes,
+                                                        [attr.id]: val
+                                                    };
+                                                    onUpdateAnnotations([states[idx]]);
+                                                }}
+                                                value={state.attributes[attr.id]}
+                                                style={{width: '100%'}}
+                                                />
+
+                                            }
+                                        </div>
+                                    </div>
+
+                                ))}
+                                </Col>
+                                <Col span={6}>
+                                    {croppedImages[idx] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[idx]}></img>}
+                                </Col>
+                            </Row>
+                        </Tabs.TabPane>
+                        ))}
+
+                    </Tabs>
+                )
+            }
       </Modal>
 
     )

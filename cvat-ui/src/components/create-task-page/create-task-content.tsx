@@ -70,7 +70,139 @@ type State = CreateTaskData & {
     loading: boolean;
     statusInProgressTask: string;
 };
-
+const demographicAttr = [
+    {
+        name: 'demographics.race',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'White',
+            'Black or African American',
+            'American Indian or Alaska Native',
+            'Asian',
+            'Native Hawaiian or Other Pacific Islander'
+        ],
+    },
+    {
+        name: 'demographics.age',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            '<18',
+            '18-30',
+            '30-45',
+            '45-65',
+            '65+'
+        ],
+    },
+    {
+        name: 'demographics.sescar',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Poor',
+            'Working Class',
+            'Middle Class',
+            'Wealthy',
+            'Not Obvious from Video'
+        ],
+    },
+    {
+        name: 'demographics.sesclothing',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Poor',
+            'Working Class',
+            'Middle Class',
+            'Wealthy',
+            'Not Obvious from Video'
+        ],
+    },
+    {
+        name: 'demographics.gender',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Male',
+            'Female',
+            'Trans Man',
+            'Trans Woman',
+            'Non-binary',
+            'Not Obvious from Video'
+        ],
+    },
+    {
+        name: 'demographics.height',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Short',
+            'Tall',
+            'Average',
+            'Not Obvious from Video'
+        ],
+    },
+    {
+        name: 'demographics.homelessness',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Not Obvious from Video',
+        ],
+    },
+    {
+        name: 'demographics.foreignaccent',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Uncertain',
+        ],
+    },
+    {
+        name: 'demographics.regionalaccent',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Uncertain',
+        ],
+    },
+    {
+        name: 'demographics.lgbtq',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Uncertain',
+        ],
+    },
+    {
+        name: 'demographics.dui',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Uncertain',
+        ],
+    },
+    {
+        name: 'demographics.specialneeds',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Uncertain',
+        ],
+}];
 const defaultState: State = {
     projectId: null,
     basic: {
@@ -107,30 +239,7 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        {
-            name: 'demographics.race',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                'White',
-                'Black or African American',
-                'American Indian or Alaska Native',
-                'Asian',
-                'Native Hawaiian or Other Pacific Islander'
-            ],
-        },
-        {
-            name: 'demographics.age',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                '<18',
-                '18-30',
-                '30-45',
-                '45-65',
-                '65+'
-            ],
-        }
+        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
         ]
     },
     {
@@ -146,30 +255,8 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        {
-            name: 'demographics.race',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                'White',
-                'Black or African American',
-                'American Indian or Alaska Native',
-                'Asian',
-                'Native Hawaiian or Other Pacific Islander'
-            ],
-        },
-        {
-            name: 'demographics.age',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                '<18',
-                '18-30',
-                '30-45',
-                '45-65',
-                '65+'
-            ],
-        }]
+        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
+    ]
     },
     {
         id: idGenerator(),
@@ -184,30 +271,8 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        {
-            name: 'demographics.race',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                'White',
-                'Black or African American',
-                'American Indian or Alaska Native',
-                'Asian',
-                'Native Hawaiian or Other Pacific Islander'
-            ],
-        },
-        {
-            name: 'demographics.age',
-            input_type: 'select',
-            mutable: false,
-            values: [
-                '<18',
-                '18-30',
-                '30-45',
-                '45-65',
-                '65+'
-            ],
-        }]
+        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
+        ]
     },
     {
         id: idGenerator(),
