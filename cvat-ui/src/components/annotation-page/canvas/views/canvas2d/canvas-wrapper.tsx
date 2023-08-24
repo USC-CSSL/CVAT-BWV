@@ -42,6 +42,7 @@ import {
     switchZLayer,
     fetchAnnotationsAsync,
     getDataFailed,
+    modalUpdateAsync,
 } from 'actions/annotation-actions';
 import {
     switchGrid,
@@ -119,7 +120,7 @@ interface DispatchToProps {
     onSplitTrack: (enabled: boolean) => void;
     onEditShape: (enabled: boolean) => void;
     onUpdateAnnotations(states: any[]): void;
-    onCreateAnnotations(sessionInstance: any, frame: number, states: any[]): void;
+    onCreateAnnotations(sessionInstance: any, frame: number, states: any[], cb: Function | null): void;
     onMergeAnnotations(sessionInstance: any, frame: number, states: any[]): void;
     onGroupAnnotations(sessionInstance: any, frame: number, states: any[]): void;
     onSplitAnnotations(sessionInstance: any, frame: number, state: any): void;
@@ -137,6 +138,7 @@ interface DispatchToProps {
     onFetchAnnotation(): void;
     onGetDataFailed(error: any): void;
     onStartIssue(position: number[]): void;
+    showPersonModal(people: any[], mode: string): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -273,8 +275,8 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onUpdateAnnotations(states: any[]): void {
             dispatch(updateAnnotationsAsync(states));
         },
-        onCreateAnnotations(sessionInstance: any, frame: number, states: any[]): void {
-            dispatch(createAnnotationsAsync(sessionInstance, frame, states));
+        onCreateAnnotations(sessionInstance: any, frame: number, states: any[], cb: Function | null = null): void {
+            dispatch(createAnnotationsAsync(sessionInstance, frame, states, cb));
         },
         onMergeAnnotations(sessionInstance: any, frame: number, states: any[]): void {
             dispatch(mergeAnnotationsAsync(sessionInstance, frame, states));
@@ -337,6 +339,13 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onStartIssue(position: number[]): void {
             dispatch(reviewActions.startIssue(position));
         },
+        showPersonModal(people: any[], mode: string): void {
+            dispatch(modalUpdateAsync({
+                people,
+                visible: true,
+                mode
+            }))
+        }
     };
 }
 
@@ -574,7 +583,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
 
     private onCanvasShapeDrawn = (event: any): void => {
         const {
-            jobInstance, activeLabelID, activeObjectType, frame, onShapeDrawn, onCreateAnnotations,
+            jobInstance, activeLabelID, activeObjectType, frame, onShapeDrawn, onCreateAnnotations, showPersonModal
         } = this.props;
 
         if (!event.detail.continue) {
@@ -588,7 +597,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         const label = state.label || jobInstance.labels.filter((label: any) => label.id === activeLabelID)[0];
         state.label = label;
         state.attributes = {
-            [label.attributes && label.attributes[0].id]: (state.attributes && state.attributes[label.attributes[0]?.id] || getAutoIncrementedIdentifierAttr(label)),
+            [label.attributes && label.attributes[0].id]: (state.attributes && state.attributes[label.attributes[0]?.id] || getAutoIncrementedIdentifierAttr(label).toString()),
         };
         state.frame = frame;
         state.rotation = state.rotation || 0;
@@ -623,7 +632,14 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         }
 
         const objectState = new cvat.classes.ObjectState(state);
-        onCreateAnnotations(jobInstance, frame, [objectState]);
+        onCreateAnnotations(jobInstance, frame, [objectState], (clientIds: number[]) => {
+            if (label.name.startsWith('person:') && clientIds.length) {
+                showPersonModal([{
+                    clientID: clientIds[0],
+                    frameNumber: objectState.frame
+                }], 'person_demographics');
+            }
+        });
     };
 
     private onCanvasObjectsMerged = (event: any): void => {

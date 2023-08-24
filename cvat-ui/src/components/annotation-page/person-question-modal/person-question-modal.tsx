@@ -1,4 +1,4 @@
-import { Modal, Select, Tabs } from 'antd';
+import { Button, Modal, Select, Tabs } from 'antd';
 import Text from 'antd/lib/typography/Text';
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { connect } from 'react-redux';
@@ -144,6 +144,11 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
         }
     }, [images]);
 
+    const onOK = () => modalUpdate({
+        visible: false,
+        people: [],
+    });
+
     // clean-up
     useEffect(() => () => {
         images.forEach((image) => {
@@ -154,20 +159,35 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
     }, []);
 
     return (
-      <Modal visible={visible} width={'80%'} onOk={() => modalUpdate({
-        visible: false,
-        people: [],
-      })} >
+      <Modal visible={visible} width={'80%'} onOk={onOK} footer={[
+        <Button
+        onClick={onOK}
+        disabled={
+            mode === 'before_save' &&
+                states.some(
+                    (state) =>
+                        Object.keys(state.attributes)
+                            .some(attrId => state.attributes[attrId] === '')
+                )
+        }
+        >
+          Done
+        </Button>,
+      ]} >
             {
                 mode === 'person_demographics' && (
-                <Row>
+                <>
+                <h2>{getLabelDisplayName(states[0].label.name)} {states[0].attributes[states[0].label.attributes[0].id]}</h2>
+                <Text>Please answer the following demographic questions for this person</Text>
+                <hr/>
+                <Row gutter={16}>
                     <Col span={18}>
                     {states[0].label.attributes
                     .filter((attr: any) => attr.name.startsWith('demographics.'))
                     .map((attr: any) => (
 
                         <div>
-                            <div>
+                            <div style={{margin:'25px 0 0 0'}}>
                                 <Text>{keyToLongQuestion[attr.name.split('demographics.')[1]]}</Text>
                             </div>
                             <div>
@@ -201,7 +221,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                     <Col span={6}>
                         {croppedImages[0] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[0]}></img>}
                     </Col>
-                </Row>
+                </Row></>
             )}
 
             {
@@ -219,14 +239,14 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                             )}
                             key={state.clientID}
                         >
-                            <Row>
+                            <Row gutter={16}>
                                 <Col span={18}>
-                                {states[0].label.attributes
+                                {state.label.attributes
                                 .filter((attr: any) => attr.name.startsWith('demographics.'))
                                 .map((attr: any) => (
 
                                     <div>
-                                        <div>
+                                        <div style={{margin:'25px 0 0 0'}}>
                                             <Text>{keyToLongQuestion[attr.name.split('demographics.')[1]]}</Text>
                                         </div>
                                         <div>

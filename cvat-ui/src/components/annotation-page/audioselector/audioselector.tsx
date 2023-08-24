@@ -13,6 +13,7 @@ import { Col, Row } from 'antd/lib/grid';
 import { getCore, ObjectState, Job } from 'cvat-core-wrapper';
 import {
     createAnnotationsAsync,
+    modalUpdateAsync,
     removeObject,
     updateAnnotationsAsync,
 } from 'actions/annotation-actions';
@@ -36,40 +37,32 @@ interface StateToProps {
 }
 
 interface DispatchToProps {
-    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
+    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[], cb: Function | null): void
     onUpdateAnnotations(states: ObjectState[]): void;
     onRemoveAnnotation(objectState: any): void;
+    showPersonModal(people: any[], mode: string): void;
 }
 
 function mapDispatchToProps(dispatch: any): DispatchToProps {
     return {
-        onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void {
-            dispatch(createAnnotationsAsync(sessionInstance, frame, states));
+        onCreateAnnotations(sessionInstance: any, frame: number, states: any[], cb: Function | null = null): void {
+            dispatch(createAnnotationsAsync(sessionInstance, frame, states, cb));
         },
         onUpdateAnnotations(states: ObjectState[]): void {
             dispatch(updateAnnotationsAsync(states));
         },
         onRemoveAnnotation(objectState: any): void {
             dispatch(removeObject(objectState, false));
+        },
+        showPersonModal(people: any[], mode: string): void {
+            dispatch(modalUpdateAsync({
+                people,
+                visible: true,
+                mode
+            }))
         }
     };
 }
-
-interface Props {
-    labels: any[],
-    startFrame: number,
-    stopFrame: number,
-    canvasInstance: Canvas3d,
-    frameNumber: number,
-    onCreateAnnotations(sessionInstance: Job, frame: number, states: ObjectState[]): void
-    onUpdateAnnotations(states: ObjectState[]): void;
-    onRemoveAnnotation(objectState: any): void;
-    jobInstance: Job,
-    states: any[],
-    isPhase2: boolean;
-    audioPreview: number[]
-}
-
 
 function mapStateToProps(state: CombinedState): StateToProps {
     const {
@@ -107,12 +100,16 @@ function mapStateToProps(state: CombinedState): StateToProps {
     };
 }
 
+interface Props {
+    isPhase2: boolean;
+}
 
 
-function AudioSelector(props: Props): JSX.Element {
+
+function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Element {
 
     const [audioselections, setAudioSelections] = useState<any[]>([]);
-    const {states} = props;
+    const {states, showPersonModal} = props;
 
     const [newAudioSelectorPopoverOpen, setNewAudioSelectorPopoverOpen] = useState(false);
 
@@ -271,7 +268,14 @@ function AudioSelector(props: Props): JSX.Element {
                                                         [attrId]: getAutoIncrementedIdentifierAttr(label).toString(),
                                                     }
                                                 });
-                                                onCreateAnnotations(jobInstance, frameNumber, [objectState]);
+                                                onCreateAnnotations(jobInstance, frameNumber, [objectState], (clientIds: number[]) => {
+                                                    if (label.name.startsWith('person:') && clientIds.length) {
+                                                        showPersonModal([{
+                                                            clientID: clientIds[0],
+                                                            frameNumber: objectState.frame
+                                                        }], 'person_demographics');
+                                                    }
+                                                });
                                                 setNewAudioSelectorLabel(null);
                                                 setNewAudioSelectorPopoverOpen(false);
                                             }

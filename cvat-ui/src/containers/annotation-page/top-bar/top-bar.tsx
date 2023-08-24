@@ -153,8 +153,8 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onSwitchPlay(playing: boolean): void {
             dispatch(switchPlay(playing));
         },
-        onSaveAnnotation(sessionInstance: any): void {
-            dispatch(saveAnnotationsAsync(sessionInstance));
+        onSaveAnnotation(sessionInstance: any, ignoreUnlabeled?: boolean): void {
+            dispatch(saveAnnotationsAsync(sessionInstance, ignoreUnlabeled));
         },
         showStatistics(sessionInstance: any): void {
             dispatch(collectStatisticsAsync(sessionInstance));

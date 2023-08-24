@@ -70,7 +70,7 @@ type State = CreateTaskData & {
     loading: boolean;
     statusInProgressTask: string;
 };
-const demographicAttr = [
+const demographicAttrCommon = [
     {
         name: 'demographics.race',
         input_type: 'select',
@@ -80,7 +80,8 @@ const demographicAttr = [
             'Black or African American',
             'American Indian or Alaska Native',
             'Asian',
-            'Native Hawaiian or Other Pacific Islander'
+            'Native Hawaiian or Other Pacific Islander',
+            'Not sure'
         ],
     },
     {
@@ -92,7 +93,8 @@ const demographicAttr = [
             '18-30',
             '30-45',
             '45-65',
-            '65+'
+            '65+',
+            'Not sure'
         ],
     },
     {
@@ -141,16 +143,6 @@ const demographicAttr = [
             'Tall',
             'Average',
             'Not Obvious from Video'
-        ],
-    },
-    {
-        name: 'demographics.homelessness',
-        input_type: 'select',
-        mutable: false,
-        values: [
-            'Yes',
-            'No',
-            'Not Obvious from Video',
         ],
     },
     {
@@ -203,6 +195,19 @@ const demographicAttr = [
             'Uncertain',
         ],
 }];
+
+const demographicAttrCivilian = [
+    {
+        name: 'demographics.homelessness',
+        input_type: 'select',
+        mutable: false,
+        values: [
+            'Yes',
+            'No',
+            'Not Obvious from Video',
+        ],
+    },
+];
 const defaultState: State = {
     projectId: null,
     basic: {
@@ -239,7 +244,7 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
+        ...demographicAttrCommon.map((attr => JSON.parse(JSON.stringify(attr))))
         ]
     },
     {
@@ -255,7 +260,7 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
+        ...demographicAttrCommon.map((attr => JSON.parse(JSON.stringify(attr))))
     ]
     },
     {
@@ -271,7 +276,8 @@ const defaultState: State = {
             values: ['1', '20', '1'],
 
         },
-        ...demographicAttr.map((attr => JSON.parse(JSON.stringify(attr))))
+        ...demographicAttrCommon.map((attr => JSON.parse(JSON.stringify(attr)))),
+        ...demographicAttrCivilian.map((attr => JSON.parse(JSON.stringify(attr))))
         ]
     },
     {

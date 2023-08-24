@@ -1059,7 +1059,7 @@ export function getJobAsync(
     };
 }
 
-export function saveAnnotationsAsync(sessionInstance: any, afterSave?: () => void): ThunkAction {
+export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boolean, afterSave?: () => void): ThunkAction {
     return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
         const { filters, showAllInterpolationTracks } = receiveAnnotationsParameters();
 
@@ -1222,11 +1222,11 @@ export function lockAllAnnotations(): ThunkAction {
     }
 }
 
-export function createAnnotationsAsync(sessionInstance: any, frame: number, statesToCreate: any[]): ThunkAction {
+export function createAnnotationsAsync(sessionInstance: any, frame: number, statesToCreate: any[], cb: Function|null = null): ThunkAction {
     return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
         try {
             const { filters, showAllInterpolationTracks } = receiveAnnotationsParameters();
-            await sessionInstance.annotations.put(statesToCreate);
+            const clientIds = await sessionInstance.annotations.put(statesToCreate);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
             const history = await sessionInstance.actions.get();
@@ -1239,6 +1239,10 @@ export function createAnnotationsAsync(sessionInstance: any, frame: number, stat
                     history,
                 },
             });
+
+            if (typeof cb === 'function') {
+                cb(clientIds)
+            }
         } catch (error) {
             dispatch({
                 type: AnnotationActionTypes.CREATE_ANNOTATIONS_FAILED,

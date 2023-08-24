@@ -83,7 +83,7 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
             dispatch(setForceExitAnnotationFlagAction(forceExit));
         },
         saveAnnotations(jobInstance: any, afterSave?: () => void): void {
-            dispatch(saveAnnotationsAsync(jobInstance, afterSave));
+            dispatch(saveAnnotationsAsync(jobInstance, false, afterSave));
         },
         updateJob(jobInstance: any): void {
             dispatch(updateJobAsync(jobInstance));
