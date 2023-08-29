@@ -149,7 +149,7 @@ export default class Collection {
                     accumulator.push(...frameShapes);
                     return accumulator;
                 }, [])
-                .filter((shape) => !shape.removed)
+                .filter((shape) => !shape.removed && !shape.isUnlabled())
                 .map((shape) => shape.toJSON()),
             tags: Object.values(this.tags)
                 .reduce((accumulator, frameTags) => {

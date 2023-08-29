@@ -63,6 +63,7 @@ interface StateToProps {
     interactors: MLModel[];
     detectors: MLModel[];
     trackers: MLModel[];
+    facematchers: MLModel[];
     curZOrder: number;
     defaultApproxPolyAccuracy: number;
     toolsBlockerState: ToolsBlockerState;
@@ -97,7 +98,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
             drawing: { activeLabelID },
         },
         models: {
-            interactors, detectors, trackers,
+            interactors, detectors, trackers, facematchers,
         },
         settings: {
             workspace: { toolsBlockerState, defaultApproxPolyAccuracy },
@@ -107,6 +108,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         interactors,
         detectors,
+        facematchers,
         trackers,
         isActivated: activeControl === ActiveControl.AI_TOOLS,
         activeLabelID,

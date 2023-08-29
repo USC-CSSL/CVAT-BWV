@@ -151,6 +151,7 @@ export enum ModelKind {
     TRACKER = 'tracker',
     CLASSIFIER = 'classifier',
     REID = 'reid',
+    FACEMATCHER = 'facematcher'
 }
 
 export enum ModelProviders {

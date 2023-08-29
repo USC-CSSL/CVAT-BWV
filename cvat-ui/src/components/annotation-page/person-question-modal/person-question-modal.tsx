@@ -1,12 +1,13 @@
 import { Button, Modal, Select, Tabs } from 'antd';
 import Text from 'antd/lib/typography/Text';
-import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, createRef } from 'react';
 import { connect } from 'react-redux';
 import { CombinedState } from 'reducers';
 import { Col, Row } from 'antd/lib/grid';
 import { ObjectState } from 'cvat-core-wrapper';
 import { modalUpdateAsync, updateAnnotationsAsync } from 'actions/annotation-actions';
 import getLabelDisplayName from 'utils/label-display';
+import { PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
 
 interface Props {
 };
@@ -31,6 +32,8 @@ interface StateToProps {
     visible: boolean;
     mode: string;
     states: any[],
+    audioData: ArrayBuffer,
+    frameSpeed: number,
     people: {
         clientID: number;
         frameImage: any
@@ -46,13 +49,26 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 people
             },
             annotations: {
-                allStates
-            }
+                allStates,
+
+            },
+            player: {
+                audio: {
+                    data: audioData
+                },
+            },
         },
+        settings: {
+            player: {
+                frameSpeed
+            }
+        }
     } = state;
 
     return {
         visible,
+        audioData,
+        frameSpeed,
         mode,
         states: allStates.filter(state => people.map(person => person.clientID).includes(state.clientID)),
         people,
@@ -78,9 +94,13 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 
 
 function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
-    const {visible, mode, states, people, onUpdateAnnotations, modalUpdate} = props;
+    const {visible, mode, states, people, audioData, frameSpeed, onUpdateAnnotations, modalUpdate} = props;
     const [croppedImages, setCroppedImages] = useState<any[]>([]);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
+    const audio = createRef<HTMLAudioElement>();
+
+    const [audioBlobURL, setAudioBlobURL] = useState<string>('');
+    const [audioPlaying, setAudioPlaying] = useState(false);
 
 
     useEffect(() => {
@@ -91,23 +111,21 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                 }
             });
             setImages([]);
+
+            if (audio.current) {
+                audio.current.pause();
+            }
+            setAudioPlaying(false);
         } else {
             const images = states.map((_, idx) => {
                 const img = new Image();
                 return img;
-            })
+            });
             setImages(images);
         }
-        // const cvs = states.map((state) => {
-        // const CVS = document.createElement('canvas');
-        // const CTX = CVS.getContext("2d");
-        // console.log(state.points)
-        // CTX?.drawImage(idToImageMap[state.clientID].imageData, 0, 0);
-        // return CVS;
 
-        // });
-        // setCnvs(cvs);
     }, [visible]);
+
 
     useEffect(() => {
         if (!images.length) {
@@ -156,7 +174,46 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                 URL.revokeObjectURL(image.src);
             }
         });
+
+        if (audioBlobURL) {
+            URL.revokeObjectURL(audioBlobURL);
+        }
+
+        if (audio.current) {
+            audio.current.pause();
+        }
+        setAudioPlaying(false);
     }, []);
+
+    useEffect(() => {
+        if(audioData) {
+            const blb = new Blob([audioData], {type: 'audio/mp3'});
+            setAudioBlobURL(URL.createObjectURL(blb));
+        }
+    }, [audioData])
+
+    const playAudio = () => {
+        if (audio.current) {
+            if (!audioPlaying) {
+                audio.current.load();
+                audio.current.play();
+                setAudioPlaying(true);
+            }
+            else {
+                audio.current.pause();
+                setAudioPlaying(false);
+            }
+        }
+    }
+
+    const frameToTimeString = (frame: number) => {
+        let totalSeconds = frame / frameSpeed;
+        const hours = Math.floor(totalSeconds / 3600);
+        totalSeconds %= 3600;
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours}:${minutes}:${seconds}`;
+    }
 
     return (
       <Modal visible={visible} width={'80%'} onOk={onOK} footer={[
@@ -219,7 +276,17 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                     ))}
                     </Col>
                     <Col span={6}>
-                        {croppedImages[0] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[0]}></img>}
+
+                        {states[0].objectType === 'audioselection' && audioBlobURL && <>
+                                <audio ref={audio} src={audioBlobURL + '#t='+frameToTimeString(states[0].frame)+','+frameToTimeString(states[0].frame + 200)}></audio>
+                                <Button onClick={playAudio}>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
+                        </>}
+
+
+                        {
+                            states[0].objectType === 'shape' && croppedImages[0] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[0]}></img>
+                        }
+
                     </Col>
                 </Row></>
             )}

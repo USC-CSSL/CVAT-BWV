@@ -43,6 +43,7 @@ class LambdaType(Enum):
     REID = "reid"
     TRACKER = "tracker"
     UNKNOWN = "unknown"
+    FACEMATCHER = "facematcher"
 
     def __str__(self):
         return self.value
@@ -287,6 +288,14 @@ class LambdaFunction:
                     "image": self._get_image(db_task, data["frame"], quality),
                     "shapes": data.get("shapes", []),
                     "states": data.get("states", [])
+                })
+            elif self.kind == LambdaType.FACEMATCHER:
+                payload.update({
+                    "images": [ self._get_image(db_task, frame, quality) for frame in data["frames"]],
+                    "mime": "image/png",
+                    "boxes": data.get("boxes", []),
+                    "target": data.get("target", ""),
+                    "targetbox": data.get("target", [])
                 })
             else:
                 raise ValidationError(

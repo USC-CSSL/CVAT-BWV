@@ -546,7 +546,7 @@ export class Shape extends Drawn {
         };
 
         if ([Source.AUTO_UNLABELED, Source.MANUAL_UNLABELED].includes(this.source)) {
-            throw Error('Cannot save with unlabeled annotations');
+            throw Error('Cannot save unlabeled annotations');
         }
 
         if (this.serverID !== null) {
@@ -558,6 +558,10 @@ export class Shape extends Drawn {
         }
 
         return result;
+    }
+
+    public isUnlabled():boolean {
+        return [Source.AUTO_UNLABELED, Source.MANUAL_UNLABELED].includes(this.source)
     }
 
     public get(frame): { outside?: boolean } & Omit<Required<SerializedData>, 'keyframe' | 'keyframes' | 'elements' | 'outside' | 'audio_selected_segments'> {

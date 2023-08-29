@@ -70,10 +70,10 @@ function LeftGroup(props: Props): JSX.Element {
 
     return (
         <>
-            <Modal className='cvat-saving-job-modal' title='Saving changes on the server' visible={saving} footer={[]} closable={false}>
+            {/* <Modal className='cvat-saving-job-modal' title='Saving changes on the server' visible={saving} footer={[]} closable={false}>
                 <Text>CVAT is saving your annotations, please wait </Text>
                 <LoadingOutlined />
-            </Modal>
+            </Modal> */}
             <Col className='cvat-annotation-header-left-group'>
                 <Dropdown overlay={<AnnotationMenuContainer />}>
                     <Button type='link' className='cvat-annotation-header-menu-button cvat-annotation-header-button'>

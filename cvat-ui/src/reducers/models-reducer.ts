@@ -16,6 +16,7 @@ const defaultState: ModelsState = {
     interactors: [],
     detectors: [],
     trackers: [],
+    facematchers: [],
     reid: [],
     classifiers: [],
     modelRunnerIsVisible: false,
@@ -65,6 +66,9 @@ export default function (state = defaultState, action: ModelsActions | AuthActio
                 )),
                 classifiers: action.payload.models.filter((model: MLModel) => (
                     model.kind === ModelKind.CLASSIFIER
+                )),
+                facematchers: action.payload.models.filter((model: MLModel) => (
+                    model.kind === ModelKind.FACEMATCHER
                 )),
                 totalCount: action.payload.count,
                 initialized: true,

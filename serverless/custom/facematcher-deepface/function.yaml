@@ -1,0 +1,43 @@
+metadata:
+  name: facematcher-deepface
+  namespace: cvat
+  annotations:
+    name: Facematcher Deepface
+    type: facematcher
+    framework: custom
+spec:
+  description: Facematcher
+  runtime: 'python:3.8'
+  handler: main:handler
+  eventTimeout: 30s
+  build:
+    image: cvat.custom.facematcher-deepface
+    baseImage: python:3.8
+
+    directives:
+      preCopy:
+        - kind: USER
+          value: root
+        - kind: RUN
+          value: apt update && apt install --no-install-recommends -y libglib2.0-0 libgl1
+        - kind: RUN
+          value: pip install deepface
+        - kind: WORKDIR
+          value: /opt/nuclio
+        - kind: RUN
+          value: ln -s /usr/bin/python3 /usr/bin/python
+
+  triggers:
+    myHttpTrigger:
+      maxWorkers: 2
+      kind: 'http'
+      workerAvailabilityTimeoutMilliseconds: 10000
+      attributes:
+        maxRequestBodySize: 33554432 # 32MB
+
+  platform:
+    attributes:
+      restartPolicy:
+        name: always
+        maximumRetryCount: 3
+      mountMode: volume

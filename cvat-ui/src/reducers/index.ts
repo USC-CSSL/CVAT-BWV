@@ -387,6 +387,7 @@ export interface ModelsState {
     interactors: MLModel[];
     detectors: MLModel[];
     trackers: MLModel[];
+    facematchers: MLModel[];
     reid: MLModel[];
     classifiers: MLModel[];
     totalCount: number;

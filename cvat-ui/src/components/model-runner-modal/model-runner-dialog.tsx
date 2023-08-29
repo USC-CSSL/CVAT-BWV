@@ -25,6 +25,7 @@ interface StateToProps {
     detectors: MLModel[];
     reid: MLModel[];
     classifiers: MLModel[];
+    facematchers: MLModel[];
 }
 
 interface DispatchToProps {
@@ -34,7 +35,7 @@ interface DispatchToProps {
 
 function mapStateToProps(state: CombinedState): StateToProps {
     const { models } = state;
-    const { detectors, reid, classifiers } = models;
+    const { detectors, reid, classifiers, facematchers } = models;
 
     return {
         visible: models.modelRunnerIsVisible,
@@ -42,6 +43,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         reid,
         detectors,
         classifiers,
+        facematchers,
     };
 }
 
@@ -58,10 +60,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch): DispatchToProps {
 
 function ModelRunnerDialog(props: StateToProps & DispatchToProps): JSX.Element {
     const {
-        reid, detectors, classifiers, task, visible, runInference, closeDialog,
+        reid, detectors, classifiers, facematchers, task, visible, runInference, closeDialog,
     } = props;
 
-    const models = [...reid, ...detectors, ...classifiers];
+    const models = [...reid, ...detectors, ...classifiers, ...facematchers];
     const [taskInstance, setTaskInstance] = useState<Task | null>(null);
 
     useEffect(() => {
