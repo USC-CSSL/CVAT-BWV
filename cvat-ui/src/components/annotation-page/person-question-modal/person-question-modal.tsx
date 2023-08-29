@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { CombinedState } from 'reducers';
 import { Col, Row } from 'antd/lib/grid';
 import { getCore, MLModel, ObjectState } from 'cvat-core-wrapper';
-import { modalUpdateAsync, updateAnnotationsAsync } from 'actions/annotation-actions';
+import { modalUpdateAsync, removeObject, updateAnnotationsAsync } from 'actions/annotation-actions';
 import getLabelDisplayName from 'utils/label-display';
 import { PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
 
@@ -76,12 +76,13 @@ function mapStateToProps(state: CombinedState): StateToProps {
         }
     } = state;
 
+
     return {
         visible,
         audioData,
         frameSpeed,
         mode,
-        states: allStates.filter(state => people.map(person => person.clientID).includes(state.clientID)),
+        states: people.map(person => allStates.filter(state => state.clientID === person.clientID)[0]),
         allStates: allStates,
         people,
         jobInstance,
@@ -92,6 +93,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
 
 interface DispatchToProps {
     onUpdateAnnotations(states: ObjectState[]): void;
+    onRemoveAnnotation(objectState: any): void;
     modalUpdate(update: any): void;
 }
 
@@ -99,6 +101,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
     return {
         onUpdateAnnotations(states: ObjectState[]): void {
             dispatch(updateAnnotationsAsync(states));
+        },
+        onRemoveAnnotation(objectState: any): void {
+            dispatch(removeObject(objectState, false));
         },
         modalUpdate(update: any): void {
             dispatch(modalUpdateAsync(update));
@@ -108,10 +113,11 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 
 
 function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
-    const {visible, mode, states, people, audioData, frameSpeed, jobInstance, facematcher, allStates, onUpdateAnnotations, modalUpdate} = props;
+    const {visible, mode, states, people, audioData, frameSpeed, jobInstance, facematcher, allStates, onUpdateAnnotations, onRemoveAnnotation, modalUpdate} = props;
     const [croppedImages, setCroppedImages] = useState<any[]>([]);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
-    const audio = createRef<HTMLAudioElement>();
+    const audio = useRef<HTMLAudioElement[]>([]);
+    const audiolisteners = useRef<((e: any) => void)[]>([]);
 
     const [audioBlobURL, setAudioBlobURL] = useState<string>('');
     const [audioPlaying, setAudioPlaying] = useState(false);
@@ -126,9 +132,10 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             });
             setImages([]);
 
-            if (audio.current) {
-                audio.current.pause();
-            }
+            audio.current.forEach((rf, idx) => {
+                rf.pause();
+                rf.removeEventListener('timeupdate', audiolisteners.current[idx])
+            });
             setAudioPlaying(false);
         } else {
             if (mode === 'similar_face' && states.length === 1) {
@@ -254,9 +261,12 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             URL.revokeObjectURL(audioBlobURL);
         }
 
-        if (audio.current) {
-            audio.current.pause();
-        }
+        audio.current.forEach((rf, idx) => {
+            rf.pause();
+            rf.removeEventListener('timeupdate', audiolisteners.current[idx])
+        });
+        audio.current = [];
+
         setAudioPlaying(false);
     }, []);
 
@@ -267,35 +277,29 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
         }
     }, [audioData])
 
-    const playAudio = () => {
-        if (audio.current) {
+    const playAudio = (idx: number) => {
+        audio.current.forEach((rf, i) => {
             if (!audioPlaying) {
-                audio.current.load();
-                audio.current.play();
-                setAudioPlaying(true);
+                if (i === idx ) {
+                    rf.currentTime = states[idx].frame / frameSpeed;
+                    rf.play();
+                    setAudioPlaying(true);
+                }
             }
             else {
-                audio.current.pause();
+                rf.pause();
                 setAudioPlaying(false);
             }
-        }
-    }
-
-    const frameToTimeString = (frame: number) => {
-        let totalSeconds = frame / frameSpeed;
-        const hours = Math.floor(totalSeconds / 3600);
-        totalSeconds %= 3600;
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
-        return `${hours}:${minutes}:${seconds}`;
+        });
     }
 
     return (
       <Modal visible={visible} width={'80%'} onOk={onOK} footer={
         (mode === 'similar_face' && states.length !== 2 && []) ||
-        (mode === 'similar_face' && states.length === 2 && [] && [
+        (mode === 'similar_face' && states.length === 2 && [
             <Button onClick={
                 () => {
+                    onRemoveAnnotation(states[0]);
                     modalUpdate({
                         mode: 'person_demographics',
                         people: [{
@@ -379,8 +383,28 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                     <Col span={6}>
 
                         {states[0].objectType === 'audioselection' && audioBlobURL && <>
-                                <audio ref={audio} src={audioBlobURL + '#t='+frameToTimeString(states[0].frame)+','+frameToTimeString(states[0].frame + 200)}></audio>
-                                <Button onClick={playAudio}>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
+                                <audio ref={(el) => {
+                                    if (el) {
+                                        audio.current[0] = el;
+                                        audiolisteners.current[0] = () => {
+                                            if (audio.current[0].currentTime >= states[0].audio_selected_segments[0].end / frameSpeed) {
+                                                audio.current[0].pause();
+                                                if (audioPlaying) {
+                                                    setAudioPlaying(false);
+                                                }
+                                            }
+                                        }
+                                        audio.current[0].addEventListener('timeupdate', audiolisteners.current[0]);
+                                    }
+                                    else {
+                                        if (audio.current[0]) {
+                                            audio.current[0].removeEventListener('timeupdate', audiolisteners.current[0]);
+                                        }
+                                    }
+                                }} src={audioBlobURL}></audio>
+                                <Button  style={{fontSize: '64px', height: '150px'}} onClick={() => {
+                                    playAudio(0);
+                                }}>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
                         </>}
 
 
@@ -397,6 +421,10 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                     <Tabs
                         type='card'
                         tabBarStyle={{ marginBottom: '0px' }}
+                        onChange={()=>{
+                            audio.current.forEach(rf => rf.pause());
+                            setAudioPlaying(false);
+                        }}
                     >
                         {states.map((state, idx) => (
                             <Tabs.TabPane
@@ -447,8 +475,30 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                 </Col>
                                 <Col span={6}>
                                     {states[idx].objectType === 'audioselection' && audioBlobURL && <>
-                                            <audio ref={audio} src={audioBlobURL + '#t='+frameToTimeString(states[idx].frame)+','+frameToTimeString(states[idx].frame + 200)}></audio>
-                                            <Button onClick={playAudio}>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
+                                            <audio ref={(el) => {
+                                                if (el) {
+                                                    audio.current[idx] = el;
+                                                    audiolisteners.current[idx] = () => {
+                                                        if (audio.current[idx].currentTime >= states[idx].audio_selected_segments[0].end / frameSpeed) {
+                                                            audio.current[idx].pause();
+                                                            if (audioPlaying) {
+                                                                setAudioPlaying(false);
+                                                            }
+                                                        }
+                                                    }
+                                                    audio.current[idx].addEventListener('timeupdate', audiolisteners.current[idx]);
+                                                }
+                                                else {
+                                                    if (audio.current[idx]) {
+                                                        audio.current[idx].removeEventListener('timeupdate', audiolisteners.current[idx]);
+                                                    }
+                                                }
+                                            }} src={audioBlobURL}></audio>
+                                            <Button  style={{fontSize: '64px', height: '150px'}} onClick={
+                                                () => {
+                                                    playAudio(idx);
+                                                }
+                                            }>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
                                     </>}
                                     {
                                         states[idx].objectType === 'shape' && croppedImages[idx] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[idx]}></img>

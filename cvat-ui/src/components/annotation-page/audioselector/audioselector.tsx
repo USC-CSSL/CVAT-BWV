@@ -261,7 +261,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                                     audio_selected_segments: [
                                                         {
                                                             start: frameNumber,
-                                                            end: Math.min(frameNumber + 40, stopFrame)
+                                                            end: Math.min(frameNumber + 150, stopFrame)
                                                         }
                                                     ],
                                                     attributes: {

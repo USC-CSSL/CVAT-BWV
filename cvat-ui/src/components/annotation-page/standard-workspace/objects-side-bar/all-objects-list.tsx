@@ -3,7 +3,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { changeFrameAsync, switchPlay } from 'actions/annotation-actions';
+import { changeFrameAsync, modalUpdateAsync, switchPlay } from 'actions/annotation-actions';
+import { Col, Row } from 'antd';
 import Button from 'antd/lib/button';
 import Text from 'antd/lib/typography/Text';
 import React from 'react';
@@ -20,6 +21,7 @@ interface StateToProps {
 
 interface DispatchToProps {
     changeFrame(frame: number): void;
+    modalUpdate(update: any): void;
     onSwitchPlay(playing: boolean): void;
 }
 
@@ -56,13 +58,16 @@ function mapDispatchToProps(dispatch: ThunkDispatch): DispatchToProps {
         onSwitchPlay(playing: boolean): void {
             dispatch(switchPlay(playing));
         },
+        modalUpdate(update: any): void {
+            dispatch(modalUpdateAsync(update));
+        }
     };
 }
 
 
 function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Element {
 
-    const {allStates, colorBy, changeFrame, onSwitchPlay, playing} = props;
+    const {allStates, colorBy, changeFrame, onSwitchPlay, modalUpdate, playing} = props;
     return (
         <div className='cvat-objects-sidebar-states-list'>
             {allStates.slice(0).sort((a, b) => a.frame - b.frame).map(state =>
@@ -85,12 +90,35 @@ function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Ele
                             Frame: {state.frame}
                         </Text>
                         <br/>
-                        <Button onClick={() => {
-                            if (playing) {
-                                onSwitchPlay(false);
-                            }
-                            changeFrame(state.frame)
-                        }}>Go To Frame</Button>
+                        <Row >
+                            <Col sm={10}>
+                                <Button onClick={() => {
+                                    if (playing) {
+                                        onSwitchPlay(false);
+                                    }
+                                    changeFrame(state.frame)
+                                }}>Go To Frame</Button>
+                            </Col>
+                            <Col sm={2}></Col>
+                            <Col sm={10}>
+                                <Button onClick={() => {
+                                    if (playing) {
+                                        onSwitchPlay(false);
+                                    }
+
+                                    modalUpdate({
+                                        mode: 'person_demographics',
+                                        people: [{
+                                            clientID: state.clientID,
+                                            frameNumber: state.frame
+                                        }],
+                                        visible: true
+                                    });
+
+                                }}>Fill Demographics</Button>
+                            </Col>
+                        </Row>
+
 
                     </div>
                 ))}

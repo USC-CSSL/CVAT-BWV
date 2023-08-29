@@ -637,7 +637,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                 showPersonModal([{
                     clientID: clientIds[0],
                     frameNumber: objectState.frame
-                }], 'person_demographics');
+                }], 'similar_face');
             }
         });
     };
