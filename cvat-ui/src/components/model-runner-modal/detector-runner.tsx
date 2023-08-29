@@ -45,6 +45,13 @@ export interface DetectorRequestBody {
     convMaskToPoly: boolean;
 }
 
+export interface FacematcherRequestBody {
+    frames: number[],
+    boxes: number[][],
+    target_frame: number,
+    target_box: number[]
+}
+
 interface Match {
     model: string | null;
     task: string | null;

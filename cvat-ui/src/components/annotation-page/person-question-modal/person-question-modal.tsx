@@ -4,13 +4,15 @@ import React, { useState, useEffect, useCallback, useRef, useLayoutEffect, creat
 import { connect } from 'react-redux';
 import { CombinedState } from 'reducers';
 import { Col, Row } from 'antd/lib/grid';
-import { ObjectState } from 'cvat-core-wrapper';
+import { getCore, MLModel, ObjectState } from 'cvat-core-wrapper';
 import { modalUpdateAsync, updateAnnotationsAsync } from 'actions/annotation-actions';
 import getLabelDisplayName from 'utils/label-display';
 import { PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
 
 interface Props {
 };
+
+const core = getCore();
 
 const keyToLongQuestion = {
     race: 'What is their perceived race?',
@@ -32,12 +34,15 @@ interface StateToProps {
     visible: boolean;
     mode: string;
     states: any[],
+    allStates: any[],
     audioData: ArrayBuffer,
     frameSpeed: number,
     people: {
         clientID: number;
         frameImage: any
-    }[]
+    }[],
+    jobInstance: any;
+    facematcher: MLModel;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -57,11 +62,17 @@ function mapStateToProps(state: CombinedState): StateToProps {
                     data: audioData
                 },
             },
+            job: {
+                instance: jobInstance
+            }
         },
         settings: {
             player: {
                 frameSpeed
             }
+        },
+        models: {
+            facematchers
         }
     } = state;
 
@@ -71,7 +82,10 @@ function mapStateToProps(state: CombinedState): StateToProps {
         frameSpeed,
         mode,
         states: allStates.filter(state => people.map(person => person.clientID).includes(state.clientID)),
+        allStates: allStates,
         people,
+        jobInstance,
+        facematcher: facematchers[0]
     };
 }
 
@@ -94,7 +108,7 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 
 
 function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
-    const {visible, mode, states, people, audioData, frameSpeed, onUpdateAnnotations, modalUpdate} = props;
+    const {visible, mode, states, people, audioData, frameSpeed, jobInstance, facematcher, allStates, onUpdateAnnotations, modalUpdate} = props;
     const [croppedImages, setCroppedImages] = useState<any[]>([]);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const audio = createRef<HTMLAudioElement>();
@@ -117,14 +131,75 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             }
             setAudioPlaying(false);
         } else {
-            const images = states.map((_, idx) => {
-                const img = new Image();
-                return img;
-            });
-            setImages(images);
+            if (mode === 'similar_face' && states.length === 1) {
+                if (facematcher) {
+                    (async function(){
+                        const targetPerson = states[0];
+                        const sameLabelVisiblePeople = allStates.filter(
+                            state => state.label.id === targetPerson.label.id &&
+                            state.objectType === 'shape' &&
+                            state.clientID !== targetPerson.clientID
+                        );
+
+                        const tp1X = Math.floor(Math.min(targetPerson.points[0], targetPerson.points[2]));
+                        const tp2X = Math.floor(Math.max(targetPerson.points[0], targetPerson.points[2]));
+
+                        const tp1Y = Math.floor(Math.min(targetPerson.points[1], targetPerson.points[3]));
+                        const tp2Y = Math.floor(Math.max(targetPerson.points[1], targetPerson.points[3]));
+                        const data = {
+                            frames: sameLabelVisiblePeople.map(state => state.frame),
+                            target_frame: targetPerson.frame,
+                            boxes: sameLabelVisiblePeople.map(state => {
+                                const p1X = Math.floor(Math.min(state.points[0], state.points[2]));
+                                const p2X = Math.floor(Math.max(state.points[0], state.points[2]));
+
+                                const p1Y = Math.floor(Math.min(state.points[1], state.points[3]));
+                                const p2Y = Math.floor(Math.max(state.points[1], state.points[3]));
+
+                                return [p1X, p1Y, p2X, p2Y];
+                            }),
+                            targetbox: [tp1X, tp1Y, tp2X, tp2Y]
+                        }
+                        const response = await core.lambda.call(jobInstance.taskId, facematcher,
+                            { ...data, job: jobInstance.id, frame: targetPerson.frame });
+
+                        if (response.verified) {
+                            modalUpdate({
+                                mode: 'similar_face',
+                                people: [{
+                                    clientID: targetPerson.clientID,
+                                    frameNumber: targetPerson.frame
+                                },
+                                {
+                                    clientID: sameLabelVisiblePeople[response.idx].clientID,
+                                    frameNumber: sameLabelVisiblePeople[response.idx].frame
+                                }
+                            ],
+                                visible: true
+                            })
+                        } else {
+                            modalUpdate({
+                                mode: 'person_demographics',
+                                people: [{
+                                    clientID: targetPerson.clientID,
+                                    frameNumber: targetPerson.frame
+                                }],
+                                visible: true
+                            })
+                        }
+                    })();
+                }
+
+            } else {
+                const images = states.map((_, idx) => {
+                    const img = new Image();
+                    return img;
+                });
+                setImages(images);
+            }
         }
 
-    }, [visible]);
+    }, [visible, mode, states.length]);
 
 
     useEffect(() => {
@@ -216,21 +291,47 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
     }
 
     return (
-      <Modal visible={visible} width={'80%'} onOk={onOK} footer={[
-        <Button
-        onClick={onOK}
-        disabled={
-            mode === 'before_save' &&
-                states.some(
-                    (state) =>
-                        Object.keys(state.attributes)
-                            .some(attrId => state.attributes[attrId] === '')
-                )
-        }
-        >
-          Done
-        </Button>,
-      ]} >
+      <Modal visible={visible} width={'80%'} onOk={onOK} footer={
+        (mode === 'similar_face' && states.length !== 2 && []) ||
+        (mode === 'similar_face' && states.length === 2 && [] && [
+            <Button onClick={
+                () => {
+                    modalUpdate({
+                        mode: 'person_demographics',
+                        people: [{
+                            clientID: states[1].clientID,
+                            frameNumber: states[1].frame
+                        }],
+                        visible: true
+                    });
+                }
+            }>Yes, they are the same people</Button>,
+
+            <Button onClick={
+                () => {
+                    modalUpdate({
+                        mode: 'person_demographics',
+                        people: [{
+                            clientID: states[0].clientID,
+                            frameNumber: states[0].frame
+                        }],
+                        visible: true
+                    })
+                }
+            }>No, they are different people</Button>
+        ]) ||
+        (mode === 'before_save' &&
+            <Button onClick={onOK}
+                disabled={
+                    states.some(state => Object.keys(state.attributes).some(attrId => state.attributes[attrId] === ''))
+                }
+            >Done</Button>
+        ) ||
+        (mode === 'person_demographics' &&
+            <Button onClick={onOK}>Done</Button>
+        )
+
+      } >
             {
                 mode === 'person_demographics' && (
                 <>
@@ -345,13 +446,38 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                 ))}
                                 </Col>
                                 <Col span={6}>
-                                    {croppedImages[idx] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[idx]}></img>}
+                                    {states[idx].objectType === 'audioselection' && audioBlobURL && <>
+                                            <audio ref={audio} src={audioBlobURL + '#t='+frameToTimeString(states[idx].frame)+','+frameToTimeString(states[idx].frame + 200)}></audio>
+                                            <Button onClick={playAudio}>{!audioPlaying ? <PlayCircleFilled /> : <PauseCircleFilled />}</Button>
+                                    </>}
+                                    {
+                                        states[idx].objectType === 'shape' && croppedImages[idx] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[idx]}></img>
+                                    }
                                 </Col>
                             </Row>
                         </Tabs.TabPane>
                         ))}
 
                     </Tabs>
+                )
+            }
+
+            {
+                mode === 'similar_face' && (
+                    states.length !== 2 ? <>
+                        <Text>Searching for similar faces</Text>
+                    </> :
+                    <>
+                        <Text>We think this is a similar face</Text>
+                        <Row gutter={16}>
+                                <Col span={12}>
+                                    {croppedImages[0] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[0]}></img>}
+                                </Col>
+                                <Col span={12}>
+                                    {croppedImages[1] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[1]}></img>}
+                                </Col>
+                        </Row>
+                    </>
                 )
             }
       </Modal>

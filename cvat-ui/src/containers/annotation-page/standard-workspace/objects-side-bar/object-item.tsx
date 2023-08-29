@@ -6,7 +6,7 @@
 import React from 'react';
 import copy from 'copy-to-clipboard';
 import { connect } from 'react-redux';
-
+const core = getCore();
 import {
     updateAnnotationsAsync,
     changeFrameAsync,
@@ -28,6 +28,7 @@ import { Canvas, CanvasMode } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { filterApplicableLabels } from 'utils/filter-applicable-labels';
 import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
+import { getCore } from 'cvat-core-wrapper';
 
 interface OwnProps {
     readonly: boolean;
@@ -294,7 +295,7 @@ class ObjectItemContainer extends React.PureComponent<Props> {
                 showPersonModal([{
                     clientID: objectState.clientID,
                     frameNumber: objectState.frame
-                }], 'person_demographics');
+                }], 'similar_face');
             }
 
         }

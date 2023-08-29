@@ -294,8 +294,8 @@ class LambdaFunction:
                     "images": [ self._get_image(db_task, frame, quality) for frame in data["frames"]],
                     "mime": "image/png",
                     "boxes": data.get("boxes", []),
-                    "target": data.get("target", ""),
-                    "targetbox": data.get("target", [])
+                    "target": self._get_image(db_task, data["target_frame"], quality),
+                    "targetbox": data.get("targetbox", [])
                 })
             else:
                 raise ValidationError(
