@@ -129,16 +129,26 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             // jobInstance.stage = JobStage.ACCEPTANCE;
             // jobInstance.state = core.enums.JobState.COMPLETED;
             // updateJob(jobInstance);
-            const people = objectStates.filter(state => {
-                if (state.label.name.startsWith('person:')) {
-                    return true;
-                }
-                return false;
-            }).map((person => ({
-                clientID: person.clientID,
-                frameNumber: person.frame
-            })));
-            showBeforeSubmitModal(people);
+
+            if (jobInstance.phase === core.enums.Phase.PHASE1A) {
+                // jobInstance.stage = JobStage.ACCEPTANCE;
+                // jobInstance.state = core.enums.JobState.COMPLETED;
+                jobInstance.phase = core.enums.Phase.PHASE1B;
+                updateJob(jobInstance);
+            }
+            else if (jobInstance.phase === core.enums.Phase.PHASE1B) {
+                const people = objectStates.filter(state => {
+                    if (state.label.name.startsWith('person:')) {
+                        return true;
+                    }
+                    return false;
+                }).map((person => ({
+                    clientID: person.clientID,
+                    frameNumber: person.frame
+                })));
+                showBeforeSubmitModal(people);
+            }
+
 
             // history.push(`/tasks/${jobInstance.taskId}`);
         } else if (action === Actions.OPEN_TASK) {

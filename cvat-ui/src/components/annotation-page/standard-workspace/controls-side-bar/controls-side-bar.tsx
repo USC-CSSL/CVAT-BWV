@@ -33,6 +33,8 @@ import SetupTagControl, { Props as SetupTagControlProps } from './setup-tag-cont
 import MergeControl, { Props as MergeControlProps } from './merge-control';
 import GroupControl, { Props as GroupControlProps } from './group-control';
 import SplitControl, { Props as SplitControlProps } from './split-control';
+import { CombinedState } from 'reducers';
+import { connect } from 'react-redux';
 
 interface Props {
     canvasInstance: Canvas;
@@ -50,6 +52,17 @@ interface Props {
     pasteShape(): void;
     resetGroup(): void;
     redrawShape(): void;
+}
+
+interface StateToProps {
+    jobPhase: string;
+}
+
+function mapStateToProps(state: CombinedState) {
+    const { phase: jobPhase } = state.annotation.job.instance;
+    return {
+        jobPhase
+    }
 }
 
 // We use the observer to see if these controls are in the viewport
@@ -74,7 +87,7 @@ const ObservedMergeControl = ControlVisibilityObserver<MergeControlProps>(MergeC
 const ObservedGroupControl = ControlVisibilityObserver<GroupControlProps>(GroupControl);
 const ObservedSplitControl = ControlVisibilityObserver<SplitControlProps>(SplitControl);
 
-export default function ControlsSideBarComponent(props: Props): JSX.Element {
+function ControlsSideBarComponent(props: Props & StateToProps): JSX.Element {
     const {
         activeControl,
         canvasInstance,
@@ -90,6 +103,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
         resetGroup,
         redrawShape,
         frameData,
+        jobPhase
     } = props;
 
     const controlsDisabled = !labels.length || frameData.deleted;
@@ -223,6 +237,7 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
             <ObservedResizeControl canvasInstance={canvasInstance} activeControl={activeControl} />
 
             <hr />
+            { jobPhase === 'phase1a' && <>
             <ObservedToolsControl />
             <ObservedOpenCVControl />
             {
@@ -350,6 +365,10 @@ export default function ControlsSideBarComponent(props: Props): JSX.Element {
             />
 
             <ExtraControlsControl />
+            </> }
         </Layout.Sider>
     );
 }
+
+
+export default connect(mapStateToProps)(ControlsSideBarComponent);

@@ -26,6 +26,7 @@ import {
     deleteFrameAsync,
     restoreFrameAsync,
     switchNavigationBlocked as switchNavigationBlockedAction,
+    lockAllAnnotations,
 } from 'actions/annotation-actions';
 import AnnotationTopBarComponent from 'components/annotation-page/top-bar/top-bar';
 import { Canvas } from 'cvat-canvas-wrapper';
@@ -84,6 +85,7 @@ interface DispatchToProps {
     deleteFrame(frame: number): void;
     restoreFrame(frame: number): void;
     switchNavigationBlocked(blocked: boolean): void;
+    lockAllObjects(): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -193,6 +195,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         switchNavigationBlocked(blocked: boolean): void {
             dispatch(switchNavigationBlockedAction(blocked));
         },
+        lockAllObjects(): void {
+            dispatch(lockAllAnnotations());
+        }
     };
 }
 
@@ -218,7 +223,7 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
 
     public componentDidMount(): void {
         const {
-            autoSaveInterval, history, jobInstance, setForceExitAnnotationFlag,
+            autoSaveInterval, history, jobInstance, setForceExitAnnotationFlag, lockAllObjects
         } = this.props;
         this.autoSaveInterval = window.setInterval(this.autoSave.bind(this), autoSaveInterval);
 
@@ -242,6 +247,10 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
 
             return undefined;
         });
+
+        if (jobInstance.phase != 'phase1a') {
+            lockAllObjects();
+        }
 
         window.addEventListener('beforeunload', this.beforeUnloadCallback);
     }

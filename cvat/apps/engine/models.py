@@ -155,7 +155,8 @@ class SortingMethod(str, Enum):
         return self.value
 
 class Phase(str, Enum):
-    PHASE1 = 'phase1'
+    PHASE1A = 'phase1a'
+    PHASE1B = 'phase1b'
     PHASE2 = 'phase2'
 
     @classmethod
@@ -385,10 +386,6 @@ class Task(models.Model):
     target_storage = models.ForeignKey('Storage', null=True, default=None,
         blank=True, on_delete=models.SET_NULL, related_name='+')
 
-    # added field for mola project
-    phase = models.CharField(max_length=10, choices=Phase.choices(),
-        default=Phase.PHASE1)
-
     # Extend default permission model
     class Meta:
         default_permissions = ()
@@ -500,6 +497,10 @@ class Job(models.Model):
     state = models.CharField(max_length=32, choices=StateChoice.choices(),
         default=StateChoice.NEW)
 
+    # added field for mola project
+    phase = models.CharField(max_length=10, choices=Phase.choices(),
+        default=Phase.PHASE1A)
+
     def get_dirname(self):
         return os.path.join(settings.JOBS_ROOT, str(self.id))
 
@@ -532,11 +533,6 @@ class Job(models.Model):
         task = self.segment.task
         project = task.project
         return project.get_labels() if project else task.get_labels()
-
-    @property
-    def phase(self):
-        task = self.segment.task
-        return task.phase
 
     class Meta:
         default_permissions = ()

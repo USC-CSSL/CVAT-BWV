@@ -600,7 +600,7 @@ class JobWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Job
-        fields = ('assignee', 'stage', 'state')
+        fields = ('assignee', 'stage', 'state', 'phase')
 
 class SimpleJobSerializer(serializers.ModelSerializer):
     assignee = BasicUserSerializer(allow_null=True)
@@ -909,7 +909,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Task
-        fields = ('url', 'id', 'name', 'project_id', 'mode', 'phase', 'owner', 'assignee',
+        fields = ('url', 'id', 'name', 'project_id', 'mode', 'owner', 'assignee',
             'bug_tracker', 'created_date', 'updated_date', 'overlap', 'segment_size',
             'status', 'data_chunk_size', 'data_compressed_chunk_type',
             'data_original_chunk_type', 'size', 'image_quality', 'data', 'dimension',
@@ -932,7 +932,7 @@ class TaskWriteSerializer(WriteOnceMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.Task
-        fields = ('url', 'id', 'name', 'project_id', 'owner_id', 'phase', 'assignee_id',
+        fields = ('url', 'id', 'name', 'project_id', 'owner_id', 'assignee_id',
             'bug_tracker', 'overlap', 'segment_size', 'labels', 'subset',
             'target_storage', 'source_storage',
         )

@@ -354,7 +354,7 @@ export class Job extends Session {
     public readonly bugTracker: string | null;
     public readonly mode: TaskMode;
     public readonly labels: Label[];
-    public readonly phase: Phase;
+    public phase: Phase;
 
     public annotations: {
         get: CallableFunction;
@@ -529,6 +529,24 @@ export class Job extends Session {
                 },
                 phase: {
                     get: () => data.phase,
+                    set: (phase) => {
+                        const type = Phase;
+                        let valueInEnum = false;
+                        for (const value in type) {
+                            if (type[value] === phase) {
+                                valueInEnum = true;
+                                break;
+                            }
+                        }
+
+                        if (!valueInEnum) {
+                            throw new ArgumentError(
+                                'Value must be a value from the enumeration cvat.enums.Phase',
+                            );
+                        }
+                        updateTrigger.update('phase');
+                        data.phase = phase;
+                    }
                 },
                 dimension: {
                     get: () => data.dimension,
@@ -651,7 +669,6 @@ export class Task extends Session {
     public readonly organization: number | null;
     public readonly progress: { count: number; completed: number };
     public readonly jobs: Job[];
-    public readonly phase: Phase;
 
     public readonly startFrame: number;
     public readonly stopFrame: number;
@@ -745,7 +762,6 @@ export class Task extends Session {
             cloud_storage_id: undefined,
             sorting_method: undefined,
             files: undefined,
-            phase: undefined,
         };
 
         const updateTrigger = new FieldUpdateTrigger();
@@ -788,13 +804,13 @@ export class Task extends Session {
                     stage: job.stage,
                     start_frame: job.start_frame,
                     stop_frame: job.stop_frame,
+                    phase: job.phase,
 
                     // following fields also returned when doing API request /jobs/<id>
                     // here we know them from task and append to constructor
                     task_id: data.id,
                     project_id: data.project_id,
                     labels: data.labels,
-                    phase: data.phase,
                     bug_tracker: data.bug_tracker,
                     mode: data.mode,
                     dimension: data.dimension,
@@ -1059,9 +1075,6 @@ export class Task extends Session {
                 },
                 progress: {
                     get: () => data.progress,
-                },
-                phase: {
-                    get: () => data.phase,
                 },
                 _internalData: {
                     get: () => data,

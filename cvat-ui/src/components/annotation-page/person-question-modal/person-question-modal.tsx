@@ -186,12 +186,13 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                             })
                         } else {
                             modalUpdate({
-                                mode: 'person_demographics',
-                                people: [{
-                                    clientID: targetPerson.clientID,
-                                    frameNumber: targetPerson.frame
-                                }],
-                                visible: true
+                                // mode: 'person_demographics',
+                                // people: [{
+                                //     clientID: targetPerson.clientID,
+                                //     frameNumber: targetPerson.frame
+                                // }],
+                                visible: false,
+                                people: []
                             })
                         }
                     })();
@@ -301,12 +302,13 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                 () => {
                     onRemoveAnnotation(states[0]);
                     modalUpdate({
-                        mode: 'person_demographics',
-                        people: [{
-                            clientID: states[1].clientID,
-                            frameNumber: states[1].frame
-                        }],
-                        visible: true
+                        // mode: 'person_demographics',
+                        // people: [{
+                        //     clientID: states[1].clientID,
+                        //     frameNumber: states[1].frame
+                        // }],
+                        visible: false,
+                        people: [],
                     });
                 }
             }>Yes, they are the same people</Button>,
@@ -314,12 +316,13 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             <Button onClick={
                 () => {
                     modalUpdate({
-                        mode: 'person_demographics',
-                        people: [{
-                            clientID: states[0].clientID,
-                            frameNumber: states[0].frame
-                        }],
-                        visible: true
+                        // mode: 'person_demographics',
+                        // people: [{
+                        //     clientID: states[0].clientID,
+                        //     frameNumber: states[0].frame
+                        // }],
+                        visible: false,
+                        people: [],
                     })
                 }
             }>No, they are different people</Button>

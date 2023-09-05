@@ -17,6 +17,7 @@ interface StateToProps {
     allStates: any[];
     colorBy: ColorBy;
     playing: boolean;
+    jobInstance: any;
 }
 
 interface DispatchToProps {
@@ -34,6 +35,9 @@ function mapStateToProps(state: CombinedState): StateToProps {
             },
             player: {
                 playing
+            },
+            job: {
+                instance: jobInstance
             }
         },
         settings: {
@@ -46,7 +50,8 @@ function mapStateToProps(state: CombinedState): StateToProps {
     return {
         allStates,
         colorBy,
-        playing
+        playing,
+        jobInstance
     };
 }
 
@@ -67,7 +72,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch): DispatchToProps {
 
 function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Element {
 
-    const {allStates, colorBy, changeFrame, onSwitchPlay, modalUpdate, playing} = props;
+    const {allStates, colorBy, changeFrame, onSwitchPlay, modalUpdate, playing, jobInstance} = props;
     return (
         <div className='cvat-objects-sidebar-states-list'>
             {allStates.slice(0).sort((a, b) => a.frame - b.frame).map(state =>
@@ -101,6 +106,7 @@ function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Ele
                             </Col>
                             <Col sm={2}></Col>
                             <Col sm={10}>
+                                { jobInstance.phase === 'phase1b' &&
                                 <Button onClick={() => {
                                     if (playing) {
                                         onSwitchPlay(false);
@@ -116,6 +122,7 @@ function AllObjectsListComponent(props: StateToProps & DispatchToProps): JSX.Ele
                                     });
 
                                 }}>Fill Demographics</Button>
+                            }
                             </Col>
                         </Row>
 

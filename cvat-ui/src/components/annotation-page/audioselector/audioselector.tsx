@@ -269,12 +269,12 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                                     }
                                                 });
                                                 onCreateAnnotations(jobInstance, frameNumber, [objectState], (clientIds: number[]) => {
-                                                    if (label.name.startsWith('person:') && clientIds.length) {
-                                                        showPersonModal([{
-                                                            clientID: clientIds[0],
-                                                            frameNumber: objectState.frame
-                                                        }], 'person_demographics');
-                                                    }
+                                                    // if (label.name.startsWith('person:') && clientIds.length) {
+                                                    //     showPersonModal([{
+                                                    //         clientID: clientIds[0],
+                                                    //         frameNumber: objectState.frame
+                                                    //     }], 'person_demographics');
+                                                    // }
                                                 });
                                                 setNewAudioSelectorLabel(null);
                                                 setNewAudioSelectorPopoverOpen(false);

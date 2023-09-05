@@ -484,9 +484,6 @@ export function implementTask(Task) {
         if (typeof this.projectId !== 'undefined') {
             taskSpec.project_id = this.projectId;
         }
-        if (typeof this.phase !== 'undefined') {
-            taskSpec.phase = this.phase;
-        }
         if (typeof this.subset !== 'undefined') {
             taskSpec.subset = this.subset;
         }

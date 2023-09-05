@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='phase',
-            field=models.CharField(choices=[('phase1', 'PHASE1'), ('phase2', 'PHASE2')], default=cvat.apps.engine.models.Phase['PHASE1'], max_length=10),
+            field=models.CharField(choices=[('phase1a', 'PHASE1A'), ('phase2', 'PHASE2')], default=cvat.apps.engine.models.Phase['PHASE1A'], max_length=10),
         ),
         migrations.CreateModel(
             name='LabeledAudioAttributeVal',

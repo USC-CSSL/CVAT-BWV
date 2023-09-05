@@ -1216,7 +1216,7 @@ export function updateAnnotationsAsync(statesToUpdate: any[]): ThunkAction {
 export function lockAllAnnotations(): ThunkAction {
     return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
         const state: CombinedState = getStore().getState();
-        const objs = state.annotation.annotations.states;
+        const objs = state.annotation.annotations.allStates;
         objs.forEach((obj) => obj.lock = true);
         dispatch(updateAnnotationsAsync(objs));
     }
