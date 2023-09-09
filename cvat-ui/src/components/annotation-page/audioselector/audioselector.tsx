@@ -20,6 +20,7 @@ import {
 import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
 import Popover from 'antd/lib/popover';
 import AudioSelectorPopover from './audioselectorpopover';
+import TranscriptPlayer from './transcript/transcript-player';
 
 const cvat = getCore();
 
@@ -34,6 +35,7 @@ interface StateToProps {
     frameNumber: number;
     states: any[];
     audioPreview: number[];
+    jobPhase: string;
 }
 
 interface DispatchToProps {
@@ -84,7 +86,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         },
     } = state;
 
-    const {startFrame, stopFrame} = jobInstance;
+    const {startFrame, stopFrame, phase: jobPhase} = jobInstance;
 
     return {
         canvasInstance: canvasInstance as Canvas3d,
@@ -96,12 +98,12 @@ function mapStateToProps(state: CombinedState): StateToProps {
         playing,
         frameNumber,
         states,
-        audioPreview
+        audioPreview,
+        jobPhase
     };
 }
 
 interface Props {
-    isPhase2: boolean;
 }
 
 
@@ -129,7 +131,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
         onCreateAnnotations,
         onUpdateAnnotations,
         onRemoveAnnotation,
-        isPhase2,
+        jobPhase,
         audioPreview,
     } = props;
 
@@ -170,7 +172,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
         >
             {
                 showControls && <div className='audioselector-controls' style={{
-                    height: `${50 + 50 * audioselections.length}px`
+                    height: `${50 + 50 * audioselections.length /*+ (jobPhase === 'phase1a' ? 300 : 0)*/}px`
                 }}>
                     <div style={{position: 'relative'}}>
                         {
@@ -204,35 +206,8 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                     />
                             ))
                         }
-                        {!isPhase2 &&
+                        {jobPhase === 'phase1a' && <>
                         <div style={{display: 'flex'}}>
-                        {/* <CVATTooltip title={`Click to highlight a section from audio`} >
-                            <Button
-                                type='primary'
-                                className='cvat-add-tag-button'
-                                style={{margin: 'auto'}}
-                                icon={<PlusOutlined />}
-                                onClick={() => {
-                                    const label = labels.filter((label: any) => label.id === labels[0].id)[0];
-                                    const attrId = label.attributes[0]?.id;
-                                    const objectState = new cvat.classes.ObjectState({
-                                        objectType: ObjectType.AUDIOSELECTION,
-                                        label:label,
-                                        frame: frameNumber,
-                                        audio_selected_segments: [
-                                            {
-                                                start: frameNumber,
-                                                end: Math.min(frameNumber + 40, stopFrame)
-                                            }
-                                        ],
-                                        attributes: {
-                                            [attrId]: getAutoIncrementedIdentifierAttr(label).toString(),
-                                        }
-                                    });
-                                    onCreateAnnotations(jobInstance, frameNumber, [objectState]);
-                                }}
-                            />
-                        </CVATTooltip> */}
                         <Popover
                                 overlayClassName='cvat-add-audioselection-popover'
                                 placement='right'
@@ -291,7 +266,12 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                 style={{margin: 'auto'}}
                                 icon={<PlusOutlined />}></Button>
                         </Popover>
-                        </div>}
+                        </div>
+                        {/* <div>
+                            <TranscriptPlayer></TranscriptPlayer>
+                        </div> */}
+                        </>
+                        }
                     </div>
                 </div>
             }

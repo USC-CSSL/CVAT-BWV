@@ -23,7 +23,7 @@ import { connect } from 'react-redux';
 import QuestionAnnotation from './objects-side-bar/question-annotation';
 
 interface StateToProps {
-    isPhase2: boolean;
+    jobPhase: string;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -36,25 +36,25 @@ function mapStateToProps(state: CombinedState): StateToProps {
     } = state;
 
     return {
-        isPhase2: jobInstance.stage === 'acceptance'
+        jobPhase: jobInstance.phase
     };
 }
 function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
-    const { isPhase2 } = props;
+    const { jobPhase } = props;
     return (<>
         <AudioPlaybackComponent />
         <Layout hasSider className='cvat-standard-workspace'>
-            {!isPhase2 &&
+            { jobPhase !== 'phase2' &&
             <ControlsSideBarContainer />
             }
             <CanvasLayout />
-            {!isPhase2 ?
+            { jobPhase !== 'phase2' ?
                 <ObjectSideBarComponent objectsList={<ObjectsListContainer />} />:
                 <QuestionAnnotation/>
             }
             <PropagateConfirmComponent />
             <CanvasContextMenuContainer />
-            <AudioSelector isPhase2={isPhase2}/>
+            <AudioSelector/>
             <CanvasPointContextMenuComponent />
             <IssueAggregatorComponent />
             <RemoveConfirmComponent />

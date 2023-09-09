@@ -144,94 +144,95 @@ function QuestionsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX
         }
     })
     return (
-        <Layout.Sider
-            className='cvat-objects-sidebar'
-            theme='light'
-            width={300}
-            collapsedWidth={0}
-            reverseArrow
-            collapsible
-            trigger={null}
-            collapsed={sidebarCollapsed}
-        >
-            {/* eslint-disable-next-line */}
-            <span
-                className={`cvat-objects-sidebar-sider
-                    ant-layout-sider-zero-width-trigger
-                    ant-layout-sider-zero-width-trigger-left`}
-                onClick={collapse}
-            >
-                {sidebarCollapsed ? <MenuFoldOutlined title='Show' /> : <MenuUnfoldOutlined title='Hide' />}
-            </span>
+        // <Layout.Sider
+        //     className='cvat-objects-sidebar'
+        //     theme='light'
+        //     width={300}
+        //     collapsedWidth={0}
+        //     reverseArrow
+        //     collapsible
+        //     trigger={null}
+        //     collapsed={sidebarCollapsed}
+        // >
+        //     {/* eslint-disable-next-line */}
+        //     <span
+        //         className={`cvat-objects-sidebar-sider
+        //             ant-layout-sider-zero-width-trigger
+        //             ant-layout-sider-zero-width-trigger-left`}
+        //         onClick={collapse}
+        //     >
+        //         {sidebarCollapsed ? <MenuFoldOutlined title='Show' /> : <MenuUnfoldOutlined title='Hide' />}
+        //     </span>
 
-            Questions
-            <Tabs type='card' defaultActiveKey='objects' className='cvat-objects-sidebar-tabs'>
-                {Object.keys(peopleInFrame).map((personName) => (
-                    <>
-                        <Tabs.TabPane tab={<Text strong>{personName}</Text>} key='objects'>
-                        <Collapse className='cvat-objects-sidebar-state-item-elements-collapse'>
-                            <Collapse.Panel
-                                header={(
-                                    <>
-                                        <Text style={{ fontSize: 10 }} type='secondary'>DEMOGRAPHICS</Text>
-                                        <br />
-                                    </>
-                                )}
-                                key='demographic'
-                            >
-                                <Text>Demographic Question 1</Text><br/>
-                                <Radio.Group name={`${personName}Q1`} onChange={(e) => {
-                                    setQuestionAns({
-                                        ...questionAns,
-                                        [personName]: {
-                                            ...questionAns[personName],
-                                            [e.target.name]: e.target.value
-                                        }
-                                    })
-                                }} value={null}>
-                                    <Space direction="vertical">
-                                        <Radio value={1}>Option A</Radio>
-                                        <Radio value={2}>Option B</Radio>
-                                        <Radio value={3}>Option C</Radio>
+        //     Questions
+        //     <Tabs type='card' defaultActiveKey='objects' className='cvat-objects-sidebar-tabs'>
+        //         {Object.keys(peopleInFrame).map((personName) => (
+        //             <>
+        //                 <Tabs.TabPane tab={<Text strong>{personName}</Text>} key='objects'>
+        //                 <Collapse className='cvat-objects-sidebar-state-item-elements-collapse'>
+        //                     <Collapse.Panel
+        //                         header={(
+        //                             <>
+        //                                 <Text style={{ fontSize: 10 }} type='secondary'>DEMOGRAPHICS</Text>
+        //                                 <br />
+        //                             </>
+        //                         )}
+        //                         key='demographic'
+        //                     >
+        //                         <Text>Demographic Question 1</Text><br/>
+        //                         <Radio.Group name={`${personName}Q1`} onChange={(e) => {
+        //                             setQuestionAns({
+        //                                 ...questionAns,
+        //                                 [personName]: {
+        //                                     ...questionAns[personName],
+        //                                     [e.target.name]: e.target.value
+        //                                 }
+        //                             })
+        //                         }} value={null}>
+        //                             <Space direction="vertical">
+        //                                 <Radio value={1}>Option A</Radio>
+        //                                 <Radio value={2}>Option B</Radio>
+        //                                 <Radio value={3}>Option C</Radio>
 
-                                    </Space>
-                                </Radio.Group>
-                            </Collapse.Panel>
-                            <Collapse.Panel
-                                header={(
-                                    <>
-                                        <Text style={{ fontSize: 10 }} type='secondary'>BEHAVIOUR</Text>
-                                        <br />
-                                    </>
-                                )}
-                                key='behavior'
-                            >
-                                <Text>Behaviour Question 1</Text><br/>
-                                <Radio.Group name={`${personName}Q2`} onChange={(e) => {
-                                    setQuestionAns({
-                                        ...questionAns,
-                                        [personName]: {
-                                            ...questionAns[personName],
-                                            [e.target.name]: e.target.value
-                                        }
-                                    })
-                                }} value={null}>
-                                    <Space direction="vertical">
-                                        <Radio value={1}>Option A</Radio>
-                                        <Radio value={2}>Option B</Radio>
-                                        <Radio value={3}>Option C</Radio>
+        //                             </Space>
+        //                         </Radio.Group>
+        //                     </Collapse.Panel>
+        //                     <Collapse.Panel
+        //                         header={(
+        //                             <>
+        //                                 <Text style={{ fontSize: 10 }} type='secondary'>BEHAVIOUR</Text>
+        //                                 <br />
+        //                             </>
+        //                         )}
+        //                         key='behavior'
+        //                     >
+        //                         <Text>Behaviour Question 1</Text><br/>
+        //                         <Radio.Group name={`${personName}Q2`} onChange={(e) => {
+        //                             setQuestionAns({
+        //                                 ...questionAns,
+        //                                 [personName]: {
+        //                                     ...questionAns[personName],
+        //                                     [e.target.name]: e.target.value
+        //                                 }
+        //                             })
+        //                         }} value={null}>
+        //                             <Space direction="vertical">
+        //                                 <Radio value={1}>Option A</Radio>
+        //                                 <Radio value={2}>Option B</Radio>
+        //                                 <Radio value={3}>Option C</Radio>
 
-                                    </Space>
-                                </Radio.Group>
-                            </Collapse.Panel>
-                        </Collapse>
-                        </Tabs.TabPane>
-                    </>
-                )) }
+        //                             </Space>
+        //                         </Radio.Group>
+        //                     </Collapse.Panel>
+        //                 </Collapse>
+        //                 </Tabs.TabPane>
+        //             </>
+        //         )) }
 
 
-            </Tabs>
-        </Layout.Sider>
+        //     </Tabs>
+        // </Layout.Sider>
+        <></>
     );
 }
 

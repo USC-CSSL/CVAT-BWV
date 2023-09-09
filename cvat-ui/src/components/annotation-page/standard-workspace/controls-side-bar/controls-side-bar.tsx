@@ -109,13 +109,13 @@ function ControlsSideBarComponent(props: Props & StateToProps): JSX.Element {
     const controlsDisabled = !labels.length || frameData.deleted;
     const withUnspecifiedType = labels.some((label: any) => label.type === 'any' && !label.hasParent);
     let rectangleControlVisible = withUnspecifiedType;
-    let polygonControlVisible = withUnspecifiedType;
+    let polygonControlVisible = false;
     let polylineControlVisible = false;
     let pointsControlVisible = false;
     let ellipseControlVisible = false;
     let cuboidControlVisible = false;
     let maskControlVisible = false;
-    let tagControlVisible = withUnspecifiedType;
+    let tagControlVisible = false;
     const skeletonControlVisible = labels.some((label: LabelOptColor) => label.type === 'skeleton');
     labels.forEach((label: LabelOptColor) => {
         rectangleControlVisible = rectangleControlVisible || label.type === ShapeType.RECTANGLE;
@@ -239,7 +239,7 @@ function ControlsSideBarComponent(props: Props & StateToProps): JSX.Element {
             <hr />
             { jobPhase === 'phase1a' && <>
             <ObservedToolsControl />
-            <ObservedOpenCVControl />
+            {/* <ObservedOpenCVControl /> */}
             {
                 rectangleControlVisible && (
                     <ObservedDrawRectangleControl
@@ -322,7 +322,7 @@ function ControlsSideBarComponent(props: Props & StateToProps): JSX.Element {
             }
             <hr />
 
-            <ObservedMergeControl
+            {/* <ObservedMergeControl
                 mergeObjects={mergeObjects}
                 canvasInstance={canvasInstance}
                 activeControl={activeControl}
@@ -362,7 +362,7 @@ function ControlsSideBarComponent(props: Props & StateToProps): JSX.Element {
                         displayValue: normalizedKeyMap.SWITCH_SPLIT_MODE,
                     },
                 }}
-            />
+            /> */}
 
             <ExtraControlsControl />
             </> }

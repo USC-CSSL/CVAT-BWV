@@ -7,7 +7,7 @@ import { Col, Row } from 'antd/lib/grid';
 import { getCore, MLModel, ObjectState } from 'cvat-core-wrapper';
 import { modalUpdateAsync, removeObject, updateAnnotationsAsync } from 'actions/annotation-actions';
 import getLabelDisplayName from 'utils/label-display';
-import { PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
+import { CloseOutlined, PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
 
 interface Props {
 };
@@ -82,9 +82,9 @@ function mapStateToProps(state: CombinedState): StateToProps {
         audioData,
         frameSpeed,
         mode,
-        states: people.map(person => allStates.filter(state => state.clientID === person.clientID)[0]),
+        states: people.map(person => allStates.filter(state => state.clientID === person.clientID)[0]).filter(person => person != null),
         allStates: allStates,
-        people,
+        people: people.filter(person => allStates.some(state => state.clientID === person.clientID)),
         jobInstance,
         facematcher: facematchers[0]
     };
@@ -336,6 +336,9 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
         ) ||
         (mode === 'person_demographics' &&
             <Button onClick={onOK}>Done</Button>
+        ) ||
+        (mode === 'face_selection' &&
+            <Button onClick={onOK}>Done</Button>
         )
 
       } >
@@ -530,6 +533,56 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                     {croppedImages[1] && <img  style={{maxWidth: '100%', maxHeight:'500px'}} src={croppedImages[1]}></img>}
                                 </Col>
                         </Row>
+                    </>
+                )
+            }
+
+            {
+                mode === 'face_selection' && states.length && (
+                    <>
+                    <Text>Please remove duplicates (if any). Click "Done" when there are no duplicates remaining</Text>
+                    <div style={{overflowY: 'scroll', height: (window?.innerHeight * 0.6) || '500px'}}>
+                    {states.map((_, idx) => (
+                        <>
+                            {idx % 2 === 0 &&
+                                (
+                                    <>
+                                    <Row>
+                                        <Col span={12}>
+                                            {
+                                                croppedImages[idx] && <img  style={{maxWidth: '100%', height:'200px'}} src={croppedImages[idx]}></img>
+                                            }
+                                            <div>
+                                                <Text>{getLabelDisplayName(states[idx].label.name)} {states[idx].attributes[states[idx].label.attributes[0].id]}</Text>
+                                            </div>
+                                            <Button onClick={() => {
+                                                    onRemoveAnnotation(states[idx]);
+                                                }} icon={<CloseOutlined />}>
+                                            </Button>
+                                        </Col>
+                                        <Col span={12}>
+                                            {states[idx + 1] && <>
+                                                {
+                                                    croppedImages[idx+1] && <img  style={{maxWidth: '100%', height:'200px'}} src={croppedImages[idx+1]}></img>
+                                                }
+                                                <div>
+                                                    <Text>{getLabelDisplayName(states[idx+1].label.name)} {states[idx+1].attributes[states[idx+1].label.attributes[0].id]}</Text>
+                                                </div>
+                                                <Button onClick={() => {
+                                                    onRemoveAnnotation(states[idx+1]);
+                                                }} icon={<CloseOutlined />}>
+                                                </Button>
+                                            </>
+                                            }
+                                        </Col>
+                                    </Row>
+                                    <hr style={{margin: '10px 0'}}/>
+                                    </>
+                                )
+                            }
+                        </>
+                    ))}
+                    </div>
                     </>
                 )
             }

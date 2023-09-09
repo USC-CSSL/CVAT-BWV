@@ -38,7 +38,7 @@ interface DispatchToProps {
     setForceExitAnnotationFlag(forceExit: boolean): void;
     saveAnnotations(jobInstance: any, afterSave?: () => void): void;
     updateJob(jobInstance: any): void;
-    showBeforeSubmitModal(people: any[]): void;
+    showBeforeSubmitModal(phase: string, people: any[]): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -88,12 +88,22 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         updateJob(jobInstance: any): void {
             dispatch(updateJobAsync(jobInstance));
         },
-        showBeforeSubmitModal(people: any[]): void {
-            dispatch(modalUpdateAsync({
-                people,
-                visible: true,
-                mode: 'before_save',
-            }))
+        showBeforeSubmitModal(phase: string, people: any[]): void {
+
+            if (phase === core.enums.Phase.PHASE1A) {
+                dispatch(modalUpdateAsync({
+                    people,
+                    visible: true,
+                    mode: 'face_selection',
+                }))
+            } else {
+                dispatch(modalUpdateAsync({
+                    people,
+                    visible: true,
+                    mode: 'before_save',
+                }))
+            }
+
         }
     };
 }
@@ -133,8 +143,18 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             if (jobInstance.phase === core.enums.Phase.PHASE1A) {
                 // jobInstance.stage = JobStage.ACCEPTANCE;
                 // jobInstance.state = core.enums.JobState.COMPLETED;
-                jobInstance.phase = core.enums.Phase.PHASE1B;
-                updateJob(jobInstance);
+                const people = objectStates.filter(state => {
+                    if (state.label.name.startsWith('person:') && state.objectType === 'shape') {
+                        return true;
+                    }
+                    return false;
+                }).map((person => ({
+                    clientID: person.clientID,
+                    frameNumber: person.frame
+                })));
+                showBeforeSubmitModal(core.enums.Phase.PHASE1A, people);
+                // jobInstance.phase = core.enums.Phase.PHASE1B;
+                // updateJob(jobInstance);
             }
             else if (jobInstance.phase === core.enums.Phase.PHASE1B) {
                 const people = objectStates.filter(state => {
@@ -146,7 +166,7 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
                     clientID: person.clientID,
                     frameNumber: person.frame
                 })));
-                showBeforeSubmitModal(people);
+                showBeforeSubmitModal(core.enums.Phase.PHASE1B, people);
             }
 
 
