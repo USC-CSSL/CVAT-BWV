@@ -186,6 +186,7 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
 
     return (
         <Menu onClick={(params: MenuInfo) => onClickMenuWrapper(params)} className='cvat-annotation-menu' selectable={false}>
+            {isOrganizationOwner && <>
             <Menu.Item key={Actions.LOAD_JOB_ANNO}>Upload annotations</Menu.Item>
             <Menu.Item key={Actions.EXPORT_JOB_DATASET}>Export job dataset</Menu.Item>
             <Menu.Item key={Actions.REMOVE_ANNO}>Remove annotations</Menu.Item>
@@ -214,13 +215,12 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
                 <Menu.Item key={`state:${JobState.COMPLETED}`}>
                     <Text className={computeClassName(JobState.COMPLETED)}>{JobState.COMPLETED}</Text>
                 </Menu.Item>
-            </Menu.SubMenu>
-            {isOrganizationOwner && <>
+            </Menu.SubMenu></>
+            }
             {[JobStage.ANNOTATION, JobStage.REVIEW].includes(jobStage) ?
                 <Menu.Item key={Actions.FINISH_JOB}>Finish the job</Menu.Item> : null}
             {jobStage === JobStage.ACCEPTANCE ?
                 <Menu.Item key={Actions.RENEW_JOB}>Renew the job</Menu.Item> : null}
-            </>}
         </Menu>
     );
 }

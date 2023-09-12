@@ -226,28 +226,28 @@ function JobListComponent(props: Props): JSX.Element {
             key: 'duration',
             className: 'cvat-text-color',
         },
-        {
-            title: 'Assignee',
-            dataIndex: 'assignee',
-            key: 'assignee',
-            className: 'cvat-job-item-assignee',
-            render: (jobInstance: any): JSX.Element => (
-                <UserSelector
-                    className='cvat-job-assignee-selector'
-                    value={jobInstance.assignee}
-                    onSelect={(value: User | null): void => {
-                        if (jobInstance?.assignee?.id === value?.id) return;
-                        jobInstance.assignee = value;
-                        onUpdateJob(jobInstance);
-                    }}
-                />
-            ),
-            sorter: sorter('assignee.assignee.username'),
-            filters: collectUsers('assignee'),
-            onFilter: (value: string | number | boolean, record: any) => (
-                record.assignee.assignee?.username || false
-            ) === value,
-        },
+        // {
+        //     title: 'Assignee',
+        //     dataIndex: 'assignee',
+        //     key: 'assignee',
+        //     className: 'cvat-job-item-assignee',
+        //     render: (jobInstance: any): JSX.Element => (
+        //         <UserSelector
+        //             className='cvat-job-assignee-selector'
+        //             value={jobInstance.assignee}
+        //             onSelect={(value: User | null): void => {
+        //                 if (jobInstance?.assignee?.id === value?.id) return;
+        //                 jobInstance.assignee = value;
+        //                 onUpdateJob(jobInstance);
+        //             }}
+        //         />
+        //     ),
+        //     sorter: sorter('assignee.assignee.username'),
+        //     filters: collectUsers('assignee'),
+        //     onFilter: (value: string | number | boolean, record: any) => (
+        //         record.assignee.assignee?.username || false
+        //     ) === value,
+        // },
     ];
 
     let completed = 0;

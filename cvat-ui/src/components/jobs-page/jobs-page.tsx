@@ -109,7 +109,7 @@ function JobsPageComponent(): JSX.Element {
             { fetching ? (
                 <Spin size='large' className='cvat-spinner' />
             ) : content }
-            <FeedbackComponent />
+            {/* <FeedbackComponent /> */}
         </div>
     );
 }

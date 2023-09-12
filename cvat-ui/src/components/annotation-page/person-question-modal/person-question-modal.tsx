@@ -8,6 +8,8 @@ import { getCore, MLModel, ObjectState } from 'cvat-core-wrapper';
 import { modalUpdateAsync, removeObject, updateAnnotationsAsync } from 'actions/annotation-actions';
 import getLabelDisplayName from 'utils/label-display';
 import { CloseOutlined, PauseCircleFilled, PlayCircleFilled } from '@ant-design/icons';
+import { updateJobAsync } from 'actions/tasks-actions';
+import { useHistory } from 'react-router';
 
 interface Props {
 };
@@ -94,6 +96,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
 interface DispatchToProps {
     onUpdateAnnotations(states: ObjectState[]): void;
     onRemoveAnnotation(objectState: any): void;
+    updateJob(jobInstance: any): void;
     modalUpdate(update: any): void;
 }
 
@@ -107,17 +110,22 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         },
         modalUpdate(update: any): void {
             dispatch(modalUpdateAsync(update));
+        },
+        updateJob(jobInstance: any): void {
+            dispatch(updateJobAsync(jobInstance));
         }
     };
 }
 
 
 function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
-    const {visible, mode, states, people, audioData, frameSpeed, jobInstance, facematcher, allStates, onUpdateAnnotations, onRemoveAnnotation, modalUpdate} = props;
+    const {visible, mode, states, people, audioData, frameSpeed, jobInstance, facematcher, allStates, onUpdateAnnotations, onRemoveAnnotation, modalUpdate, updateJob} = props;
     const [croppedImages, setCroppedImages] = useState<any[]>([]);
     const [images, setImages] = useState<HTMLImageElement[]>([]);
     const audio = useRef<HTMLAudioElement[]>([]);
     const audiolisteners = useRef<((e: any) => void)[]>([]);
+
+    const history = useHistory();
 
     const [audioBlobURL, setAudioBlobURL] = useState<string>('');
     const [audioPlaying, setAudioPlaying] = useState(false);
@@ -167,30 +175,38 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                             }),
                             targetbox: [tp1X, tp1Y, tp2X, tp2Y]
                         }
-                        const response = await core.lambda.call(jobInstance.taskId, facematcher,
-                            { ...data, job: jobInstance.id, frame: targetPerson.frame });
 
-                        if (response.verified) {
+                        try {
+                            const response = await core.lambda.call(jobInstance.taskId, facematcher,
+                                { ...data, job: jobInstance.id, frame: targetPerson.frame });
+
+                            if (response.verified) {
+                                modalUpdate({
+                                    mode: 'similar_face',
+                                    people: [{
+                                        clientID: targetPerson.clientID,
+                                        frameNumber: targetPerson.frame
+                                    },
+                                    {
+                                        clientID: sameLabelVisiblePeople[response.idx].clientID,
+                                        frameNumber: sameLabelVisiblePeople[response.idx].frame
+                                    }
+                                ],
+                                    visible: true
+                                })
+                            } else {
+                                modalUpdate({
+                                    // mode: 'person_demographics',
+                                    // people: [{
+                                    //     clientID: targetPerson.clientID,
+                                    //     frameNumber: targetPerson.frame
+                                    // }],
+                                    visible: false,
+                                    people: []
+                                })
+                            }
+                        } catch(error) {
                             modalUpdate({
-                                mode: 'similar_face',
-                                people: [{
-                                    clientID: targetPerson.clientID,
-                                    frameNumber: targetPerson.frame
-                                },
-                                {
-                                    clientID: sameLabelVisiblePeople[response.idx].clientID,
-                                    frameNumber: sameLabelVisiblePeople[response.idx].frame
-                                }
-                            ],
-                                visible: true
-                            })
-                        } else {
-                            modalUpdate({
-                                // mode: 'person_demographics',
-                                // people: [{
-                                //     clientID: targetPerson.clientID,
-                                //     frameNumber: targetPerson.frame
-                                // }],
                                 visible: false,
                                 people: []
                             })
@@ -338,7 +354,14 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             <Button onClick={onOK}>Done</Button>
         ) ||
         (mode === 'face_selection' &&
-            <Button onClick={onOK}>Done</Button>
+            <Button onClick={() => {
+                onOK();
+                jobInstance.phase = 'phase1b';
+                updateJob(jobInstance);
+                setTimeout(() => {
+                    history.push(`/tasks`);
+                }, 1000);
+            }}>Done</Button>
         )
 
       } >

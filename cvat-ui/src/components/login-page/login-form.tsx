@@ -46,11 +46,11 @@ function LoginFormComponent(props: Props): JSX.Element {
     const forgotPasswordLink = (
         <Col className='cvat-credentials-link'>
             <Text strong>
-                <Link to={credential.includes('@') ?
+                {/* <Link to={credential.includes('@') ?
                     `/auth/password/reset?credential=${credential}` : '/auth/password/reset'}
                 >
                     Forgot password?
-                </Link>
+                </Link> */}
             </Text>
         </Col>
     );

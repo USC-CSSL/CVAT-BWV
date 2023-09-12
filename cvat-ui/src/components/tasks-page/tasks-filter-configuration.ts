@@ -91,6 +91,19 @@ export const config: Partial<Config> = {
             valueSources: ['value'],
             operators: ['like'],
         },
+        // phase: {
+        //     label: 'Phase',
+        //     type: 'select',
+        //     valueSources: ['value'],
+        //     operators: ['select_equals', 'select_any_in', 'select_not_any_in'],
+        //     fieldSettings: {
+        //         listValues: [
+        //             { value: 'phase1a', title: 'Phase 1A' },
+        //             { value: 'phase1b', title: 'Phase 1B' },
+        //             { value: 'phase2', title: 'Phase 2' },
+        //         ],
+        //     },
+        // }
     },
 };
 

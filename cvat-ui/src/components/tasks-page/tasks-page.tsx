@@ -148,7 +148,7 @@ function TasksPageComponent(props: Props): JSX.Element {
                     <Spin size='large' className='cvat-spinner' />
                 </div>
             ) : content }
-            <FeedbackComponent />
+            {/* <FeedbackComponent /> */}
         </div>
     );
 }
