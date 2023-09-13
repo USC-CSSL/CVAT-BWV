@@ -193,17 +193,17 @@ function HeaderContainer(props: Props): JSX.Element {
                         <Text type='secondary'>{` ${tool.ui.version}`}</Text>
                     </p>
                     <Row justify='space-around'>
-                        <Col>
+                        {/* <Col>
                             <a href={CHANGELOG_URL} target='_blank' rel='noopener noreferrer'>
                                 What&apos;s new?
                             </a>
-                        </Col>
+                        </Col> */}
                         <Col>
                             <a href={LICENSE_URL} target='_blank' rel='noopener noreferrer'>
                                 MIT License
                             </a>
                         </Col>
-                        <Col>
+                        {/* <Col>
                             <a href={GITTER_URL} target='_blank' rel='noopener noreferrer'>
                                 Need help?
                             </a>
@@ -212,7 +212,7 @@ function HeaderContainer(props: Props): JSX.Element {
                             <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
                                 Find us on Discord
                             </a>
-                        </Col>
+                        </Col> */}
                     </Row>
                 </div>
             ),
@@ -355,16 +355,16 @@ function HeaderContainer(props: Props): JSX.Element {
         }
     }
 
-    menuItems.push([(
-        <Menu.Item
-            icon={<SettingOutlined />}
-            key='settings'
-            title={`Press ${switchSettingsShortcut} to switch`}
-            onClick={() => switchSettingsDialog(true)}
-        >
-            Settings
-        </Menu.Item>
-    ), 20]);
+    // menuItems.push([(
+    //     <Menu.Item
+    //         icon={<SettingOutlined />}
+    //         key='settings'
+    //         title={`Press ${switchSettingsShortcut} to switch`}
+    //         onClick={() => switchSettingsDialog(true)}
+    //     >
+    //         Settings
+    //     </Menu.Item>
+    // ), 20]);
 
     menuItems.push([(
         <Menu.Item icon={<InfoCircleOutlined />} key='about' onClick={() => showAboutModal()}>
@@ -436,18 +436,21 @@ function HeaderContainer(props: Props): JSX.Element {
                 >
                     Projects
                 </Button> */}
-                <Button
-                    className={getButtonClassName('tasks')}
-                    type='link'
-                    value='tasks'
-                    href='/tasks?page=1'
-                    onClick={(event: React.MouseEvent): void => {
-                        event.preventDefault();
-                        history.push('/tasks');
-                    }}
-                >
-                    Tasks
-                </Button>
+                {user.isStaff && (<>
+                    <Button
+                        className={getButtonClassName('tasks')}
+                        type='link'
+                        value='tasks'
+                        href='/tasks?page=1'
+                        onClick={(event: React.MouseEvent): void => {
+                            event.preventDefault();
+                            history.push('/tasks');
+                        }}
+                    >
+                        Tasks
+                    </Button>
+                </>)
+                }
                 <Button
                     className={getButtonClassName('jobs')}
                     type='link'
@@ -472,7 +475,7 @@ function HeaderContainer(props: Props): JSX.Element {
                 >
                     Cloud Storages
                 </Button> */}
-                {isModelsPluginActive ? (
+                {isModelsPluginActive && user.isStaff ? (
                     <Button
                         className={getButtonClassName('models')}
                         type='link'
@@ -501,7 +504,7 @@ function HeaderContainer(props: Props): JSX.Element {
                 ) : null}
             </div>
             <div className='cvat-right-header'>
-                <CVATTooltip overlay='Click to open repository'>
+                {/* <CVATTooltip overlay='Click to open repository'>
                     <Button
                         icon={<GithubOutlined />}
                         size='large'
@@ -526,7 +529,7 @@ function HeaderContainer(props: Props): JSX.Element {
                             window.open(GUIDE_URL, '_blank');
                         }}
                     />
-                </CVATTooltip>
+                </CVATTooltip> */}
                 <Dropdown placement='bottomRight' overlay={userMenu} className='cvat-header-menu-user-dropdown'>
                     <span>
                         <UserOutlined className='cvat-header-dropdown-icon' />

@@ -155,7 +155,7 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
         } else if (params.key === Actions.FINISH_JOB) {
             Modal.confirm({
                 title: 'The job stage is going to be switched',
-                content: 'Stage will be changed to "acceptance". Would you like to continue?',
+                content: 'This action will unassign you and move the task to the next phase. Continue?',
                 okText: 'Continue',
                 cancelText: 'Cancel',
                 className: 'cvat-modal-content-finish-job',

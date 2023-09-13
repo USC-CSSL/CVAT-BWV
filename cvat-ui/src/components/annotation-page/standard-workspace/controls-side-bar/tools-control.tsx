@@ -40,6 +40,7 @@ import {
     fetchAnnotationsAsync,
     updateAnnotationsAsync,
     createAnnotationsAsync,
+    switchPlay,
 } from 'actions/annotation-actions';
 import DetectorRunner, { DetectorRequestBody } from 'components/model-runner-modal/detector-runner';
 import LabelSelector from 'components/label-selector/label-selector';
@@ -77,6 +78,7 @@ interface DispatchToProps {
     fetchAnnotations(): void;
     onSwitchToolsBlockerState(toolsBlockerState: ToolsBlockerState): void;
     switchNavigationBlocked(navigationBlocked: boolean): void;
+    onSwitchPlay(play: boolean): void;
 }
 
 const MIN_SUPPORTED_INTERACTOR_VERSION = 2;
@@ -131,6 +133,7 @@ const mapDispatchToProps = {
     fetchAnnotations: fetchAnnotationsAsync,
     onSwitchToolsBlockerState: switchToolsBlockerState,
     switchNavigationBlocked: switchNavigationBlockedAction,
+    onSwitchPlay: switchPlay,
 };
 
 type Props = StateToProps & DispatchToProps;
@@ -1141,7 +1144,7 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
 
     private renderDetectorBlock(): JSX.Element {
         const {
-            jobInstance, detectors, curZOrder, frame, createAnnotations,
+            jobInstance, detectors, curZOrder, frame, createAnnotations, onSwitchPlay
         } = this.props;
 
         if (!detectors.length) {
@@ -1214,6 +1217,7 @@ export class ToolsControlComponent extends React.PureComponent<Props, State> {
                 dimension={jobInstance.dimension}
                 runInference={async (model: MLModel, body: DetectorRequestBody) => {
                     try {
+                        onSwitchPlay(false);
                         this.setState({ mode: 'detection', fetching: true });
                         const result = await core.lambda.call(jobInstance.taskId, model, {
                             ...body, frame, job: jobInstance.id,

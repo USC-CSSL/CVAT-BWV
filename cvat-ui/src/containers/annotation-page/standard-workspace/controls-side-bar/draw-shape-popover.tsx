@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import { RadioChangeEvent } from 'antd/lib/radio';
 
 import { CombinedState, ShapeType, ObjectType } from 'reducers';
-import { rememberObject } from 'actions/annotation-actions';
+import { rememberObject, switchPlay } from 'actions/annotation-actions';
 import { Canvas, RectDrawingMethod, CuboidDrawingMethod } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import DrawShapePopoverComponent from 'components/annotation-page/standard-workspace/controls-side-bar/draw-shape-popover';
@@ -26,6 +26,7 @@ interface DispatchToProps {
         rectDrawingMethod?: RectDrawingMethod,
         cuboidDrawingMethod?: CuboidDrawingMethod,
     ): void;
+    onSwitchPlay(play: boolean): void;
 }
 
 interface StateToProps {
@@ -57,6 +58,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
                 }),
             );
         },
+        onSwitchPlay(play: boolean): void {
+            dispatch(switchPlay(play));
+        }
     };
 }
 
@@ -165,6 +169,7 @@ class DrawShapePopoverContainer extends React.PureComponent<Props, State> {
     };
 
     private onDrawShape = (): void => {
+        this.props.onSwitchPlay(false);
         this.onDraw(ObjectType.SHAPE);
     };
 

@@ -364,7 +364,12 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             }}>Done</Button>
         )
 
-      } >
+      } onCancel={() => {
+            modalUpdate({
+                visible: false,
+                people: [],
+            })
+      }} >
             {
                 mode === 'person_demographics' && (
                 <>

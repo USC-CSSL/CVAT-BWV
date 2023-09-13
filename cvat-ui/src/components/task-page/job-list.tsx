@@ -157,41 +157,41 @@ function JobListComponent(props: Props): JSX.Element {
             key: 'frames',
             className: 'cvat-text-color cvat-job-item-frames',
         },
-        {
-            title: 'Stage',
-            dataIndex: 'stage',
-            key: 'stage',
-            className: 'cvat-job-item-stage',
-            render: (jobInstance: any): JSX.Element => {
-                const { stage } = jobInstance;
+        // {
+        //     title: 'Stage',
+        //     dataIndex: 'stage',
+        //     key: 'stage',
+        //     className: 'cvat-job-item-stage',
+        //     render: (jobInstance: any): JSX.Element => {
+        //         const { stage } = jobInstance;
 
-                return (
-                    <div>
-                        <Select
-                            value={stage}
-                            onChange={(newValue: string) => {
-                                jobInstance.stage = newValue;
-                                onUpdateJob(jobInstance);
-                            }}
-                        >
-                            <Select.Option value={JobStage.ANNOTATION}>{JobStage.ANNOTATION}</Select.Option>
-                            <Select.Option value={JobStage.REVIEW}>{JobStage.REVIEW}</Select.Option>
-                            <Select.Option value={JobStage.ACCEPTANCE}>{JobStage.ACCEPTANCE}</Select.Option>
-                        </Select>
-                        <CVATTooltip title={<ReviewSummaryComponent jobInstance={jobInstance} />}>
-                            <QuestionCircleOutlined />
-                        </CVATTooltip>
-                    </div>
-                );
-            },
-            sorter: sorter('stage.stage'),
-            filters: [
-                { text: 'annotation', value: 'annotation' },
-                { text: 'validation', value: 'validation' },
-                { text: 'acceptance', value: 'acceptance' },
-            ],
-            onFilter: (value: string | number | boolean, record: any) => record.stage.stage === value,
-        },
+        //         return (
+        //             <div>
+        //                 <Select
+        //                     value={stage}
+        //                     onChange={(newValue: string) => {
+        //                         jobInstance.stage = newValue;
+        //                         onUpdateJob(jobInstance);
+        //                     }}
+        //                 >
+        //                     <Select.Option value={JobStage.ANNOTATION}>{JobStage.ANNOTATION}</Select.Option>
+        //                     <Select.Option value={JobStage.REVIEW}>{JobStage.REVIEW}</Select.Option>
+        //                     <Select.Option value={JobStage.ACCEPTANCE}>{JobStage.ACCEPTANCE}</Select.Option>
+        //                 </Select>
+        //                 <CVATTooltip title={<ReviewSummaryComponent jobInstance={jobInstance} />}>
+        //                     <QuestionCircleOutlined />
+        //                 </CVATTooltip>
+        //             </div>
+        //         );
+        //     },
+        //     sorter: sorter('stage.stage'),
+        //     filters: [
+        //         { text: 'annotation', value: 'annotation' },
+        //         { text: 'validation', value: 'validation' },
+        //         { text: 'acceptance', value: 'acceptance' },
+        //     ],
+        //     onFilter: (value: string | number | boolean, record: any) => record.stage.stage === value,
+        // },
         {
             title: 'State',
             dataIndex: 'state',

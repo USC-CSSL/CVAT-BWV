@@ -77,7 +77,7 @@ function JobCardComponent(props: Props): JSX.Element {
                     <Descriptions.Item label='Assignee'>{job.assignee.username}</Descriptions.Item>
                 ) : null}
             </Descriptions>
-            <Dropdown overlay={(
+            {/* <Dropdown overlay={(
                 <Menu onClick={(action: MenuInfo) => {
                     if (action.key === 'task') {
                         history.push(`/tasks/${job.taskId}`);
@@ -96,7 +96,7 @@ function JobCardComponent(props: Props): JSX.Element {
             )}
             >
                 <MoreOutlined className='cvat-job-card-more-button' />
-            </Dropdown>
+            </Dropdown> */}
         </Card>
     );
 }

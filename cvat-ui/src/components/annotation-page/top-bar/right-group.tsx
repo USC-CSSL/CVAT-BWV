@@ -70,7 +70,7 @@ function RightGroup(props: Props): JSX.Element {
                 Filters
             </Button>
             <div>
-                <Select
+                {/* <Select
                     dropdownClassName='cvat-workspace-selector-dropdown'
                     className='cvat-workspace-selector'
                     onChange={changeWorkspace}
@@ -96,7 +96,7 @@ function RightGroup(props: Props): JSX.Element {
                         }
                         return null;
                     })}
-                </Select>
+                </Select> */}
             </div>
         </Col>
     );

@@ -15,6 +15,7 @@ import {
     createAnnotationsAsync,
     modalUpdateAsync,
     removeObject,
+    switchPlay,
     updateAnnotationsAsync,
 } from 'actions/annotation-actions';
 import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
@@ -43,6 +44,7 @@ interface DispatchToProps {
     onUpdateAnnotations(states: ObjectState[]): void;
     onRemoveAnnotation(objectState: any): void;
     showPersonModal(people: any[], mode: string): void;
+    onSwitchPlay(play: boolean): void;
 }
 
 function mapDispatchToProps(dispatch: any): DispatchToProps {
@@ -62,6 +64,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
                 visible: true,
                 mode
             }))
+        },
+        onSwitchPlay(play: boolean): void {
+            dispatch(switchPlay(play));
         }
     };
 }
@@ -131,6 +136,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
         onCreateAnnotations,
         onUpdateAnnotations,
         onRemoveAnnotation,
+        onSwitchPlay,
         jobPhase,
         audioPreview,
     } = props;
@@ -209,7 +215,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                         {jobPhase === 'phase1a' && <>
                         <div style={{display: 'flex'}}>
                         <Popover
-                                overlayClassName='cvat-add-audioselection-popover'
+                                overlayClassName='cvat-add-audioselection-popover cvat-tools-control-popover'
                                 placement='right'
                                 trigger="click"
                                 visible={newAudioSelectorPopoverOpen}
@@ -226,6 +232,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                         labels={personLabels}
                                         jobInstance={jobInstance}
                                         onAdd={()=> {
+                                            onSwitchPlay(false);
                                             if (newAudioSelectorLabel) {
                                                 const label = newAudioSelectorLabel;
                                                 const attrId = label.attributes[0]?.id;

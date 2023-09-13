@@ -444,38 +444,24 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
 
         if (readyForRender) {
             if (user && user.isVerified) {
-                return (
-                    <GlobalErrorBoundary>
-                        <ShortcutsContextProvider>
-                            <Layout>
-                                <Header />
-                                <Layout.Content style={{ height: '100%' }}>
-                                    <ShortcutsDialog />
-                                    <GlobalHotKeys keyMap={subKeyMap} handlers={handlers}>
-                                        <Switch>
-                                            <Route exact path='/auth/logout' component={LogoutComponent} />
-                                            <Route exact path='/projects' component={ProjectsPageComponent} />
-                                            <Route exact path='/projects/create' component={CreateProjectPageComponent} />
-                                            <Route exact path='/projects/:id' component={ProjectPageComponent} />
-                                            <Route exact path='/projects/:id/webhooks' component={WebhooksPage} />
-                                            <Route exact path='/tasks' component={TasksPageContainer} />
-                                            <Route exact path='/tasks/create' component={CreateTaskPageContainer} />
-                                            <Route exact path='/tasks/:id' component={TaskPageComponent} />
-                                            <Route exact path='/tasks/:tid/jobs/:jid' component={AnnotationPageContainer} />
-                                            <Route exact path='/jobs' component={JobsPageComponent} />
-                                            {/* <Route exact path='/cloudstorages' component={CloudStoragesPageComponent} />
-                                            <Route
-                                                exact
-                                                path='/cloudstorages/create'
-                                                component={CreateCloudStoragePageComponent}
-                                            />
-                                            <Route
-                                                exact
-                                                path='/cloudstorages/update/:id'
-                                                component={UpdateCloudStoragePageComponent}
-                                            /> */}
-                                            { user.isSuperuser &&
-                                            <>
+                // for some weird reason, if I just put a condition inside <Switch> blocks, a lot of things get messed up.
+                // so separate the parts for user.isSuperuser
+                if (user.isSuperuser) {
+                    return (
+                        <GlobalErrorBoundary>
+                            <ShortcutsContextProvider>
+                                <Layout>
+                                    <Header />
+                                    <Layout.Content style={{ height: '100%' }}>
+                                        <ShortcutsDialog />
+                                        <GlobalHotKeys keyMap={subKeyMap} handlers={handlers}>
+                                            <Switch>
+                                                <Route exact path='/auth/logout' component={LogoutComponent} />
+                                                <Route exact path='/tasks' component={TasksPageContainer} />
+                                                <Route exact path='/tasks/create' component={CreateTaskPageContainer} />
+                                                <Route exact path='/tasks/:id' component={TaskPageComponent} />
+                                                <Route exact path='/tasks/:tid/jobs/:jid' component={AnnotationPageContainer} />
+                                                <Route exact path='/jobs' component={JobsPageComponent} />
                                                 <Route
                                                     exact
                                                     path='/organizations/create'
@@ -485,40 +471,74 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                                 <Route exact path='/webhooks/create' component={CreateWebhookPage} />
                                                 <Route exact path='/webhooks/update/:id' component={UpdateWebhookPage} />
                                                 <Route exact path='/organization' component={OrganizationPage} />
-                                            </>
-                                            }
-                                            { routesToRender }
-                                            {isModelPluginActive && (
-                                                <Route
-                                                    path='/models'
-                                                >
-                                                    <Switch>
-                                                        <Route exact path='/models' component={ModelsPageComponent} />
-                                                        <Route exact path='/models/create' component={CreateModelPage} />
-                                                    </Switch>
-                                                </Route>
-                                            )}
-                                            <Redirect
-                                                push
-                                                to={new URLSearchParams(location.search).get('next') || '/tasks'}
-                                            />
-                                        </Switch>
-                                    </GlobalHotKeys>
-                                    <ExportDatasetModal />
-                                    <ExportBackupModal />
-                                    <ImportDatasetModal />
-                                    <ImportBackupModal />
-                                    { loggedInModals.map((Component, idx) => (
-                                        <Component key={idx} targetProps={this.props} targetState={this.state} />
-                                    ))}
-                                    <OrganizationWatcher />
-                                    {/* eslint-disable-next-line */}
-                                    <a id='downloadAnchor' target='_blank' style={{ display: 'none' }} download />
-                                </Layout.Content>
-                            </Layout>
-                        </ShortcutsContextProvider>
-                    </GlobalErrorBoundary>
-                );
+
+                                                { routesToRender }
+                                                {isModelPluginActive && (
+                                                    <Route
+                                                        path='/models'
+                                                    >
+                                                        <Switch>
+                                                            <Route exact path='/models' component={ModelsPageComponent} />
+                                                            <Route exact path='/models/create' component={CreateModelPage} />
+                                                        </Switch>
+                                                    </Route>
+                                                )}
+                                                <Redirect
+                                                    push
+                                                    to={new URLSearchParams(location.search).get('next') || '/tasks'}
+                                                />
+                                            </Switch>
+                                        </GlobalHotKeys>
+                                        <ExportDatasetModal />
+                                        <ExportBackupModal />
+                                        <ImportDatasetModal />
+                                        <ImportBackupModal />
+                                        { loggedInModals.map((Component, idx) => (
+                                            <Component key={idx} targetProps={this.props} targetState={this.state} />
+                                        ))}
+                                        <OrganizationWatcher />
+                                        {/* eslint-disable-next-line */}
+                                        <a id='downloadAnchor' target='_blank' style={{ display: 'none' }} download />
+                                    </Layout.Content>
+                                </Layout>
+                            </ShortcutsContextProvider>
+                        </GlobalErrorBoundary>
+                    );
+                } else {
+                    return (
+                        <GlobalErrorBoundary>
+                            <ShortcutsContextProvider>
+                                <Layout>
+                                    <Header />
+                                    <Layout.Content style={{ height: '100%' }}>
+                                        <ShortcutsDialog />
+                                        <GlobalHotKeys keyMap={subKeyMap} handlers={handlers}>
+                                            <Switch>
+                                                <Route exact path='/auth/logout' component={LogoutComponent} />
+                                                <Route exact path='/jobs' component={JobsPageComponent} />
+                                                { routesToRender }
+                                                <Redirect
+                                                    push
+                                                    to={new URLSearchParams(location.search).get('next') || '/jobs'}
+                                                />
+                                            </Switch>
+                                        </GlobalHotKeys>
+                                        <ExportDatasetModal />
+                                        <ExportBackupModal />
+                                        <ImportDatasetModal />
+                                        <ImportBackupModal />
+                                        { loggedInModals.map((Component, idx) => (
+                                            <Component key={idx} targetProps={this.props} targetState={this.state} />
+                                        ))}
+                                        <OrganizationWatcher />
+                                        {/* eslint-disable-next-line */}
+                                        <a id='downloadAnchor' target='_blank' style={{ display: 'none' }} download />
+                                    </Layout.Content>
+                                </Layout>
+                            </ShortcutsContextProvider>
+                        </GlobalErrorBoundary>
+                    );
+                }
             }
 
             return (

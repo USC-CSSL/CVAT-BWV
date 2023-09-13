@@ -2632,6 +2632,7 @@ export class CanvasViewImpl implements CanvasView, Listener {
             acc[val.id] = val.name;
             return acc;
         }, {});
+        const identifierAttrId = label.attributes.find(attr => attr.name === 'identifier').id;
 
         if (state.shapeType === 'skeleton') {
             state.elements.forEach((element: any) => {
@@ -2662,18 +2663,29 @@ export class CanvasViewImpl implements CanvasView, Listener {
                             .addClass('cvat_canvas_text_description');
                     }
                 }
+
                 if (withAttr && !(['auto_unlabeled', 'manual_unlabeled'].includes(source)) ) {
-                    for (const attrID of Object.keys(attributes)) {
-                        const value = attributes[attrID] === undefinedAttrValue ? '' : attributes[attrID];
-                        block
-                            .tspan(`${attrNames[attrID]}: ${value}`)
-                            .attr({
-                                attrID,
-                                dy: '1em',
-                                x: 0,
-                            })
-                            .addClass('cvat_canvas_text_attribute');
-                    }
+                    const attrID = identifierAttrId;
+                    const value = attributes[attrID] === undefinedAttrValue ? '' : attributes[attrID];
+                    block
+                        .tspan(`${attrNames[attrID]}: ${value}`)
+                        .attr({
+                            attrID,
+                            dy: '1em',
+                            x: 0,
+                        })
+                        .addClass('cvat_canvas_text_attribute');
+                    // for (const attrID of Object.keys(attributes)) {
+                    //     const value = attributes[attrID] === undefinedAttrValue ? '' : attributes[attrID];
+                    //     block
+                    //         .tspan(`${attrNames[attrID]}: ${value}`)
+                    //         .attr({
+                    //             attrID,
+                    //             dy: '1em',
+                    //             x: 0,
+                    //         })
+                    //         .addClass('cvat_canvas_text_attribute');
+                    // }
                 }
             })
             .move(0, 0)
