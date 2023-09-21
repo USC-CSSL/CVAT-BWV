@@ -35,6 +35,7 @@ interface AnnotationsParameters {
     frame: number;
     showAllInterpolationTracks: boolean;
     jobInstance: any;
+    fetching: Boolean;
 }
 
 const cvat = getCore();
@@ -57,7 +58,7 @@ export function receiveAnnotationsParameters(): AnnotationsParameters {
         annotation: {
             annotations: { filters },
             player: {
-                frame: { number: frame },
+                frame: { number: frame, fetching },
             },
             job: { instance: jobInstance },
         },
@@ -71,6 +72,7 @@ export function receiveAnnotationsParameters(): AnnotationsParameters {
         frame,
         jobInstance,
         showAllInterpolationTracks,
+        fetching,
     };
 }
 
@@ -675,7 +677,7 @@ export function changeFrameAsync(
                 visible: statisticsVisible,
             },
         } = state.annotation;
-        const { filters, frame, showAllInterpolationTracks } = receiveAnnotationsParameters();
+        const { filters, frame, showAllInterpolationTracks, fetching } = receiveAnnotationsParameters();
 
         try {
             if (toFrame < job.startFrame || toFrame > job.stopFrame) {
@@ -703,15 +705,17 @@ export function changeFrameAsync(
                 dispatch(confirmCanvasReady());
             };
 
+            if ((toFrame === frame || fetching) && !forceUpdate) {
+                //abortAction();
+                return;
+            }
+
             dispatch({
                 type: AnnotationActionTypes.CHANGE_FRAME,
                 payload: {},
             });
 
-            if (toFrame === frame && !forceUpdate) {
-                abortAction();
-                return;
-            }
+
 
             const data = await job.frames.get(toFrame, fillBuffer, frameStep);
             const states = await job.annotations.get(toFrame, showAllInterpolationTracks, filters);
