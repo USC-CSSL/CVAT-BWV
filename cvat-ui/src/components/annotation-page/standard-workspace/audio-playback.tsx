@@ -1,6 +1,6 @@
 import { fetchAudioAsync, fetchAudioPreviewAsync } from 'actions/annotation-actions';
 import { changeFrameSpeed } from 'actions/settings-actions';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {connect} from 'react-redux';
 import { CombinedState } from 'reducers';
 
@@ -72,106 +72,91 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
     }
 }
 
-
-
 function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
-    const { fetchAudio, audioData, audioFetching, frameNumber, startFrame, stopFrame, playing , frameSpeed, fetchPreview, setFrameSpeed} = props;
-
-    const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
-    const [audioSource, setAudioSource] = useState<AudioBufferSourceNode | null>(null);
-    const [buffer, setBuffer] = useState<AudioBuffer | null>(null);
-    const [lastAudioOffset, setLastAudioOffset] = useState<[number, number]>([0, 0]);
+    const {audioData, audioFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame, fetchAudio, fetchPreview, setFrameSpeed} = props;
     const [audioSlowDownFactor, setAudioSlowDownFactor] = useState(1);
     useEffect(() => {
         if (!audioData && !audioFetching) {
-            setAudioCtx(new AudioContext())
             fetchAudio();
             fetchPreview();
         }
     }, []);
 
     useEffect(() => {
-        if (audioCtx && !audioFetching && audioData) {
+        if (!audioFetching && audioData) {
+            if (audioRef.current) {
+                audioRef.current.src = URL.createObjectURL(new Blob([audioData], {type: 'audio/mp3'}));
 
-            audioCtx.decodeAudioData(audioData.slice(0)).then((buffer) => {
-                const duration = buffer.duration;
-                const frameRate = (stopFrame - startFrame) / duration;
-                setFrameSpeed(frameRate);
-                setBuffer(buffer);
-            });
-        }
-    }, [audioCtx, audioData, audioFetching])
-
-    function reOffset() {
-        {
-            if (audioCtx && !audioFetching && audioData) {
-                if (audioSource) {
-                    try {
-                        audioSource.stop();
-                    } catch(err) {
-
-                    }
-                }
-
-                if (playing) {
-                    setAudioSource(audioCtx.createBufferSource());
-                }
             }
         }
-    }
-
-    useEffect(() => {
-        reOffset();
-    }, [audioFetching, playing]);
-
-    useEffect(() => {
-        if (frameNumber % 200 === 0) {
-            if (audioCtx && audioSource && playing && audioSource.buffer) {
-                const videoCurTime = (frameNumber - startFrame) / frameSpeed;
-                const [lastOffset, lastTime] = lastAudioOffset;
-                const currentAudioOffset = lastOffset + (audioCtx.currentTime - lastTime) * audioSource.playbackRate.value;
-
-                if (audioCtx.state === 'running' && audioCtx.currentTime) {
-                    if (currentAudioOffset - videoCurTime > 0.1) {
-                        console.log('video lag', currentAudioOffset - videoCurTime)
-                        setAudioSlowDownFactor(audioSlowDownFactor * 0.98)
-                        reOffset();
-                    } else if (currentAudioOffset - videoCurTime < -0.1) {
-                        console.log('audio lag', currentAudioOffset - videoCurTime)
-                        setAudioSlowDownFactor(audioSlowDownFactor * 1.02)
-                        reOffset();
-                    }
-                }
-            }
-        }
-    }, [frameNumber]);
-
-    useEffect(() => {
-        if (audioCtx && audioSource && playing && buffer) {
-            const videoDuration = (stopFrame - startFrame) / frameSpeed;
-            const audioDuration = buffer.duration;
-            audioSource.buffer = buffer;
-            audioSource.playbackRate.value = audioDuration / videoDuration * audioSlowDownFactor;
-
-            const portionVideo = (frameNumber - startFrame) / (stopFrame - startFrame);
-            const offsetAudio = portionVideo * audioDuration;
-            setLastAudioOffset([offsetAudio, audioCtx.currentTime]);
-            audioSource.start(0, offsetAudio);
-            audioSource.connect(audioCtx.destination);
-
-            if (audioCtx.state !== 'running') {
-                audioCtx.resume();
-            }
-        }
-    }, [audioSource]);
+    }, [audioData, audioFetching]);
 
     useEffect(() => () => {
-        if (audioCtx && audioCtx.state !== 'closed') {
-            audioCtx.close();
+        if (audioRef.current?.src) {
+            audioRef.current.pause();
+            URL.revokeObjectURL(audioRef.current.src);
         }
     }, []);
 
-    return <></>
+    useEffect(() => {
+        if (!audioRef.current || !audioRef.current.duration) {
+            return;
+        }
+        const frameRate = (stopFrame - startFrame) / audioRef.current.duration;
+        if (frameNumber % 200 === 0) {
+            if (playing) {
+                if (frameSpeed != frameRate) {
+                    setFrameSpeed(frameRate);
+                }
+
+                const videoCurTime = (frameNumber - startFrame) / frameRate;
+                const audioCurrentTime = audioRef.current.currentTime;
+
+                if (audioCurrentTime - videoCurTime > 0.1) {
+
+                    console.log('video lag', audioCurrentTime - videoCurTime)
+                    setAudioSlowDownFactor(audioSlowDownFactor * 0.98);
+                    audioRef.current.playbackRate = audioSlowDownFactor * 0.98;
+
+                    audioRef.current.currentTime = videoCurTime;
+                } else if (audioCurrentTime - videoCurTime < -0.1) {
+
+                    console.log('audio lag', audioCurrentTime - videoCurTime)
+                    setAudioSlowDownFactor(audioSlowDownFactor * 1.02);
+                    audioRef.current.playbackRate = audioSlowDownFactor * 1.02;
+
+                    audioRef.current.currentTime = videoCurTime;
+                }
+            }
+        }
+
+        if (playing && audioRef.current.paused) {
+            audioRef.current.play();
+        } else if (!playing) {
+            const videoDuration = (stopFrame - startFrame) / frameRate;
+            const audioDuration = audioRef.current.duration;
+
+            audioRef.current.playbackRate = audioDuration / videoDuration * audioSlowDownFactor;
+
+            const videoCurTime = (frameNumber - startFrame) / frameRate;
+            audioRef.current.currentTime = videoCurTime;
+        }
+
+    }, [frameNumber]);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            if (!playing) {
+                audioRef.current.pause();
+            }
+        }
+    }, [playing])
+
+
+    const audioRef = useRef<HTMLAudioElement>(null);
+    return <>
+        <audio ref={audioRef} style={{display: 'none'}}></audio>
+    </>
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AudioPlaybackComponent);
