@@ -21,7 +21,6 @@ import {
 import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
 import Popover from 'antd/lib/popover';
 import AudioSelectorPopover from './audioselectorpopover';
-import TranscriptPlayer from './transcript/transcript-player';
 
 const cvat = getCore();
 

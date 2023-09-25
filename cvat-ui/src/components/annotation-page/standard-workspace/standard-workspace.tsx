@@ -21,6 +21,7 @@ import AudioPlaybackComponent from './audio-playback';
 import { CombinedState } from 'reducers';
 import { connect } from 'react-redux';
 import QuestionAnnotation from './objects-side-bar/question-annotation';
+import TranscriptPlayer from '../transcript/transcript-player';
 
 interface StateToProps {
     jobPhase: string;
@@ -48,6 +49,7 @@ function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
             <ControlsSideBarContainer />
             }
             <CanvasLayout />
+            <TranscriptPlayer />
             { jobPhase !== 'phase2' ?
                 <ObjectSideBarComponent objectsList={<ObjectsListContainer />} />:
                 <QuestionAnnotation/>

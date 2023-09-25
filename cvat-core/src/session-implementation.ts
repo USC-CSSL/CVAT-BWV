@@ -201,6 +201,11 @@ export function implementJob(Job) {
         return data;
     }
 
+    Job.prototype.transcript.get.implementation = async function () {
+        const transcriptData = await serverProxy.transcript.get(this.id);
+        return transcriptData;
+    }
+
     // TODO: Check filter for annotations
     Job.prototype.annotations.get.implementation = async function (frame, allTracks, filters) {
         if (!Array.isArray(filters)) {

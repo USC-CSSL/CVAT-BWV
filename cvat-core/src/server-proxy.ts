@@ -2237,6 +2237,30 @@ async function fetchFrameImage(jid, frameNumber) {
     }
 }
 
+async function fetchTranscript(jid) {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.get(`${backendAPI}/jobs/${jid}/data`, {
+            params: {
+                ...enableOrganization(),
+                quality: 'compressed',
+                type: 'transcript',
+                number: '0',
+            },
+            responseType: 'json',
+        });
+        return response.data;
+    } catch(errorData) {
+        throw generateError({
+            message: '',
+            response: {
+                ...errorData.response,
+                data: String.fromCharCode.apply(null, new Uint8Array(errorData.response.data)),
+            },
+        });
+    }
+}
+
 export default Object.freeze({
     server: Object.freeze({
         setAuthData,
@@ -2311,6 +2335,10 @@ export default Object.freeze({
     audio: Object.freeze({
         get: fetchAudio,
         preview: fetchAudioPreview,
+    }),
+
+    transcript: Object.freeze({
+       get: fetchTranscript
     }),
 
     annotations: Object.freeze({

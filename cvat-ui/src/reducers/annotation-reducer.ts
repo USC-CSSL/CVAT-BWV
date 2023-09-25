@@ -76,6 +76,10 @@ const defaultState: AnnotationState = {
             fetching: false,
             preview: [],
         },
+        transcript: {
+            fetching: false,
+            data: null,
+        },
         playing: false,
         frameAngles: [],
         navigationBlocked: false,
@@ -355,6 +359,32 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                     audio: {
                         ...state.player.audio,
                         preview: audioPreview
+                    }
+                }
+            }
+        }
+        case AnnotationActionTypes.FETCH_TRANSCRIPT_SUCCESS: {
+            const { transcriptData } = action.payload;
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    transcript: {
+                        ...state.player.transcript,
+                        fetching: false,
+                        data: transcriptData
+                    }
+                }
+            }
+        }
+        case AnnotationActionTypes.FETCH_TRANSCRIPT_FAILED: {
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    transcript: {
+                        ...state.player.transcript,
+                        fetching: false,
                     }
                 }
             }

@@ -685,6 +685,10 @@ export interface AnnotationState {
             fetching: boolean;
             preview: number[];
         };
+        transcript: {
+            fetching: boolean;
+            data: any | null;
+        };
         navigationBlocked: boolean;
         playing: boolean;
         frameAngles: number[];

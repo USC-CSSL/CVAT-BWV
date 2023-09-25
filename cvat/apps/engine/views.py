@@ -565,6 +565,7 @@ class DataChunkGetter:
             'context_image',
             'audio',
             'waveform',
+            'transcript'
         )
         possible_quality_values = ('compressed', 'original')
 
@@ -614,6 +615,12 @@ class DataChunkGetter:
             if self.type == 'waveform':
                 path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-waveformvals')
                 data = []
+                with open(path, 'r') as f:
+                    data = f.readlines()
+                return HttpResponse(data, content_type='application/json')
+            if self.type == 'transcript':
+                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-transcript.json')
+                data = {}
                 with open(path, 'r') as f:
                     data = f.readlines()
                 return HttpResponse(data, content_type='application/json')

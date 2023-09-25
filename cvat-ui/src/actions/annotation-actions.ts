@@ -201,6 +201,8 @@ export enum AnnotationActionTypes {
     UPDATE_BRUSH_TOOLS_CONFIG = 'UPDATE_BRUSH_TOOLS_CONFIG',
     FETCH_AUDIO_SUCCESS = 'FETCH_AUDIO_SUCCESS',
     FETCH_AUDIO_FAILED = 'FETCH_AUDIO_FAILED',
+    FETCH_TRANSCRIPT_SUCCESS = 'FETCH_TRANSCRIPT_SUCCESS',
+    FETCH_TRANSCRIPT_FAILED = 'FETCH_TRANSCRIPT_FAILED',
     FETCH_AUDIO_PREVIEW_SUCCESS = 'FETCH_AUDIO_PREVIEW_SUCCESS',
     MODAL_UPDATE = 'MODAL_UPDATE',
 }
@@ -659,6 +661,29 @@ export function fetchAudioPreviewAsync(): ThunkAction {
 
     };
 }
+
+export function fetchTranscriptAsync(): ThunkAction {
+    return async (dispatch: ActionCreator<Dispatch>, getState: () => CombinedState): Promise<void> => {
+        const state: CombinedState = getState();
+        const { instance: job } = state.annotation.job;
+
+        try {
+            const transcriptData = await job.transcript.get();
+            dispatch({
+                type: AnnotationActionTypes.FETCH_TRANSCRIPT_SUCCESS,
+                payload: {
+                    transcriptData,
+                },
+            });
+        } catch(error) {
+            dispatch({
+                type: AnnotationActionTypes.FETCH_TRANSCRIPT_FAILED,
+            })
+        }
+
+    };
+}
+
 
 export function changeFrameAsync(
     toFrame: number,

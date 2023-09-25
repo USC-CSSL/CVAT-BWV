@@ -57,9 +57,14 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 root.style.minHeight = '';
             }
 
-            if (!history.location.pathname.includes('/jobs')) {
-                closeJob();
-            }
+            // if (!history.location.pathname.includes('/jobs')) {
+            //     closeJob();
+            // }
+            // comment the above stuff out to make sure everthing closes.
+            // we have audio and transcripts which have loaded which are also cleared by closeJob.
+            // if this were not to be called, those things are not cleared and implementing
+            // the whole prevJob flow for everything seems a bit too overkill for now.
+            closeJob();
         };
     }, []);
 
