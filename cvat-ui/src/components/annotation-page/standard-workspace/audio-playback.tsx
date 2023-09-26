@@ -148,7 +148,6 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         if (audioRef.current) {
             if (!playing) {
                 audioRef.current.pause();
-                audioRef.current.src = '';
             }
         }
     }, [playing])
