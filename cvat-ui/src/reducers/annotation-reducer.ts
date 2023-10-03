@@ -389,6 +389,20 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 }
             }
         }
+        case AnnotationActionTypes.UPDATE_TRANSCRIPT: {
+            const { transcriptData } = action.payload;
+            return {
+                ...state,
+                player: {
+                    ...state.player,
+                    transcript: {
+                        ...state.player.transcript,
+                        fetching: false,
+                        data: transcriptData
+                    }
+                }
+            }
+        }
         case AnnotationActionTypes.ROTATE_FRAME: {
             const { offset, angle, rotateAll } = action.payload;
             return {

@@ -22,6 +22,7 @@ import { CombinedState } from 'reducers';
 import { connect } from 'react-redux';
 import QuestionAnnotation from './objects-side-bar/question-annotation';
 import TranscriptPlayer from '../transcript/transcript-player';
+import WaveformSlider from '../transcript/waveform-slider';
 
 interface StateToProps {
     jobPhase: string;
@@ -48,7 +49,16 @@ function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
             { jobPhase !== 'phase2' &&
             <ControlsSideBarContainer />
             }
-            <CanvasLayout />
+            <Layout.Content>
+                <Layout>
+                    <Layout.Header style={{padding: '10px', }}>
+                        {/* <AudioSelector/> */}
+                        <WaveformSlider/>
+                    </Layout.Header>
+                    <CanvasLayout />
+
+                </Layout>
+            </Layout.Content>
             <TranscriptPlayer />
             { jobPhase !== 'phase2' ?
                 <ObjectSideBarComponent objectsList={<ObjectsListContainer />} />:
@@ -56,7 +66,6 @@ function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
             }
             <PropagateConfirmComponent />
             <CanvasContextMenuContainer />
-            <AudioSelector/>
             <CanvasPointContextMenuComponent />
             <IssueAggregatorComponent />
             <RemoveConfirmComponent />

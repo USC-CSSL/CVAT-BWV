@@ -6,6 +6,7 @@ import { CombinedState } from 'reducers';
 import Layout from 'antd/lib/layout';
 import {UserOutlined} from '@ant-design/icons'
 import {Avatar} from 'antd';
+import {personColors} from './conf'
 
 interface StateToProps {
     transciptData: any,
@@ -79,7 +80,7 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
     }
 }
 
-const personColors = ['#6b5b95', '#feb236', '#d64161' ,'#ff7b25', '#86af49', '#c0ded9', '#563f46'];
+
 function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
     const {transciptData, transcriptFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame,
         fetchTranscript, onSwitchPlay, changeFrame} = props;
@@ -139,7 +140,7 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
                         <div>{segment.speaker &&
 
                             <Avatar size={32} icon={<UserOutlined />} style={{
-                                backgroundColor: personColors[parseInt(segment.speaker.split('_')[1]) - 1],
+                                backgroundColor: personColors[parseInt(segment.speaker.split('_')[1]) ],
                             }} />
                         }</div>
                         <div contentEditable={isCurrent}>{segment.text}</div>

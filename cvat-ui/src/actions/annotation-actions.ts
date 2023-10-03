@@ -203,6 +203,7 @@ export enum AnnotationActionTypes {
     FETCH_AUDIO_FAILED = 'FETCH_AUDIO_FAILED',
     FETCH_TRANSCRIPT_SUCCESS = 'FETCH_TRANSCRIPT_SUCCESS',
     FETCH_TRANSCRIPT_FAILED = 'FETCH_TRANSCRIPT_FAILED',
+    UPDATE_TRANSCRIPT = 'UPDATE_TRANSCRIPT',
     FETCH_AUDIO_PREVIEW_SUCCESS = 'FETCH_AUDIO_PREVIEW_SUCCESS',
     MODAL_UPDATE = 'MODAL_UPDATE',
 }
@@ -682,6 +683,21 @@ export function fetchTranscriptAsync(): ThunkAction {
         }
 
     };
+}
+
+export function updateTranscript(index: number, segment: any): AnyAction {
+    const state: CombinedState = getStore().getState();
+    const transcriptData = {...state.annotation.player.transcript.data};
+    const shouldShort = transcriptData.segments[index].start != segment.start;
+    transcriptData.segments[index] = segment;
+
+    if (shouldShort) transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+    return {
+        type: AnnotationActionTypes.UPDATE_TRANSCRIPT,
+        payload: {
+            transcriptData
+        }
+    }
 }
 
 
