@@ -1,15 +1,21 @@
-import { changeFrameAsync, fetchAudioAsync, fetchAudioPreviewAsync, fetchTranscriptAsync, switchPlay } from 'actions/annotation-actions';
+import { changeFrameAsync, fetchAudioAsync, fetchAudioPreviewAsync, fetchTranscriptAsync, switchPlay, updateTranscript } from 'actions/annotation-actions';
 import { changeFrameSpeed } from 'actions/settings-actions';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {connect} from 'react-redux';
 import { CombinedState } from 'reducers';
 import Layout from 'antd/lib/layout';
+import {Row, Col} from 'antd'
 import {UserOutlined} from '@ant-design/icons'
 import {Avatar} from 'antd';
 import {personColors} from './conf'
 
+import {
+    DeleteOutlined
+  } from '@ant-design/icons';
+import TranscriptUtteranceText from './transcript-utterance-text';
+
 interface StateToProps {
-    transciptData: any,
+    transcriptData: any,
     transcriptFetching: boolean;
     startFrame: number;
     stopFrame: number;
@@ -23,6 +29,7 @@ interface DispatchToProps {
     fetchTranscript: () => void;
     changeFrame: (frame: number) => void;
     onSwitchPlay: (play: boolean) => void;
+    onChangeTranscript(index: number, segment: any): void;
 }
 
 
@@ -37,7 +44,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
             },
             player: {
                 transcript: {
-                    data: transciptData,
+                    data: transcriptData,
                     fetching: transcriptFetching,
 
                 },
@@ -57,7 +64,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         }
     } = state;
     return {
-        transciptData,
+        transcriptData,
         transcriptFetching,
         canvasIsReady,
         playing,
@@ -77,13 +84,27 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onSwitchPlay(playing: boolean): void {
             dispatch(switchPlay(playing));
         },
+        onChangeTranscript(index: number, segment: any): void {
+            dispatch(updateTranscript(index, segment));
+        },
     }
 }
 
+const currentStyle = {
+    fontWeight: 'bold',
+    opacity: '100%'
+}
+
+const otherStyle = {
+    opacity: '50%'
+}
+
+
 
 function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
-    const {transciptData, transcriptFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame,
-        fetchTranscript, onSwitchPlay, changeFrame} = props;
+    const {transcriptData, transcriptFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame,
+        fetchTranscript, onSwitchPlay, changeFrame, onChangeTranscript} = props;
+
 
     const scrollFn = useCallback((node: HTMLDivElement) => {
        if (node) {
@@ -95,58 +116,69 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
        }
       }, []);
     useEffect(() => {
-        if (!transciptData && !transcriptFetching) {
+        if (!transcriptData && !transcriptFetching) {
             fetchTranscript();
         }
 
-    }, [])
+    }, []);
 
-    const currentStyle = {
-        fontWeight: 'bold',
-        opacity: '100%'
-    }
-
-    const otherStyle = {
-        opacity: '50%'
-    }
 
     const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
+    let currentIdx = -1;
+    const speakers = new Set();
+    transcriptData && transcriptData.segments.forEach((segment: any, index: number) => {
+        if (currentTimeInSeconds >= segment.start && currentTimeInSeconds <= segment.end) {
+            currentIdx = index;
+        }
+        segment.speaker && speakers.add(parseInt(segment.speaker.split('_')[1]))
+
+    });
+
     return <>
        <Layout.Sider width={300} style={{fontSize: 18, overflowY: 'scroll'}}>
         <div style={{padding: '10px', textAlign: 'center', color: 'white'}}>
-            {!transciptData && !transcriptFetching && 'No Transcript'}
-            {!transciptData && transcriptFetching && 'Loading Transcript...'}
-            {transciptData && <>
-                {transciptData.segments.map((segment: any) =>
+            {!transcriptData && !transcriptFetching && 'No Transcript'}
+            {!transcriptData && transcriptFetching && 'Loading Transcript...'}
+            {transcriptData && <>
+                {transcriptData.segments.map((segment: any, index: number) =>
                 {
-                    const isCurrent = currentTimeInSeconds > segment.start && currentTimeInSeconds < segment.end;
+                    const isCurrent = currentIdx === index;
                     const appliedStyle = (isCurrent) ? currentStyle : otherStyle;
-                    return <>
+                    // return <>
 
-                    <div style={{
-                        marginTop: 10,
-                        cursor: 'pointer',
-                        ...appliedStyle
-                        }}
-                        ref={isCurrent ? scrollFn : null}
-                        onClick={(e) => {
-                            scrollFn(e.target as HTMLDivElement)
-                            if (playing) {
-                                onSwitchPlay(false);
-                            }
-                            changeFrame(Math.min(Math.ceil(segment.start * frameSpeed), stopFrame))
-                        }}
-                        >
-                        <div>{segment.speaker &&
+                    // <div style={{
+                    //     marginTop: 10,
+                    //     cursor: 'pointer',
+                    //     ...appliedStyle
+                    //     }}
+                    //     ref={isCurrent ? scrollFn : null}
+                    //     onClick={(e) => {
+                    //         scrollFn(e.target as HTMLDivElement)
+                    //         if (playing) {
+                    //             onSwitchPlay(false);
+                    //         }
+                    //         changeFrame(Math.min(Math.ceil(segment.start * frameSpeed), stopFrame))
+                    //     }}
+                    //     >
+                    //     <div>{segment.speaker &&
 
-                            <Avatar size={32} icon={<UserOutlined />} style={{
-                                backgroundColor: personColors[parseInt(segment.speaker.split('_')[1]) ],
-                            }} />
-                        }</div>
-                        <div contentEditable={isCurrent}>{segment.text}</div>
+                    //         <Avatar size={32} icon={<UserOutlined />} style={{
+                    //             backgroundColor: personColors[parseInt(segment.speaker.split('_')[1]) ],
+                    //         }} />
+                    //     }</div>
+                    //     <Row ><Col span={2}>{isCurrent && <DeleteOutlined style={{fontSize: 12}} onClick={()=>{
+                    //         onChangeTranscript(index, null);
+                    //     }}/>}</Col><Col span={21}><div contentEditable={isCurrent}>{segment.text}</div></Col><Col span={1}></Col></Row>
+                    // </div>
+                    // </>
 
-                    </div>
-                    </>
+                    return <TranscriptUtteranceText
+                        speakerCount={speakers.size}
+                        appliedStyle={appliedStyle} isCurrent={isCurrent} stopFrame={stopFrame}
+                        scrollFn={scrollFn} changeFrame={changeFrame} playing={playing}
+                        segment={segment} index={index} personColors={personColors} frameSpeed={frameSpeed}
+                        onSwitchPlay={onSwitchPlay} onChangeTranscript={onChangeTranscript}
+                    />
                 }
                 )}
             </>}

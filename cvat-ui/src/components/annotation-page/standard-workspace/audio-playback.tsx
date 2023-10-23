@@ -103,11 +103,12 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
             return;
         }
         const frameRate = (stopFrame - startFrame) / audioRef.current.duration;
+        if (frameSpeed != frameRate) {
+            setFrameSpeed(frameRate);
+        }
         if (frameNumber % 200 === 0) {
             if (playing) {
-                if (frameSpeed != frameRate) {
-                    setFrameSpeed(frameRate);
-                }
+
 
                 const videoCurTime = (frameNumber - startFrame) / frameRate;
                 const audioCurrentTime = audioRef.current.currentTime;

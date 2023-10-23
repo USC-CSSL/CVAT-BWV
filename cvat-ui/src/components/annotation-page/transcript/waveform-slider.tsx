@@ -10,11 +10,7 @@ import { Col, Row } from 'antd/lib/grid';
 import { getCore, ObjectState, Job } from 'cvat-core-wrapper';
 import {
     changeFrameAsync,
-    createAnnotationsAsync,
-    modalUpdateAsync,
-    removeObject,
     switchPlay,
-    updateAnnotationsAsync,
     updateTranscript
 } from 'actions/annotation-actions';
 import getAutoIncrementedIdentifierAttr from 'utils/label-identifier-auto-increment';
@@ -168,6 +164,10 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
         }
     }, [activatedIdx, dragging, sliderRef, frameNumber, frameNumber]);
 
+    useEffect(() => {
+        setActivatedIdx(-1);
+    }, [transcriptData])
+
 
 
 
@@ -199,7 +199,13 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
 
 
     const sliderWidth = sliderRef.current?.clientWidth || 0;
-
+    const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
+    let currentIdx = -1;
+    transcriptData &&  transcriptData.segments.forEach((segment: any, index: number) => {
+        if (currentTimeInSeconds >= segment.start && currentTimeInSeconds <= segment.end) {
+            currentIdx = index;
+        }
+    });
     return (
         <>
 
@@ -213,15 +219,28 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
                     width: '100%',
                     height: '100%',
                     backgroundPosition: sliderWidth? `${(sliderWidth / 2 - MULTIPLIER_WIDTH*frameNumber)}px 0px` : '0px 0px',
+                    cursor: activatedIdx !== -1 ? 'auto' : 'crosshair'
 
-                }} ref={sliderRef}></div>
+                }} onClick={(e) => {
+                    if (sliderRef.current && activatedIdx === -1) {
+                    onSwitchPlay(false);
+                    const xPos = e.clientX;
+                    const sliderMid = sliderRef.current.getBoundingClientRect().x + sliderRef.current.getBoundingClientRect().width / 2;
+                    const newTime = (frameNumber + (xPos - sliderMid) * MULTIPLIER_WIDTH) / frameSpeed;
+
+                    onChangeTranscript(-1, {
+                        start: newTime,
+                        end: newTime + 5,
+                        text: "Enter New Utterance",
+                        speaker: "SPEAKER_00"
+                    })
+                }}} ref={sliderRef}></div>
 
                 {
                     transcriptData && transcriptData.segments.map((segment: any, idx: number) => {
                         if (segment.speaker) {
                             const color  = personColors[parseInt(segment.speaker.split('_')[1])];
-                            const currentlyBeingSpoken = segment.start * frameSpeed < (frameNumber - startFrame) &&
-                                segment.end * frameSpeed > (frameNumber - startFrame);
+                            const currentlyBeingSpoken = idx === currentIdx;
 
                             const sliderStyle = {
                                 position: 'absolute' as Property.Position,

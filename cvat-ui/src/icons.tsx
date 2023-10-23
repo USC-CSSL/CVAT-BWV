@@ -6,6 +6,8 @@
 import React from 'react';
 
 import SVGCVATLogo from './assets/cvat-logo.svg';
+import SVGEveryDayRespectLogoLight from './assets/everydayrespect_logo_light.svg';
+import SVGEveryDayRespectLogoDark from './assets/everydayrespect_logo_dark.svg';
 import SVGCursorIcon from './assets/cursor-icon.svg';
 import SVGMoveIcon from './assets/move-icon.svg';
 import SVGRotateIcon from './assets/rotate-icon.svg';
@@ -122,3 +124,5 @@ export const ClearIcon = React.memo((): JSX.Element => <SVGClearIcon />);
 export const ShowPasswordIcon = React.memo((): JSX.Element => <SVGShowPasswordIcon />);
 export const PlusIcon = React.memo((): JSX.Element => <SVGPlusIcon />);
 export const CheckIcon = React.memo((): JSX.Element => <SVGCheckIcon />);
+export const EverydayRespectLogo = React.memo((): JSX.Element => <SVGEveryDayRespectLogoLight/>)
+export const EverydayRespectLogoDark = React.memo((): JSX.Element => <SVGEveryDayRespectLogoDark/>)

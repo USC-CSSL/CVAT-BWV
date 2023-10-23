@@ -8,4 +8,4 @@ COPY ./cvat-canvas/package.json /tmp/cvat-canvas/
 COPY ./cvat-canvas3d/package.json /tmp/cvat-canvas3d/
 COPY ./cvat-ui/package.json /tmp/cvat-ui/
 COPY ./cvat-data/package.json /tmp/cvat-data/
-CMD [ "yarn", "install", "--ignore-scripts", "--frozen-lockfile" ]
+# CMD [ "yarn", "install", "--ignore-scripts", "--frozen-lockfile" ]

@@ -33,7 +33,7 @@ import Select from 'antd/lib/select';
 import { getCore } from 'cvat-core-wrapper';
 import config from 'config';
 
-import { CVATLogo } from 'icons';
+import { CVATLogo, EverydayRespectLogo } from 'icons';
 import ChangePasswordDialog from 'components/change-password-modal/change-password-modal';
 import CVATTooltip from 'components/common/cvat-tooltip';
 import { switchSettingsDialog as switchSettingsDialogAction } from 'actions/settings-actions';
@@ -423,7 +423,7 @@ function HeaderContainer(props: Props): JSX.Element {
     return (
         <Layout.Header className='cvat-header'>
             <div className='cvat-left-header'>
-                <Icon className='cvat-logo-icon' component={CVATLogo} />
+                <Icon className='cvat-logo-icon' component={EverydayRespectLogo} />
                 {/* <Button
                     className={getButtonClassName('projects')}
                     type='link'

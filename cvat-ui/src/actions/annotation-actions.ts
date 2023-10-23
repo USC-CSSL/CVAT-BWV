@@ -688,10 +688,20 @@ export function fetchTranscriptAsync(): ThunkAction {
 export function updateTranscript(index: number, segment: any): AnyAction {
     const state: CombinedState = getStore().getState();
     const transcriptData = {...state.annotation.player.transcript.data};
-    const shouldShort = transcriptData.segments[index].start != segment.start;
-    transcriptData.segments[index] = segment;
+    if (segment == null) {
+        // delete segment at index
+        transcriptData.segments = transcriptData.segments.filter((_: any, i: number) => i!=index);
+    } else if (index === -1) {
+        // add a new segment
+        transcriptData.segments.push(segment);
+        transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+    } else{
+        const shouldSort = transcriptData.segments[index].start != segment.start;
+        transcriptData.segments[index] = segment;
 
-    if (shouldShort) transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+        if (shouldSort) transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+    }
+
     return {
         type: AnnotationActionTypes.UPDATE_TRANSCRIPT,
         payload: {
