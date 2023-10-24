@@ -710,6 +710,27 @@ export function updateTranscript(index: number, segment: any): AnyAction {
     }
 }
 
+export function updateTranscriptBulk(indexes: number[], segments: any[]): AnyAction {
+    const state: CombinedState = getStore().getState();
+    const transcriptData = {...state.annotation.player.transcript.data};
+    for (let i = 0; i<indexes.length; i++) {
+        const index = indexes[i];
+        const segment = segments[i];
+
+        transcriptData.segments[index] = segment;
+
+
+    }
+    transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+
+    return {
+        type: AnnotationActionTypes.UPDATE_TRANSCRIPT,
+        payload: {
+            transcriptData
+        }
+    }
+}
+
 
 export function changeFrameAsync(
     toFrame: number,

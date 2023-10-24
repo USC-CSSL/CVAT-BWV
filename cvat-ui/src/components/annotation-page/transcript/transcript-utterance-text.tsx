@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {personColors} from './conf'
 interface Props {
     appliedStyle: any,
@@ -18,7 +18,11 @@ interface Props {
     isCurrent: boolean,
     playing: boolean,
     onSwitchPlay: (play: boolean) => void
-    speakerCount: number
+    speakerCount: number,
+    isSelected: boolean,
+    isLastSelected: boolean,
+    clearSelected: () => void;
+    changeSpeakerBulk: (speaker: string) => void
 
 }
 
@@ -27,19 +31,29 @@ import {DeleteOutlined, UserOutlined} from '@ant-design/icons'
 import './style.scss';
 function TransciptUtteranceText(props: Props) {
     const {appliedStyle, scrollFn, isCurrent, playing, onSwitchPlay, changeFrame, segment, frameSpeed, stopFrame,
-    personColors, onChangeTranscript, index, speakerCount} = props;
+    personColors, onChangeTranscript, index, speakerCount, isSelected, isLastSelected, clearSelected, changeSpeakerBulk} = props;
+
+    const utteranceRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isLastSelected && utteranceRef.current) {
+            scrollFn(utteranceRef.current);
+        }
+    }, [isLastSelected])
 
     return (
         <>
             <div
+                ref={utteranceRef}
                 style={{
                     marginTop: 10,
                     cursor: 'pointer',
                     ...appliedStyle,
+                    backgroundColor: isSelected ? 'rgb(19, 72, 123)' : 'rgb(0, 21, 41)'
                 }}
-                ref={isCurrent ? scrollFn : null}
                 onClick={(e) => {
                     scrollFn(e.target as HTMLDivElement);
+                    clearSelected();
                     if (playing) {
                         onSwitchPlay(false);
                     }
@@ -54,10 +68,14 @@ function TransciptUtteranceText(props: Props) {
                         }}>
                             {Array(speakerCount).fill(0).map((_, idx) => (
                                 <Menu.Item onClick={()=>{
-                                    onChangeTranscript(index, {
-                                        ...segment,
-                                        speaker: "SPEAKER_"+(idx)
-                                    })
+                                    if (!isSelected) {
+                                        onChangeTranscript(index, {
+                                            ...segment,
+                                            speaker: "SPEAKER_"+(idx)
+                                        })
+                                    } else {
+                                        changeSpeakerBulk("SPEAKER_"+(idx));
+                                    }
                                 }}>
                                     <div style={{ height: 36}} >
                                     <Avatar

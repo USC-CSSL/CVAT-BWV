@@ -502,6 +502,18 @@ function HeaderContainer(props: Props): JSX.Element {
                         Analytics
                     </Button>
                 ) : null}
+
+                <Button
+                    className={getButtonClassName('analytics')}
+                    type='link'
+                    href={`https://forms.gle/eyr7YarWwwihfmPU8`}
+                    onClick={(event: React.MouseEvent): void => {
+                        event.preventDefault();
+                        window.open(`https://forms.gle/eyr7YarWwwihfmPU8`, '_blank');
+                    }}
+                >
+                    Report Bug
+                </Button>
             </div>
             <div className='cvat-right-header'>
                 {/* <CVATTooltip overlay='Click to open repository'>

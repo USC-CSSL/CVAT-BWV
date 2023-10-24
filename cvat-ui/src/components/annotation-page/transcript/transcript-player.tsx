@@ -1,4 +1,4 @@
-import { changeFrameAsync, fetchAudioAsync, fetchAudioPreviewAsync, fetchTranscriptAsync, switchPlay, updateTranscript } from 'actions/annotation-actions';
+import { changeFrameAsync, updateTranscriptBulk, fetchTranscriptAsync, switchPlay, updateTranscript } from 'actions/annotation-actions';
 import { changeFrameSpeed } from 'actions/settings-actions';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {connect} from 'react-redux';
@@ -30,6 +30,7 @@ interface DispatchToProps {
     changeFrame: (frame: number) => void;
     onSwitchPlay: (play: boolean) => void;
     onChangeTranscript(index: number, segment: any): void;
+    onChangeTranscriptBulk(indexes: number[], segments: any[]): void;
 }
 
 
@@ -87,6 +88,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
         onChangeTranscript(index: number, segment: any): void {
             dispatch(updateTranscript(index, segment));
         },
+        onChangeTranscriptBulk(indexes: number[], segments: any[]) {
+            dispatch(updateTranscriptBulk(indexes, segments));
+        },
     }
 }
 
@@ -105,6 +109,29 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
     const {transcriptData, transcriptFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame,
         fetchTranscript, onSwitchPlay, changeFrame, onChangeTranscript} = props;
 
+    const [currentIdx, setCurrentIdx] = useState(-1);
+    const [speakerCount, setSpeakerCount] = useState(0);
+
+    const [selected, setSelected] = useState<number[]>([]);
+
+
+    useEffect(() => {
+        const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
+        let cIdx = -1;
+        const speakers = new Set();
+        transcriptData && transcriptData.segments.forEach((segment: any, index: number) => {
+            if (currentTimeInSeconds >= segment.start && currentTimeInSeconds <= segment.end) {
+                cIdx = index;
+            }
+            segment.speaker && speakers.add(parseInt(segment.speaker.split('_')[1]))
+
+        });
+
+        setCurrentIdx(cIdx)
+
+        setSpeakerCount(speakers.size)
+    }, [frameNumber])
+
 
     const scrollFn = useCallback((node: HTMLDivElement) => {
        if (node) {
@@ -115,6 +142,64 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
         })
        }
       }, []);
+
+    const clearSelected = useCallback(() => {
+        setSelected([]);
+    }, []);
+
+    const changeSpeakerBulk = useCallback((speaker: string) => {
+        const sel = Array.from(new Set(selected));
+        const segments = [];
+        for( const idx of sel) {
+            segments.push({
+                ...transcriptData.segments[idx],
+                speaker: speaker
+            })
+        }
+
+        updateTranscriptBulk(sel, segments);
+    }, [selected, transcriptData])
+    useEffect(() => {
+        const keyDownFn = (event: KeyboardEvent) => {
+            if (event.shiftKey && event.key === 'ArrowUp') {
+                if (!selected.length) {
+                    selected.push(currentIdx);
+                    selected.push(currentIdx - 1);
+                }
+                else if (currentIdx < selected[selected.length - 1]) {
+                    selected.pop();
+                }
+                else {
+                    if (selected[selected.length - 1] > 0) {
+                        selected.push(selected[selected.length - 1] - 1);
+                    }
+                }
+            } else if (event.shiftKey && event.key === 'ArrowDown') {
+                if (!selected.length) {
+                    selected.push(currentIdx);
+                    selected.push(currentIdx + 1);
+                }
+                else if (currentIdx > selected[selected.length - 1]) {
+                    selected.pop();
+                }
+                else {
+                    if (selected[selected.length - 1] < transcriptData?.segments?.length) {
+                        selected.push(selected[selected.length - 1] + 1);
+                    }
+                }
+
+            }
+            setSelected([...selected]);
+        }
+
+
+        document.addEventListener('keydown', keyDownFn);
+
+        return () => {
+            document.removeEventListener('keydown', keyDownFn);
+        }
+    }, [selected, currentIdx, transcriptData]);
+
     useEffect(() => {
         if (!transcriptData && !transcriptFetching) {
             fetchTranscript();
@@ -122,17 +207,12 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
 
     }, []);
 
+    useEffect(() => {
+        setSelected([]);
+    }, [transcriptData])
 
-    const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
-    let currentIdx = -1;
-    const speakers = new Set();
-    transcriptData && transcriptData.segments.forEach((segment: any, index: number) => {
-        if (currentTimeInSeconds >= segment.start && currentTimeInSeconds <= segment.end) {
-            currentIdx = index;
-        }
-        segment.speaker && speakers.add(parseInt(segment.speaker.split('_')[1]))
 
-    });
+
 
     return <>
        <Layout.Sider width={300} style={{fontSize: 18, overflowY: 'scroll'}}>
@@ -173,11 +253,15 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
                     // </>
 
                     return <TranscriptUtteranceText
-                        speakerCount={speakers.size}
+                        speakerCount={speakerCount}
                         appliedStyle={appliedStyle} isCurrent={isCurrent} stopFrame={stopFrame}
                         scrollFn={scrollFn} changeFrame={changeFrame} playing={playing}
                         segment={segment} index={index} personColors={personColors} frameSpeed={frameSpeed}
                         onSwitchPlay={onSwitchPlay} onChangeTranscript={onChangeTranscript}
+                        isSelected={selected.includes(index)}
+                        isLastSelected={selected && selected[selected.length - 1] === index}
+                        clearSelected={clearSelected}
+                        changeSpeakerBulk={changeSpeakerBulk}
                     />
                 }
                 )}
