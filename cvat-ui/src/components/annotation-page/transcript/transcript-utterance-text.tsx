@@ -36,10 +36,10 @@ function TransciptUtteranceText(props: Props) {
     const utteranceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (isLastSelected && utteranceRef.current) {
+        if ((isLastSelected || isCurrent) && utteranceRef.current) {
             scrollFn(utteranceRef.current);
         }
-    }, [isLastSelected])
+    }, [isLastSelected, isCurrent])
 
     return (
         <>
@@ -52,7 +52,6 @@ function TransciptUtteranceText(props: Props) {
                     backgroundColor: isSelected ? 'rgb(19, 72, 123)' : 'rgb(0, 21, 41)'
                 }}
                 onClick={(e) => {
-                    scrollFn(e.target as HTMLDivElement);
                     clearSelected();
                     if (playing) {
                         onSwitchPlay(false);
