@@ -224,35 +224,9 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
                 {
                     const isCurrent = currentIdx === index;
                     const appliedStyle = (isCurrent) ? currentStyle : otherStyle;
-                    // return <>
-
-                    // <div style={{
-                    //     marginTop: 10,
-                    //     cursor: 'pointer',
-                    //     ...appliedStyle
-                    //     }}
-                    //     ref={isCurrent ? scrollFn : null}
-                    //     onClick={(e) => {
-                    //         scrollFn(e.target as HTMLDivElement)
-                    //         if (playing) {
-                    //             onSwitchPlay(false);
-                    //         }
-                    //         changeFrame(Math.min(Math.ceil(segment.start * frameSpeed), stopFrame))
-                    //     }}
-                    //     >
-                    //     <div>{segment.speaker &&
-
-                    //         <Avatar size={32} icon={<UserOutlined />} style={{
-                    //             backgroundColor: personColors[parseInt(segment.speaker.split('_')[1]) ],
-                    //         }} />
-                    //     }</div>
-                    //     <Row ><Col span={2}>{isCurrent && <DeleteOutlined style={{fontSize: 12}} onClick={()=>{
-                    //         onChangeTranscript(index, null);
-                    //     }}/>}</Col><Col span={21}><div contentEditable={isCurrent}>{segment.text}</div></Col><Col span={1}></Col></Row>
-                    // </div>
-                    // </>
 
                     return <TranscriptUtteranceText
+                        key={segment.key}
                         speakerCount={speakerCount}
                         appliedStyle={appliedStyle} isCurrent={isCurrent} stopFrame={stopFrame}
                         scrollFn={scrollFn} changeFrame={changeFrame} playing={playing}

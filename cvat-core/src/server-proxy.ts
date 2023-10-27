@@ -2261,6 +2261,23 @@ async function fetchTranscript(jid) {
     }
 }
 
+async function saveTranscript(jid, transcript) {
+    const { backendAPI } = config;
+    try {
+        const response = await Axios.post(`${backendAPI}/jobs/${jid}/saveTranscript`, {
+            transcript
+        });
+        return response.data;
+    } catch(errorData) {
+        throw generateError({
+            message: '',
+            response: {
+                ...errorData.response,
+            },
+        });
+    }
+}
+
 export default Object.freeze({
     server: Object.freeze({
         setAuthData,
@@ -2338,7 +2355,8 @@ export default Object.freeze({
     }),
 
     transcript: Object.freeze({
-       get: fetchTranscript
+       get: fetchTranscript,
+       save: saveTranscript,
     }),
 
     annotations: Object.freeze({

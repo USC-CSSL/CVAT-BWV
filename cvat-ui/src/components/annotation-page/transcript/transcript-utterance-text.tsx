@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {personColors} from './conf'
 interface Props {
     appliedStyle: any,
@@ -35,11 +35,27 @@ function TransciptUtteranceText(props: Props) {
 
     const utteranceRef = useRef<HTMLDivElement>(null);
 
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const [editingText, setEditingText] = useState(false);
+    const [editedContent, setEditedContent] = useState(segment?.text)
+
     useEffect(() => {
         if ((isLastSelected || isCurrent) && utteranceRef.current) {
             scrollFn(utteranceRef.current);
         }
-    }, [isLastSelected, isCurrent])
+
+        setEditingText(false);
+
+        if (segment.text !== editedContent) {
+            onChangeTranscript(index, {
+                ...segment,
+                text: editedContent
+            })
+        }
+
+    }, [isLastSelected, isCurrent]);
+
 
     return (
         <>
@@ -112,7 +128,18 @@ function TransciptUtteranceText(props: Props) {
                         )}
                     </Col>
                     <Col span={21}>
-                        <div contentEditable={isCurrent}>{segment.text}</div>
+                        <div onDoubleClick={() => {
+                            if (isCurrent) {
+                                setEditingText(true);
+                            }
+                        }} >
+                            {editingText && <textarea ref={textareaRef} style={{
+                                backgroundColor: 'rgba(0, 0, 0, 0)',
+                                height: textareaRef.current && textareaRef.current.scrollHeight || 'auto',
+                                resize: 'none'
+                            }} value={editedContent} onChange={(e) => setEditedContent(e.target.value)} ></textarea>}
+                            {!editingText && segment.text}
+                        </div>
                     </Col>
                     <Col span={1}></Col>
                 </Row>

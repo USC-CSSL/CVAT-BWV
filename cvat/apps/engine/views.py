@@ -11,6 +11,7 @@ import traceback
 from datetime import datetime
 from distutils.util import strtobool
 from tempfile import mkstemp
+import json
 
 from django.db.models.query import Prefetch
 import django_rq
@@ -1566,6 +1567,20 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
 
         return data_getter(request, db_job.segment.start_frame,
             db_job.segment.stop_frame, db_job.segment.task.data)
+
+
+    @action(detail=True, methods=['POST'], serializer_class=None,
+        url_path='saveTranscript')
+    def saveTranscript(self, request, pk):
+        db_job = self.get_object() # call check_object_permissions as well
+        jobid = db_job.id
+
+        transcript = request.data['transcript']
+
+        with open(os.path.join('/home/django/data', 'data', str(jobid), 'compressed', '0.zip-transcript.json'), 'w') as f:
+            f.write(json.dumps(transcript))
+
+        return HttpResponse(status=HTTPStatus.OK)
 
 
     @extend_schema(summary='Method provides a meta information about media files which are related with the job',

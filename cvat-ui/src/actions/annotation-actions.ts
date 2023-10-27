@@ -36,6 +36,7 @@ interface AnnotationsParameters {
     showAllInterpolationTracks: boolean;
     jobInstance: any;
     fetching: Boolean;
+    transcriptData: any
 }
 
 const cvat = getCore();
@@ -59,8 +60,12 @@ export function receiveAnnotationsParameters(): AnnotationsParameters {
             annotations: { filters },
             player: {
                 frame: { number: frame, fetching },
+                transcript: {
+                    data: transcriptData
+                }
             },
             job: { instance: jobInstance },
+
         },
         settings: {
             workspace: { showAllInterpolationTracks },
@@ -73,6 +78,7 @@ export function receiveAnnotationsParameters(): AnnotationsParameters {
         jobInstance,
         showAllInterpolationTracks,
         fetching,
+        transcriptData
     };
 }
 
@@ -693,6 +699,7 @@ export function updateTranscript(index: number, segment: any): AnyAction {
         transcriptData.segments = transcriptData.segments.filter((_: any, i: number) => i!=index);
     } else if (index === -1) {
         // add a new segment
+        segment.key = new Date().valueOf();
         transcriptData.segments.push(segment);
         transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
     } else{
@@ -1137,7 +1144,7 @@ export function getJobAsync(
 
 export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boolean, afterSave?: () => void): ThunkAction {
     return async (dispatch: ActionCreator<Dispatch>): Promise<void> => {
-        const { filters, showAllInterpolationTracks } = receiveAnnotationsParameters();
+        const { filters, showAllInterpolationTracks, transcriptData } = receiveAnnotationsParameters();
 
         dispatch({
             type: AnnotationActionTypes.SAVE_ANNOTATIONS,
@@ -1149,6 +1156,7 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
 
             await sessionInstance.frames.save();
             await sessionInstance.annotations.save();
+            await sessionInstance.transcript.save(transcriptData);
             await saveJobEvent.close();
             dispatch(saveLogsAsync());
 

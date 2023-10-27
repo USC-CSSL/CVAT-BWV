@@ -105,6 +105,11 @@ export async function saveAnnotations(session, onUpdate) {
     // If a collection wasn't uploaded, than it wasn't changed, finally we shouldn't save it
 }
 
+export async function saveTranscript(session, transcript, onUpdate) {
+    const res = await serverProxy.transcript.save(session.id, transcript)
+    if (typeof onUpdate === 'function') onUpdate(res);
+}
+
 export function searchAnnotations(session, filters, frameFrom, frameTo) {
     const sessionType = session instanceof Task ? 'task' : 'job';
     const cache = getCache(sessionType);

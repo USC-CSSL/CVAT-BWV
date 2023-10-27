@@ -281,7 +281,16 @@ function buildDuplicatedAPI(prototype) {
                     );
                     return result;
                 },
+                async save(transcript, onUpdate) {
+                    const result = await PluginRegistry.apiWrapper.call(
+                        this,
+                        prototype.transcript.save,
+                        transcript, onUpdate
+                    );
+                    return result;
+                },
             }
+
         }),
         logger: Object.freeze({
             value: {
@@ -414,6 +423,7 @@ export class Job extends Session {
 
     public transcript: {
         get: CallableFunction;
+        save: CallableFunction;
     }
 
     public logger: {
@@ -634,6 +644,7 @@ export class Job extends Session {
 
         this.transcript = {
             get: Object.getPrototypeOf(this).transcript.get.bind(this),
+            save: Object.getPrototypeOf(this).transcript.save.bind(this),
         }
 
         this.logger = {

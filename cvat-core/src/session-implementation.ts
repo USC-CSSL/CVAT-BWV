@@ -32,7 +32,7 @@ import {
     importCollection, exportCollection, importDataset,
     exportDataset, undoActions, redoActions,
     freezeHistory, clearActions, getActions,
-    clearCache, getHistory,
+    clearCache, getHistory, saveTranscript
 } from './annotations';
 
 // must be called with task/job context
@@ -285,6 +285,11 @@ export function implementJob(Job) {
 
     Job.prototype.annotations.save.implementation = async function (onUpdate) {
         const result = await saveAnnotations(this, onUpdate);
+        return result;
+    };
+
+    Job.prototype.transcript.save.implementation = async function (transcript, onUpdate) {
+        const result = await saveTranscript(this, transcript, onUpdate);
         return result;
     };
 
