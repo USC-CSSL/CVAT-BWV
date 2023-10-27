@@ -155,6 +155,7 @@ class SortingMethod(str, Enum):
         return self.value
 
 class Phase(str, Enum):
+    PHASE0 = 'phase0'
     PHASE1A = 'phase1a'
     PHASE1B = 'phase1b'
     PHASE2 = 'phase2'
@@ -499,7 +500,7 @@ class Job(models.Model):
 
     # added field for mola project
     phase = models.CharField(max_length=10, choices=Phase.choices(),
-        default=Phase.PHASE1A)
+        default=Phase.PHASE0)
 
     def get_dirname(self):
         return os.path.join(settings.JOBS_ROOT, str(self.id))

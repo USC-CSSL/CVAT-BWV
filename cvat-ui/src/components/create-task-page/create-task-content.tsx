@@ -33,7 +33,7 @@ import { idGenerator } from 'components/labels-editor/common';
 const { Option } = Select;
 
 type TabName = 'local' | 'share' | 'remote' | 'cloudStorage';
-type Phase = 'phase1a' | 'phase1b' | 'phase2';
+type Phase = 'phase0' | 'phase1a' | 'phase1b' | 'phase2';
 const core = getCore();
 
 export interface CreateTaskData {

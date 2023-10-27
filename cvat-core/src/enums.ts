@@ -259,6 +259,7 @@ export enum LabelType {
 }
 
 export enum Phase {
+    PHASE0 = 'phase0',
     PHASE1A = 'phase1a',
     PHASE1B = 'phase1b',
     PHASE2 = 'phase2'
