@@ -1242,6 +1242,7 @@ class JobPermission(OpenPolicyAgentPermission):
             ('commits', 'GET'): Scopes.VIEW_COMMITS,
             ('dataset_export', 'GET'): Scopes.EXPORT_DATASET,
             ('preview', 'GET'): Scopes.VIEW,
+            ('saveTranscript', 'POST'): Scopes.UPDATE_ANNOTATIONS,
         }.get((view.action, request.method))
 
         scopes = []

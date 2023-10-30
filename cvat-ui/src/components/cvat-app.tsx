@@ -516,6 +516,7 @@ class CVATApplication extends React.PureComponent<CVATAppProps & RouteComponentP
                                             <Switch>
                                                 <Route exact path='/auth/logout' component={LogoutComponent} />
                                                 <Route exact path='/jobs' component={JobsPageComponent} />
+                                                <Route exact path='/tasks/:tid/jobs/:jid' component={AnnotationPageContainer} />
                                                 { routesToRender }
                                                 <Redirect
                                                     push
