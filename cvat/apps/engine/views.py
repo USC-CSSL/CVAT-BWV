@@ -63,7 +63,7 @@ from cvat.apps.engine.serializers import (
     UserSerializer, PluginsSerializer, IssueReadSerializer,
     IssueWriteSerializer, CommentReadSerializer, CommentWriteSerializer, CloudStorageWriteSerializer,
     CloudStorageReadSerializer, DatasetFileSerializer,
-    ProjectFileSerializer, TaskFileSerializer, CloudStorageContentSerializer)
+    ProjectFileSerializer, TaskFileSerializer, CloudStorageContentSerializer, TranscriptSerializer)
 from cvat.apps.engine.view_utils import get_cloud_storage_for_import_or_export
 from cvat.apps.engine.schema import ORGANIZATION_OPEN_API_PARAMETERS
 
@@ -1576,6 +1576,11 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         jobid = db_job.id
 
         transcript = request.data['transcript']
+
+        valid_ser = TranscriptSerializer(data=transcript)
+        if not valid_ser.is_valid():
+            print(valid_ser.errors)
+            return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
         with open(os.path.join('/home/django/data', 'data', str(jobid), 'compressed', '0.zip-transcript.json'), 'w') as f:
             f.write(json.dumps(transcript))

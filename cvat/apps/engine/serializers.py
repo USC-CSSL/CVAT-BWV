@@ -1855,3 +1855,14 @@ def _validate_existence_of_cloud_storage(cloud_storage_id):
         _ = models.CloudStorage.objects.get(id=cloud_storage_id)
     except models.CloudStorage.DoesNotExist:
         raise serializers.ValidationError(f'The specified cloud storage {cloud_storage_id} does not exist.')
+
+class TranscriptSegmentSerializer(serializers.Serializer):
+    speaker = serializers.CharField(max_length=128, required=False)
+    key = serializers.IntegerField(required=True)
+    start = serializers.FloatField(required=True)
+    end = serializers.FloatField(required=True)
+    text = serializers.CharField()
+
+class TranscriptSerializer(serializers.Serializer):
+    segments = serializers.ListField(child=TranscriptSegmentSerializer())
+
