@@ -1156,7 +1156,9 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
 
             await sessionInstance.frames.save();
             await sessionInstance.annotations.save();
-            await sessionInstance.transcript.save(transcriptData);
+            if (transcriptData) {
+                await sessionInstance.transcript.save(transcriptData);
+            }
             await saveJobEvent.close();
             dispatch(saveLogsAsync());
 
