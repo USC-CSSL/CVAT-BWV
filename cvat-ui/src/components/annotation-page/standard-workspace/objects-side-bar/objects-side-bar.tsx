@@ -78,7 +78,7 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
 
     const is2D = jobInstance ? jobInstance.dimension === DimensionType.DIMENSION_2D : true;
     return (
-        <Layout.Sider
+        jobInstance.phase === 'phase0' ? <></> : <Layout.Sider
             className='cvat-objects-sidebar'
             theme='light'
             width={300}

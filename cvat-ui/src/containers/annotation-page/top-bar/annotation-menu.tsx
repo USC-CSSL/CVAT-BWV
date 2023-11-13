@@ -139,8 +139,12 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
             // jobInstance.stage = JobStage.ACCEPTANCE;
             // jobInstance.state = core.enums.JobState.COMPLETED;
             // updateJob(jobInstance);
-
-            if (jobInstance.phase === core.enums.Phase.PHASE1A) {
+            if (jobInstance.phase === core.enums.Phase.PHASE0) {
+                jobInstance.phase = core.enums.Phase.PHASE1A;
+                updateJob(jobInstance);
+                window.location.reload();
+            }
+            else if (jobInstance.phase === core.enums.Phase.PHASE1A) {
                 // jobInstance.stage = JobStage.ACCEPTANCE;
                 // jobInstance.state = core.enums.JobState.COMPLETED;
                 const people = objectStates.filter(state => {
