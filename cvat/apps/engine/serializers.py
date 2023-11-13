@@ -593,7 +593,15 @@ class JobWriteSerializer(serializers.ModelSerializer):
         if assignee is not None:
             validated_data['assignee'] = User.objects.get(id=assignee)
 
-        if instance.phase == models.Phase.PHASE1A and validated_data.get('phase') == models.Phase.PHASE1B:
+        if instance.phase == models.Phase.PHASE0 and validated_data.get('phase') == models.Phase.PHASE1A:
+            task = models.Task.objects.get(id=instance.get_task_id())
+            task.assignee = None
+            task.save()
+        elif instance.phase == models.Phase.PHASE1A and validated_data.get('phase') == models.Phase.PHASE1B:
+            task = models.Task.objects.get(id=instance.get_task_id())
+            task.assignee = None
+            task.save()
+        elif instance.phase == models.Phase.PHASE1B and validated_data.get('phase') == models.Phase.PHASE2:
             task = models.Task.objects.get(id=instance.get_task_id())
             task.assignee = None
             task.save()
