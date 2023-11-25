@@ -211,7 +211,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                     />
                             ))
                         }
-                        {jobPhase === 'phase1a' && <>
+                        <>
                         <div style={{display: 'flex'}}>
                         <Popover
                                 overlayClassName='cvat-add-audioselection-popover cvat-tools-control-popover'
@@ -273,11 +273,8 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                 icon={<PlusOutlined />}></Button>
                         </Popover>
                         </div>
-                        {/* <div>
-                            <TranscriptPlayer></TranscriptPlayer>
-                        </div> */}
                         </>
-                        }
+                        
                     </div>
                 </div>
             }

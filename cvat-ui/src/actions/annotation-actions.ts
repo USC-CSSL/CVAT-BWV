@@ -307,6 +307,7 @@ export function fetchAnnotationsAsync(): ThunkAction {
             } = receiveAnnotationsParameters();
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await jobInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => jobInstance.frames.getImage(state.frame)));
             const history = await jobInstance.actions.get();
             const [minZ, maxZ] = computeZRange(states);
 
@@ -315,6 +316,7 @@ export function fetchAnnotationsAsync(): ThunkAction {
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                     history,
                     minZ,
                     maxZ,
@@ -379,6 +381,7 @@ export function removeAnnotationsAsync(
             const history = await jobInstance.actions.get();
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await jobInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => jobInstance.frames.getImage(state.frame)));
 
             dispatch({
                 type: AnnotationActionTypes.REMOVE_JOB_ANNOTATIONS_SUCCESS,
@@ -386,6 +389,7 @@ export function removeAnnotationsAsync(
                     history,
                     states,
                     allStates,
+                    allStatesFrameImages
                 },
             });
         } catch (error) {
@@ -694,19 +698,29 @@ export function fetchTranscriptAsync(): ThunkAction {
 export function updateTranscript(index: number, segment: any): AnyAction {
     const state: CombinedState = getStore().getState();
     const transcriptData = {...state.annotation.player.transcript.data};
-    if (segment == null) {
-        // delete segment at index
-        transcriptData.segments = transcriptData.segments.filter((_: any, i: number) => i!=index);
-    } else if (index === -1) {
-        // add a new segment
-        segment.key = new Date().valueOf();
-        transcriptData.segments.push(segment);
-        transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
-    } else{
-        const shouldSort = transcriptData.segments[index].start != segment.start;
-        transcriptData.segments[index] = segment;
+    if (state.annotation.job.instance.phase === 'phase0') { // todo: break this into 2 functions, one for phase0, another for everything else
+        if (segment == null) {
+            // delete segment at index
+            transcriptData.segments = transcriptData.segments.filter((_: any, i: number) => i!=index);
+        } else if (index === -1) {
+            // add a new segment
+            segment.key = new Date().valueOf();
+            transcriptData.segments.push(segment);
+            transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+        } else{
+            const shouldSort = transcriptData.segments[index].start != segment.start;
+            transcriptData.segments[index] = segment;
 
-        if (shouldSort) transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+            if (shouldSort) transcriptData.segments.sort((a: any, b: any) => a.start - b.start);
+        }
+    } else {
+        // not phase 0
+        const speakerColor = parseInt(transcriptData.segments[index].speaker.split('_')[1]);
+        transcriptData.segments.forEach((sgmt: any) => {
+            if (parseInt(sgmt.speaker.split('_')[1]) === speakerColor) {
+                sgmt.speaker = segment.speaker
+            }
+        })
     }
 
     return {
@@ -885,6 +899,7 @@ export function undoActionAsync(sessionInstance: any, frame: number): ThunkActio
             const history = await sessionInstance.actions.get();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const frameData = await sessionInstance.frames.get(frame);
             const [minZ, maxZ] = computeZRange(states);
             await undoLog.close();
@@ -895,6 +910,7 @@ export function undoActionAsync(sessionInstance: any, frame: number): ThunkActio
                     history,
                     states,
                     allStates,
+                    allStatesFrameImages,
                     minZ,
                     maxZ,
                     frameData,
@@ -938,6 +954,7 @@ export function redoActionAsync(sessionInstance: any, frame: number): ThunkActio
             const history = await sessionInstance.actions.get();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const [minZ, maxZ] = computeZRange(states);
             const frameData = await sessionInstance.frames.get(frame);
             await redoLog.close();
@@ -947,6 +964,7 @@ export function redoActionAsync(sessionInstance: any, frame: number): ThunkActio
                     history,
                     states,
                     allStates,
+                    allStatesFrameImages,
                     minZ,
                     maxZ,
                     frameData,
@@ -1099,6 +1117,7 @@ export function getJobAsync(
             }
             const states = await job.annotations.get(frameNumber, showAllInterpolationTracks, filters);
             const allStates = await job.annotations.getAll(frameNumber);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => job.frames.getImage(state.frame)));
             const issues = await job.issues();
             const [minZ, maxZ] = computeZRange(states);
             const colors = [...cvat.enums.colors];
@@ -1114,6 +1133,7 @@ export function getJobAsync(
                     issues,
                     states,
                     allStates,
+                    allStatesFrameImages,
                     frameNumber,
                     frameFilename: frameData.filename,
                     relatedFiles: frameData.relatedFiles,
@@ -1156,7 +1176,7 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
 
             await sessionInstance.frames.save();
             await sessionInstance.annotations.save();
-            if (transcriptData) {
+            if (transcriptData && sessionInstance.phase === 'phase0') {
                 await sessionInstance.transcript.save(transcriptData);
             }
             await saveJobEvent.close();
@@ -1165,6 +1185,7 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
             const { frame } = receiveAnnotationsParameters();
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             if (typeof afterSave === 'function') {
                 afterSave();
             }
@@ -1179,6 +1200,7 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                 },
             });
         } catch (error) {
@@ -1287,12 +1309,14 @@ export function updateAnnotationsAsync(statesToUpdate: any[]): ThunkAction {
         } catch (error) {
             const states = await jobInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await jobInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => jobInstance.frames.getImage(state.frame)));
             dispatch({
                 type: AnnotationActionTypes.UPDATE_ANNOTATIONS_FAILED,
                 payload: {
                     error,
                     states,
                     allStates,
+                    allStatesFrameImages
                 },
             });
         }
@@ -1315,6 +1339,7 @@ export function createAnnotationsAsync(sessionInstance: any, frame: number, stat
             const clientIds = await sessionInstance.annotations.put(statesToCreate);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const history = await sessionInstance.actions.get();
 
             dispatch({
@@ -1322,6 +1347,7 @@ export function createAnnotationsAsync(sessionInstance: any, frame: number, stat
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                     history,
                 },
             });
@@ -1347,6 +1373,7 @@ export function mergeAnnotationsAsync(sessionInstance: any, frame: number, state
             await sessionInstance.annotations.merge(statesToMerge);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const history = await sessionInstance.actions.get();
 
             dispatch({
@@ -1354,6 +1381,7 @@ export function mergeAnnotationsAsync(sessionInstance: any, frame: number, state
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                     history,
                 },
             });
@@ -1390,6 +1418,7 @@ export function groupAnnotationsAsync(sessionInstance: any, frame: number, state
             await sessionInstance.annotations.group(statesToGroup, reset);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const history = await sessionInstance.actions.get();
 
             dispatch({
@@ -1397,6 +1426,7 @@ export function groupAnnotationsAsync(sessionInstance: any, frame: number, state
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                     history,
                 },
             });
@@ -1418,6 +1448,7 @@ export function splitAnnotationsAsync(sessionInstance: any, frame: number, state
             await sessionInstance.annotations.split(stateToSplit, frame);
             const states = await sessionInstance.annotations.get(frame, showAllInterpolationTracks, filters);
             const allStates = await sessionInstance.annotations.getAll(frame);
+            const allStatesFrameImages = await Promise.all(allStates.map((state: any) => sessionInstance.frames.getImage(state.frame)));
             const history = await sessionInstance.actions.get();
 
             dispatch({
@@ -1425,6 +1456,7 @@ export function splitAnnotationsAsync(sessionInstance: any, frame: number, state
                 payload: {
                     states,
                     allStates,
+                    allStatesFrameImages,
                     history,
                 },
             });

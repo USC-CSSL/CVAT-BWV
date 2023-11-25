@@ -1029,7 +1029,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                     <UpOutlined className='cvat-canvas-image-setups-trigger' />
                 </Dropdown>
 
-                <div className='cvat-canvas-z-axis-wrapper'>
+                {/* <div className='cvat-canvas-z-axis-wrapper'>
                     <Slider
                         disabled={minZLayer === maxZLayer}
                         min={minZLayer}
@@ -1043,7 +1043,7 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
                     <CVATTooltip title={`Add new layer ${maxZLayer + 1} and switch to it`}>
                         <PlusCircleOutlined onClick={onAddZLayer} />
                     </CVATTooltip>
-                </div>
+                </div> */}
 
                 {showTagsOnFrame ? (
                     <div className='cvat-canvas-frame-tags'>

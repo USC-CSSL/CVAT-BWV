@@ -122,7 +122,8 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
         audioPreview,
         frameSpeed,
         changeFrame,
-        onChangeTranscript
+        onChangeTranscript,
+        jobInstance
     } = props;
 
     const sliderRef = useRef<HTMLDivElement>(null);
@@ -219,7 +220,7 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
                     width: '100%',
                     height: '100%',
                     backgroundPosition: sliderWidth? `${(sliderWidth / 2 - MULTIPLIER_WIDTH*frameNumber)}px 0px` : '0px 0px',
-                    cursor: activatedIdx !== -1 ? 'auto' : 'crosshair'
+                    cursor: (activatedIdx !== -1 || jobInstance.phase !== 'phase0' ) ? 'auto' : 'crosshair'
 
                 }} onClick={(e) => {
                     if (sliderRef.current && activatedIdx === -1) {
@@ -273,16 +274,19 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
                                         display: activatedIdx === -1 || activatedIdx === idx ? 'block': 'none',
                                         zIndex: 1,
                                     }}  onMouseDown={() =>{
-                                        if (activatedIdx === -1) {
-                                            if (playing) onSwitchPlay(false);
+                                        if (jobInstance.phase === 'phase0') {
+                                            if (activatedIdx === -1) {
+                                                if (playing) onSwitchPlay(false);
 
-                                            changeFrame(Math.min(startFrame + Math.round(segment.start * frameSpeed) + 1, stopFrame))
+                                                changeFrame(Math.min(startFrame + Math.round(segment.start * frameSpeed) + 1, stopFrame))
 
-                                            setLeftBound(segment.start);
-                                            setRightBound(segment.end);
-                                            setActivatedIdx(idx)
+                                                setLeftBound(segment.start);
+                                                setRightBound(segment.end);
+                                                setActivatedIdx(idx);
+
+                                            }
+                                            setDragging('left');
                                         }
-                                        setDragging('left');
                                     }}></div>
 
                                 </div>

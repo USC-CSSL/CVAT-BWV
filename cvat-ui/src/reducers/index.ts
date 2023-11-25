@@ -711,6 +711,7 @@ export interface AnnotationState {
         collapsedAll: boolean;
         states: any[];
         allStates: any[];
+        allStatesFrameImages: any[];
         filters: any[];
         resetGroupFlag: boolean;
         history: {

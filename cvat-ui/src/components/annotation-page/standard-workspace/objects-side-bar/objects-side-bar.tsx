@@ -121,7 +121,7 @@ function ObjectsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX.E
                 ) : null} */}
             </Tabs>
 
-            {!sidebarCollapsed && <AppearanceBlock />}
+            {/* {!sidebarCollapsed && <AppearanceBlock />} */}
         </Layout.Sider>
     );
 }

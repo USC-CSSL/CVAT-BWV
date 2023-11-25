@@ -52,9 +52,11 @@ function StandardWorkspaceComponent(props: StateToProps): JSX.Element {
             <Layout.Content>
                 <Layout>
                     <Layout.Header style={{padding: '10px', }}>
-                        {/* <AudioSelector/> */}
+
                         <WaveformSlider/>
+
                     </Layout.Header>
+                    {jobPhase === 'phase1a' && <AudioSelector/>}
                     <CanvasLayout />
 
                 </Layout>

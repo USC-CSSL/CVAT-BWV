@@ -23,15 +23,25 @@ interface Props {
     isLastSelected: boolean,
     clearSelected: () => void;
     changeSpeakerBulk: (speaker: string) => void
+    phase: string;
+    images: any | null;
+    audios: any | null;
+    playAudio: (play: boolean, frame: number) => void
 
 }
 
 import {Row, Col, Avatar, Dropdown, Menu} from 'antd'
-import {DeleteOutlined, UserOutlined} from '@ant-design/icons'
+import {DeleteOutlined, SoundOutlined, UserOutlined} from '@ant-design/icons'
 import './style.scss';
 function TransciptUtteranceText(props: Props) {
-    const {appliedStyle, scrollFn, isCurrent, playing, onSwitchPlay, changeFrame, segment, frameSpeed, stopFrame,
-    personColors, onChangeTranscript, index, speakerCount, isSelected, isLastSelected, clearSelected, changeSpeakerBulk} = props;
+    const {
+        appliedStyle, scrollFn, isCurrent, playing, onSwitchPlay, changeFrame, segment, frameSpeed, stopFrame,
+    personColors, onChangeTranscript, index, speakerCount, isSelected, isLastSelected, clearSelected, changeSpeakerBulk,
+    phase, images, audios, playAudio
+
+} = props;
+
+    console.log(images);
 
     const utteranceRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +66,8 @@ function TransciptUtteranceText(props: Props) {
 
     }, [isLastSelected, isCurrent]);
 
+    const speakerColorId = segment.speaker && parseInt(segment.speaker.split('_')[1]);
+    const speakerClientId = segment.speaker && segment.speaker.split('_')[2] && parseInt(segment.speaker.split('_')[2]);
 
     return (
         <>
@@ -77,11 +89,17 @@ function TransciptUtteranceText(props: Props) {
             >
                 <div>
                     {segment.speaker && (
-                        <Dropdown overlayClassName='speakerChangeDropDown' overlayStyle={{animationDuration: '0s'}} overlay={<Menu mode="horizontal" style={{
+                        <Dropdown
+                            overlayClassName='speakerChangeDropDown'
+                            onVisibleChange={() => {
+                                onSwitchPlay(false);
+                            }}
+                            overlayStyle={{animationDuration: '0s'}}
+                            overlay={<Menu mode="horizontal" style={{
                             backgroundColor: 'rgba(0, 22, 40, 0.5)',
                             backdropFilter: 'blur(5px)'
                         }}>
-                            {Array(speakerCount).fill(0).map((_, idx) => (
+                            {phase === 'phase0' && Array(speakerCount).fill(0).map((_, idx) => (
                                 <Menu.Item onClick={()=>{
                                     if (!isSelected) {
                                         onChangeTranscript(index, {
@@ -103,12 +121,69 @@ function TransciptUtteranceText(props: Props) {
                                     </div>
                                 </Menu.Item>
                             ))}
+                            {phase === 'phase1a' &&  images &&
+                                Array(Object.keys(images).length).fill(0).map((_, idx) => (
+                                    <Menu.Item onClick={()=>{
+                                        onChangeTranscript(index, {
+                                            ...segment,
+                                            speaker: "SPEAKER_"+speakerColorId+'_'+(Object.keys(images)[idx])
+                                        })
+                                    }}>
+                                        <div style={{ height: 66}} >
+                                        <Avatar
+                                        size={64}
+
+                                        style={{
+                                            border: `2px solid ${personColors[speakerColorId]}`,
+                                            backgroundImage: `url(${images[Object.keys(images)[idx]]})`,
+                                            backgroundSize: 'contain',
+                                        }}
+                                        />
+                                        </div>
+                                    </Menu.Item>
+                                ))
+                            }
+                            {phase === 'phase1a' &&  audios &&
+                                Array(Object.keys(audios).length).fill(0).map((_, idx) => (
+                                    <Menu.Item onClick={()=>{
+                                        onChangeTranscript(index, {
+                                            ...segment,
+                                            speaker: "SPEAKER_"+speakerColorId+'_'+(Object.keys(audios)[idx])
+                                        })
+                                    }}>
+                                        <div style={{ height: 66}}
+                                            onMouseEnter={() => {
+                                                playAudio(true, audios[Object.keys(audios)[idx]])
+                                            }}
+
+                                            onMouseLeave={() => {
+                                                playAudio(false, 0);
+                                            }}
+                                        >
+                                        <Avatar
+                                        size={64}
+                                        icon={<SoundOutlined />}
+                                        style={{
+                                            backgroundColor: personColors[speakerColorId],
+                                        }}
+                                        />
+                                        </div>
+                                    </Menu.Item>
+                                ))
+                            }
                         </Menu>} trigger={['contextMenu']}>
                         <Avatar
                             size={32}
-                            icon={<UserOutlined />}
+                            icon={
+                                speakerClientId ?
+                                    (images[speakerClientId] ? <></> : <SoundOutlined />)
+                                    : <UserOutlined />
+                            }
                             style={{
-                                backgroundColor: personColors[parseInt(segment.speaker.split('_')[1])],
+                                backgroundColor: personColors[speakerColorId],
+                                backgroundImage: speakerClientId && images[speakerClientId] ? `url(${images[speakerClientId]})` :undefined,
+                                backgroundSize: 'contain',
+                                border: speakerClientId ? `2px solid ${personColors[speakerColorId]}` : undefined,
                             }}
 
                         />
@@ -118,7 +193,8 @@ function TransciptUtteranceText(props: Props) {
                 </div>
                 <Row>
                     <Col span={2}>
-                        {isCurrent && (
+
+                        {isCurrent && phase === 'phase0' && (
                             <DeleteOutlined
                                 style={{ fontSize: 12 }}
                                 onClick={() => {
@@ -129,7 +205,7 @@ function TransciptUtteranceText(props: Props) {
                     </Col>
                     <Col span={21}>
                         <div onDoubleClick={() => {
-                            if (isCurrent) {
+                            if (isCurrent && phase === 'phase0') {
                                 setEditingText(true);
                             }
                         }} >

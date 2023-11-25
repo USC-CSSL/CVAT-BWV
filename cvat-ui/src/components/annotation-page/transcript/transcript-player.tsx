@@ -2,7 +2,7 @@ import { changeFrameAsync, updateTranscriptBulk, fetchTranscriptAsync, switchPla
 import { changeFrameSpeed } from 'actions/settings-actions';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {connect} from 'react-redux';
-import { CombinedState } from 'reducers';
+import { CombinedState, ObjectType } from 'reducers';
 import Layout from 'antd/lib/layout';
 import {Row, Col} from 'antd'
 import {UserOutlined} from '@ant-design/icons'
@@ -23,6 +23,10 @@ interface StateToProps {
     playing: boolean;
     frameNumber: number;
     frameSpeed: number;
+    phase: string;
+    allStates: any[];
+    allStatesFrameImages: any[];
+    audioData: any
 }
 
 interface DispatchToProps {
@@ -40,8 +44,13 @@ function mapStateToProps(state: CombinedState): StateToProps {
             job: {
                 instance: {
                     startFrame,
-                    stopFrame
+                    stopFrame,
+                    phase,
                 }
+            },
+            annotations: {
+                allStates,
+                allStatesFrameImages
             },
             player: {
                 transcript: {
@@ -53,6 +62,9 @@ function mapStateToProps(state: CombinedState): StateToProps {
                 frame: {
                     number: frameNumber,
                 },
+                audio: {
+                    data: audioData,
+                }
             },
             canvas: {
                 ready: canvasIsReady
@@ -64,6 +76,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
             }
         }
     } = state;
+
     return {
         transcriptData,
         transcriptFetching,
@@ -72,7 +85,11 @@ function mapStateToProps(state: CombinedState): StateToProps {
         frameNumber,
         startFrame,
         stopFrame,
-        frameSpeed
+        frameSpeed,
+        phase,
+        allStates: phase === 'phase0' ? [] : allStates,
+        allStatesFrameImages: phase === 'phase0' ? [] : allStatesFrameImages,
+        audioData
     }
 }
 
@@ -106,13 +123,98 @@ const otherStyle = {
 
 
 function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
-    const {transcriptData, transcriptFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame,
+    const {
+        transcriptData,
+        transcriptFetching,
+        playing, frameNumber,
+        frameSpeed, startFrame,
+        stopFrame, phase, allStates,
+        allStatesFrameImages,
+        audioData,
         fetchTranscript, onSwitchPlay, changeFrame, onChangeTranscript} = props;
+
+    const [croppedImageMap, setCroppedImageMap] = useState<any>(null);
+    useEffect(() => {
+        // cropped images of the people
+        const peopleIndices :number[] = [];
+        allStates.forEach((state, idx) => {
+            // person tags which are NOT audio selection
+            if (state.label.name.startsWith('person:') && state.objectType !== ObjectType.AUDIOSELECTION) {
+                peopleIndices.push(idx);
+            }
+        })
+        const images = peopleIndices.map(() => new Image());
+        Promise.all(images.map(async (image, i) => {
+            const cnv = document.createElement('canvas');
+            const ctx = cnv.getContext('2d');
+
+            const p1X = Math.min(allStates[peopleIndices[i]].points[0], allStates[peopleIndices[i]].points[2]);
+            const p2X = Math.max(allStates[peopleIndices[i]].points[0], allStates[peopleIndices[i]].points[2]);
+
+            const p1Y = Math.min(allStates[peopleIndices[i]].points[1], allStates[peopleIndices[i]].points[3]);
+            const p2Y = Math.max(allStates[peopleIndices[i]].points[1], allStates[peopleIndices[i]].points[3]);
+
+            const sX = p1X,
+                sY = p1Y,
+                sW = p2X - p1X,
+                sH = p2Y - p1Y;
+
+            cnv.width = sW;
+            cnv.height = sH;
+            return await (new Promise((resolve) => {
+                image.onload = () => {
+                    ctx?.drawImage(image, sX, sY, sW, sH, 0, 0, sW, sH);
+                    const cropped = cnv.toDataURL();
+                    cnv.remove();
+                    resolve(cropped);
+                };
+                image.src = URL.createObjectURL(allStatesFrameImages[peopleIndices[i]]);
+            }));
+        })).then((imgs) => setCroppedImageMap(
+            imgs.reduce((acc: any, cur, idx) => {
+                acc[allStates[peopleIndices[idx]].clientID] = cur;
+                return acc;
+            }, {})
+            )
+        );
+
+    }, [allStates, allStatesFrameImages]);
+
+    const [audioBlobURL, setAudioBlobURL] = useState('');
+    const [audioFrameMap, setAudioFrameMap] = useState<any>(null);
+    useEffect(() => {
+        if(audioData) {
+            const blb = new Blob([audioData], {type: 'audio/mp3'});
+            setAudioBlobURL(URL.createObjectURL(blb));
+        }
+
+        return () => {
+            if (audioBlobURL.length) {
+                URL.revokeObjectURL(audioBlobURL)
+            }
+        }
+    }, [audioData]);
+
+    useEffect(() => {
+        setAudioFrameMap(
+            allStates.
+                filter((state) =>
+                    state.label.name.startsWith('person:') &&
+                    state.objectType === ObjectType.AUDIOSELECTION
+                ).
+                reduce((acc: any, cur) => {
+                    acc[cur.clientID] = cur.frame;
+                    return acc;
+                }, {})
+        );
+    }, [allStates])
 
     const [currentIdx, setCurrentIdx] = useState(-1);
     const [speakerCount, setSpeakerCount] = useState(0);
 
     const [selected, setSelected] = useState<number[]>([]);
+
+
 
 
     useEffect(() => {
@@ -159,46 +261,50 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
 
         updateTranscriptBulk(sel, segments);
     }, [selected, transcriptData])
-    useEffect(() => {
-        const keyDownFn = (event: KeyboardEvent) => {
-            if (event.shiftKey && event.key === 'ArrowUp') {
-                if (!selected.length) {
-                    selected.push(currentIdx);
-                    selected.push(currentIdx - 1);
-                }
-                else if (currentIdx < selected[selected.length - 1]) {
-                    selected.pop();
-                }
-                else {
-                    if (selected[selected.length - 1] > 0) {
-                        selected.push(selected[selected.length - 1] - 1);
-                    }
-                }
-            } else if (event.shiftKey && event.key === 'ArrowDown') {
-                if (!selected.length) {
-                    selected.push(currentIdx);
-                    selected.push(currentIdx + 1);
-                }
-                else if (currentIdx > selected[selected.length - 1]) {
-                    selected.pop();
-                }
-                else {
-                    if (selected[selected.length - 1] < transcriptData?.segments?.length) {
-                        selected.push(selected[selected.length - 1] + 1);
-                    }
-                }
 
+    if (phase === 'phase0') {
+        // stuff for multiselect
+        useEffect(() => {
+            const keyDownFn = (event: KeyboardEvent) => {
+                if (event.shiftKey && event.key === 'ArrowUp') {
+                    if (!selected.length) {
+                        selected.push(currentIdx);
+                        selected.push(currentIdx - 1);
+                    }
+                    else if (currentIdx < selected[selected.length - 1]) {
+                        selected.pop();
+                    }
+                    else {
+                        if (selected[selected.length - 1] > 0) {
+                            selected.push(selected[selected.length - 1] - 1);
+                        }
+                    }
+                } else if (event.shiftKey && event.key === 'ArrowDown') {
+                    if (!selected.length) {
+                        selected.push(currentIdx);
+                        selected.push(currentIdx + 1);
+                    }
+                    else if (currentIdx > selected[selected.length - 1]) {
+                        selected.pop();
+                    }
+                    else {
+                        if (selected[selected.length - 1] < transcriptData?.segments?.length) {
+                            selected.push(selected[selected.length - 1] + 1);
+                        }
+                    }
+
+                }
+                setSelected([...selected]);
             }
-            setSelected([...selected]);
-        }
 
 
-        document.addEventListener('keydown', keyDownFn);
+            document.addEventListener('keydown', keyDownFn);
 
-        return () => {
-            document.removeEventListener('keydown', keyDownFn);
-        }
-    }, [selected, currentIdx, transcriptData]);
+            return () => {
+                document.removeEventListener('keydown', keyDownFn);
+            }
+        }, [selected, currentIdx, transcriptData]);
+    }
 
     useEffect(() => {
         if (!transcriptData && !transcriptFetching) {
@@ -209,13 +315,28 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
 
     useEffect(() => {
         setSelected([]);
-    }, [transcriptData])
+    }, [transcriptData]);
 
-
-
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const playAudio = useCallback((play: boolean, frame: number) => {
+        if (audioRef.current ) {
+            if (play) {
+                audioRef.current.currentTime = frame / frameSpeed;
+                audioRef.current.play();
+                timeoutRef.current = setTimeout(() => {
+                    audioRef.current && audioRef.current.pause();
+                }, 5000)
+            } else {
+                audioRef.current.pause();
+                timeoutRef.current && clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [audioBlobURL]);
 
     return <>
        <Layout.Sider width={300} style={{fontSize: 18, overflowY: 'scroll'}}>
+        <audio ref={audioRef} src={audioBlobURL}></audio>
         <div style={{padding: '10px', textAlign: 'center', color: 'white'}}>
             {!transcriptData && !transcriptFetching && 'No Transcript'}
             {!transcriptData && transcriptFetching && 'Loading Transcript...'}
@@ -226,6 +347,7 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
                     const appliedStyle = (isCurrent) ? currentStyle : otherStyle;
 
                     return <TranscriptUtteranceText
+                        phase={phase}
                         key={segment.key}
                         speakerCount={speakerCount}
                         appliedStyle={appliedStyle} isCurrent={isCurrent} stopFrame={stopFrame}
@@ -236,6 +358,9 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
                         isLastSelected={selected && selected[selected.length - 1] === index}
                         clearSelected={clearSelected}
                         changeSpeakerBulk={changeSpeakerBulk}
+                        images = {phase === 'phase0' ? null : croppedImageMap}
+                        audios = {phase === 'phase0' ? null : audioFrameMap}
+                        playAudio={playAudio}
                     />
                 }
                 )}

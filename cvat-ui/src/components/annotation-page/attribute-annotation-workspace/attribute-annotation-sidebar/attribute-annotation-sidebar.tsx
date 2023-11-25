@@ -349,7 +349,7 @@ function AttributeAnnotationSidebar(props: StateToProps & DispatchToProps): JSX.
                     </div>
                 )}
 
-                {!sidebarCollapsed && <AppearanceBlock />}
+                {/* {!sidebarCollapsed && <AppearanceBlock />} */}
             </Layout.Sider>
         );
     }
