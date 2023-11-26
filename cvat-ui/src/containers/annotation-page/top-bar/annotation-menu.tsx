@@ -17,6 +17,7 @@ import {
     setForceExitAnnotationFlag as setForceExitAnnotationFlagAction,
     removeAnnotationsAsync as removeAnnotationsAsyncAction,
     modalUpdateAsync,
+    setTemporaryPhaseFlagAction
 } from 'actions/annotation-actions';
 import { exportActions } from 'actions/export-actions';
 import { importActions } from 'actions/import-actions';
@@ -39,6 +40,7 @@ interface DispatchToProps {
     saveAnnotations(jobInstance: any, afterSave?: () => void): void;
     updateJob(jobInstance: any): void;
     showBeforeSubmitModal(phase: string, people: any[]): void;
+    setTemporaryPhaseFlag(tempPhase: boolean): void;
 }
 
 function mapStateToProps(state: CombinedState): StateToProps {
@@ -104,6 +106,9 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
                 }))
             }
 
+        },
+        setTemporaryPhaseFlag(tempPhase: boolean): void {
+            dispatch(setTemporaryPhaseFlagAction(tempPhase));
         }
     };
 }
@@ -123,7 +128,8 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
         updateJob,
         isOrganizationOwner,
         objectStates,
-        showBeforeSubmitModal
+        showBeforeSubmitModal,
+        setTemporaryPhaseFlag
     } = props;
 
     const onClickMenu = (params: MenuInfo): void => {
@@ -175,6 +181,10 @@ function AnnotationMenuContainer(props: Props): JSX.Element {
 
 
             // history.push(`/tasks/${jobInstance.taskId}`);
+        } else if (action === Actions.EDIT_PHASE0) {
+            setTemporaryPhaseFlag(true);
+        } else if (action === Actions.BACK_TO_PHASE1A) {
+            setTemporaryPhaseFlag(false);
         } else if (action === Actions.OPEN_TASK) {
             history.push(`/tasks/${jobInstance.taskId}`);
         } else if (action.startsWith('state:')) {

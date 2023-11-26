@@ -474,6 +474,27 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 },
             };
         }
+        case AnnotationActionTypes.SET_TEMP_PHASE_FLAG: {
+            const { tempPhase } = action.payload;
+            const jobInstance = {
+                ...state.job.instance,
+            };
+            if (tempPhase) {
+                jobInstance.phase = 'phase0';
+                jobInstance.tempPhase = true;
+            } else {
+                jobInstance.phase = 'phase1a';
+                delete jobInstance.tempPhase;
+            }
+
+            return {
+                ...state,
+                job: {
+                    ...state.job,
+                    instance: jobInstance
+                }
+            }
+        }
         case AnnotationActionTypes.COLLAPSE_SIDEBAR: {
             return {
                 ...state,

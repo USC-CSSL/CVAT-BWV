@@ -212,6 +212,7 @@ export enum AnnotationActionTypes {
     UPDATE_TRANSCRIPT = 'UPDATE_TRANSCRIPT',
     FETCH_AUDIO_PREVIEW_SUCCESS = 'FETCH_AUDIO_PREVIEW_SUCCESS',
     MODAL_UPDATE = 'MODAL_UPDATE',
+    SET_TEMP_PHASE_FLAG = 'SET_TEMP_PHASE_FLAG'
 }
 
 export function saveLogsAsync(): ThunkAction {
@@ -623,6 +624,15 @@ export function switchPlay(playing: boolean): AnyAction {
             playing,
         },
     };
+}
+
+export function setTemporaryPhaseFlagAction(tempPhase: boolean) {
+    return {
+        type: AnnotationActionTypes.SET_TEMP_PHASE_FLAG,
+        payload: {
+            tempPhase,
+        },
+    }
 }
 
 export function confirmCanvasReady(): AnyAction {
@@ -1177,7 +1187,7 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
             await sessionInstance.frames.save();
             await sessionInstance.annotations.save();
             if (transcriptData && sessionInstance.phase === 'phase0') {
-                await sessionInstance.transcript.save(transcriptData);
+                // await sessionInstance.transcript.save(transcriptData);
             }
             await saveJobEvent.close();
             dispatch(saveLogsAsync());

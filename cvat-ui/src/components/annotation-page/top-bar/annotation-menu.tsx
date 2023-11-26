@@ -39,6 +39,8 @@ export enum Actions {
     OPEN_TASK = 'open_task',
     FINISH_JOB = 'finish_job',
     RENEW_JOB = 'renew_job',
+    EDIT_PHASE0 = 'edit_phase0',
+    BACK_TO_PHASE1A = 'back_to_phase1a'
 }
 
 function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Element {
@@ -54,6 +56,7 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
     } = props;
 
     const jobStage = jobInstance.stage;
+    const jobPhase = jobInstance.phase;
     const jobState = jobInstance.state;
     const taskID = jobInstance.taskId;
     const { JobState } = core.enums;
@@ -217,7 +220,11 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
                 </Menu.Item>
             </Menu.SubMenu></>
             }
-            {[JobStage.ANNOTATION, JobStage.REVIEW].includes(jobStage) ?
+            {jobPhase === core.enums.Phase.PHASE1A && !jobInstance.tempPhase ?
+                <Menu.Item key={Actions.EDIT_PHASE0}>Edit Transcript</Menu.Item> : null}
+            {jobPhase === core.enums.Phase.PHASE0 && jobInstance.tempPhase ?
+                <Menu.Item key={Actions.BACK_TO_PHASE1A}>Finish Editing Transcript</Menu.Item> : null}
+            {[JobStage.ANNOTATION, JobStage.REVIEW].includes(jobStage) && !jobInstance.temporaryPhase ?
                 <Menu.Item key={Actions.FINISH_JOB}>Finish the job</Menu.Item> : null}
             {jobStage === JobStage.ACCEPTANCE ?
                 <Menu.Item key={Actions.RENEW_JOB}>Renew the job</Menu.Item> : null}

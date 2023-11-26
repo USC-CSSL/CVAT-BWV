@@ -79,7 +79,7 @@ function TransciptUtteranceText(props: Props) {
                     ...appliedStyle,
                     backgroundColor: isSelected ? 'rgb(19, 72, 123)' : 'rgb(0, 21, 41)'
                 }}
-                onClick={(e) => {
+                onClick={() => {
                     clearSelected();
                     if (playing) {
                         onSwitchPlay(false);

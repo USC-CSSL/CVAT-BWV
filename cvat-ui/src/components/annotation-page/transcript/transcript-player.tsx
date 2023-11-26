@@ -131,7 +131,8 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
         stopFrame, phase, allStates,
         allStatesFrameImages,
         audioData,
-        fetchTranscript, onSwitchPlay, changeFrame, onChangeTranscript} = props;
+        fetchTranscript, onSwitchPlay, changeFrame, onChangeTranscript
+    } = props;
 
     const [croppedImageMap, setCroppedImageMap] = useState<any>(null);
     useEffect(() => {
@@ -211,11 +212,7 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
 
     const [currentIdx, setCurrentIdx] = useState(-1);
     const [speakerCount, setSpeakerCount] = useState(0);
-
     const [selected, setSelected] = useState<number[]>([]);
-
-
-
 
     useEffect(() => {
         const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
@@ -262,9 +259,10 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
         updateTranscriptBulk(sel, segments);
     }, [selected, transcriptData])
 
-    if (phase === 'phase0') {
-        // stuff for multiselect
-        useEffect(() => {
+
+    // stuff for multiselect
+    useEffect(() => {
+        if (phase === 'phase0') {
             const keyDownFn = (event: KeyboardEvent) => {
                 if (event.shiftKey && event.key === 'ArrowUp') {
                     if (!selected.length) {
@@ -303,8 +301,8 @@ function TranscriptPlayerComponent(props: StateToProps & DispatchToProps) {
             return () => {
                 document.removeEventListener('keydown', keyDownFn);
             }
-        }, [selected, currentIdx, transcriptData]);
-    }
+        }
+    }, [selected, currentIdx, transcriptData]);
 
     useEffect(() => {
         if (!transcriptData && !transcriptFetching) {
