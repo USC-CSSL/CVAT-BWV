@@ -596,8 +596,9 @@ class CanvasWrapperComponent extends React.PureComponent<Props> {
         state.objectType = state.objectType || activeObjectType;
         const label = state.label || jobInstance.labels.filter((label: any) => label.id === activeLabelID)[0];
         state.label = label;
+        const identifierAttrId = label.attributes?.find((attr: any) => attr.name === 'identifier').id;
         state.attributes = {
-            [label.attributes && label.attributes[0].id]: (state.attributes && state.attributes[label.attributes[0]?.id] || getAutoIncrementedIdentifierAttr(label).toString()),
+            [label.attributes && identifierAttrId]: (state.attributes && state.attributes[identifierAttrId] || getAutoIncrementedIdentifierAttr(label).toString()),
         };
         state.frame = frame;
         state.rotation = state.rotation || 0;

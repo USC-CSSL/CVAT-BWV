@@ -262,8 +262,8 @@ class ObjectItemContainer extends React.PureComponent<Props> {
         const { objectState, readonly, showPersonModal } = this.props;
         if (!readonly) {
             // for the identitity attribute only
-            const oldAttrId = objectState.label.attributes[0].id;
-            const newAttrId = label.attributes[0].id;
+            const oldAttrId = objectState.label.attributes?.find((attr: any) => attr.name === 'identifier').id;
+            const newAttrId = label.attributes?.find((attr: any) => attr.name === 'identifier').id;
 
             objectState.label = label;
 

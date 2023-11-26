@@ -212,6 +212,11 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                             })
                         }
                     })();
+                } else {
+                    modalUpdate({
+                        visible: false,
+                        people: []
+                    })
                 }
 
             } else {
@@ -373,7 +378,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
             {
                 mode === 'person_demographics' && (
                 <>
-                <h2>{getLabelDisplayName(states[0].label.name)} {states[0].attributes[states[0].label.attributes[0].id]}</h2>
+                <h2>{getLabelDisplayName(states[0].label.name)} {states[0].attributes[states[0].label.attributes?.find((attr: any) => attr.name === 'identifier').id]}</h2>
                 <Text>Please answer the following demographic questions for this person</Text>
                 <hr/>
                 <Row gutter={16}>
@@ -464,7 +469,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                             <Tabs.TabPane
                             tab={(
                                 <span>
-                                    <Text>{getLabelDisplayName(state.label.name)} {state.attributes[state.label.attributes[0].id]}</Text>
+                                    <Text>{getLabelDisplayName(state.label.name)} {state.attributes[state.label.attributes?.find((attr: any) => attr.name === 'identifier').id]}</Text>
                                 </span>
                             )}
                             key={state.clientID}
@@ -581,7 +586,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                                 croppedImages[idx] && <img  style={{maxWidth: '100%', height:'200px'}} src={croppedImages[idx]}></img>
                                             }
                                             <div>
-                                                <Text>{getLabelDisplayName(states[idx].label.name)} {states[idx].attributes[states[idx].label.attributes[0].id]}</Text>
+                                                <Text>{getLabelDisplayName(states[idx].label.name)} {states[idx].attributes[states[idx].label.attributes?.find((attr: any) => attr.name === 'identifier').id]}</Text>
                                             </div>
                                             <Button onClick={() => {
                                                     onRemoveAnnotation(states[idx]);
@@ -594,7 +599,7 @@ function PersonQuestionModal(props: Props & StateToProps & DispatchToProps) {
                                                     croppedImages[idx+1] && <img  style={{maxWidth: '100%', height:'200px'}} src={croppedImages[idx+1]}></img>
                                                 }
                                                 <div>
-                                                    <Text>{getLabelDisplayName(states[idx+1].label.name)} {states[idx+1].attributes[states[idx+1].label.attributes[0].id]}</Text>
+                                                    <Text>{getLabelDisplayName(states[idx+1].label.name)} {states[idx+1].attributes[states[idx+1].label.attributes?.find((attr: any) => attr.name === 'identifier').id]}</Text>
                                                 </div>
                                                 <Button onClick={() => {
                                                     onRemoveAnnotation(states[idx+1]);

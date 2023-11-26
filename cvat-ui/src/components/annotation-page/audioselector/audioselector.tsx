@@ -234,7 +234,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                                             onSwitchPlay(false);
                                             if (newAudioSelectorLabel) {
                                                 const label = newAudioSelectorLabel;
-                                                const attrId = label.attributes[0]?.id;
+                                                const attrId = label.attributes?.find((attr: any) => attr.name === 'identifier').id;
                                                 const objectState = new cvat.classes.ObjectState({
                                                     objectType: ObjectType.AUDIOSELECTION,
                                                     label:label,
@@ -274,7 +274,7 @@ function AudioSelector(props: StateToProps & DispatchToProps & Props): JSX.Eleme
                         </Popover>
                         </div>
                         </>
-                        
+
                     </div>
                 </div>
             }

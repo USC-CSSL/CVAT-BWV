@@ -8,7 +8,7 @@ export default function getAutoIncrementedIdentifierAttr(label: any): number {
 
     const {annotation: {annotations: {allStates}}} = state;
     const relevant = allStates.filter(state => state.label.id === label.id);
-    const identifierAttrId = label.attributes[0].id;
+    const identifierAttrId = label.attributes?.find((attr: any) => attr.name === 'identifier').id;
     const maxIdentifier = relevant.reduce(
         (prev, state) => Math.max(prev, parseInt(state.attributes[identifierAttrId] || '0')),
         0

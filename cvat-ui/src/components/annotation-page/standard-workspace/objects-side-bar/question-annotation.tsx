@@ -139,7 +139,7 @@ function QuestionsSideBar(props: StateToProps & DispatchToProps & OwnProps): JSX
 
     const peopleInFrame = {};
     statesInFrame.forEach((state) => {
-        peopleInFrame[`${state.label.name} ${state.attributes[state.label.attributes[0].id]}`] = {
+        peopleInFrame[`${state.label.name} ${state.attributes[state.label.attributes?.find((attr: any) => attr.name === 'identifier').id]}`] = {
             label: state.label.name
         }
     })
