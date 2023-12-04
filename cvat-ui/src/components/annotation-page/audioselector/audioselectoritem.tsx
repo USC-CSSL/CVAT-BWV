@@ -49,12 +49,14 @@ export default function AudioSelectorItem (props: Props) {
         <Row >
             <Col span={3}>
                 <div style={{display: 'flex', height: '100%'}}>
-                <Space style={{margin: 'auto'}}>
-                    <LabelSelector labels={labels} value={selectionObject.label.id} onChange={(label: any) => {
-                        selectionObject.label = label;
-                        onUpdateAnnotations([selectionObject])
-                    }}/>
-                </Space>
+
+                <LabelSelector
+                style={{width: '100%'}}
+                    labels={labels} value={selectionObject.label.id} onChange={(label: any) => {
+                    selectionObject.label = label;
+                    onUpdateAnnotations([selectionObject])
+                }}/>
+
                 </div>
             </Col>
             <Col span={1}>

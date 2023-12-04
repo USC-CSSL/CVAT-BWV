@@ -175,13 +175,13 @@ function TransciptUtteranceText(props: Props) {
                         <Avatar
                             size={32}
                             icon={
-                                speakerClientId ?
+                                phase === 'phase1a' &&  images && speakerClientId ?
                                     (images[speakerClientId] ? <></> : <SoundOutlined />)
                                     : <UserOutlined />
                             }
                             style={{
                                 backgroundColor: personColors[speakerColorId],
-                                backgroundImage: speakerClientId && images[speakerClientId] ? `url(${images[speakerClientId]})` :undefined,
+                                backgroundImage: speakerClientId && images && images[speakerClientId] ? `url(${images[speakerClientId]})` :undefined,
                                 backgroundSize: 'contain',
                                 border: speakerClientId ? `2px solid ${personColors[speakerColorId]}` : undefined,
                             }}
