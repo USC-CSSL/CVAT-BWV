@@ -585,7 +585,7 @@ class DataChunkGetter:
 
         self.dimension = task_dim
 
-    def __call__(self, request, start, stop, db_data):
+    def __call__(self, request, start, stop, db_data, phase=None):
         if not db_data:
             raise NotFound(detail='Cannot find requested data')
 
@@ -620,7 +620,7 @@ class DataChunkGetter:
                     data = f.readlines()
                 return HttpResponse(data, content_type='application/json')
             if self.type == 'transcript':
-                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-transcript.json')
+                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-transcript-'+phase+'.json')
                 data = {}
                 with open(path, 'r') as f:
                     data = f.readlines()
@@ -1566,7 +1566,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             db_job.segment.task.dimension)
 
         return data_getter(request, db_job.segment.start_frame,
-            db_job.segment.stop_frame, db_job.segment.task.data)
+            db_job.segment.stop_frame, db_job.segment.task.data, phase=db_job.phase)
 
 
     @action(detail=True, methods=['POST'], serializer_class=None,
@@ -1574,6 +1574,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
     def saveTranscript(self, request, pk):
         db_job = self.get_object() # call check_object_permissions as well
         jobid = db_job.id
+        jobphase = db_job.phase
 
         transcript = request.data['transcript']
 
@@ -1582,7 +1583,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             print(valid_ser.errors)
             return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
-        with open(os.path.join('/home/django/data', 'data', str(jobid), 'compressed', '0.zip-transcript.json'), 'w') as f:
+        with open(os.path.join('/home/django/data', 'data', str(jobid), 'compressed', '0.zip-transcript-'+jobphase+'.json'), 'w') as f:
             f.write(json.dumps(transcript))
 
         return HttpResponse(status=HTTPStatus.OK)

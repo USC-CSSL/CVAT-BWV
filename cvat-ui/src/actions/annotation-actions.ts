@@ -708,7 +708,7 @@ export function fetchTranscriptAsync(): ThunkAction {
 export function updateTranscript(index: number, segment: any): AnyAction {
     const state: CombinedState = getStore().getState();
     const transcriptData = {...state.annotation.player.transcript.data};
-    if (state.annotation.job.instance.phase === 'phase0') { // todo: break this into 2 functions, one for phase0, another for everything else
+    if (state.annotation.job.instance.phase === cvat.enums.Phase.PHASE0) { // todo: break this into 2 functions, one for phase0, another for everything else
         if (segment == null) {
             // delete segment at index
             transcriptData.segments = transcriptData.segments.filter((_: any, i: number) => i!=index);
@@ -1186,8 +1186,8 @@ export function saveAnnotationsAsync(sessionInstance: any, ignoreUnlabeled?: boo
 
             await sessionInstance.frames.save();
             await sessionInstance.annotations.save();
-            if (transcriptData && sessionInstance.phase === 'phase0') {
-                // await sessionInstance.transcript.save(transcriptData);
+            if (transcriptData && [cvat.enums.Phase.PHASE0, cvat.enums.Phase.PHASE1A].includes(sessionInstance.phase)) {
+                await sessionInstance.transcript.save(transcriptData);
             }
             await saveJobEvent.close();
             dispatch(saveLogsAsync());
