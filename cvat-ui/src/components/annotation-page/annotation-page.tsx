@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router';
 import Layout from 'antd/lib/layout';
 import Result from 'antd/lib/result';
@@ -36,12 +36,42 @@ interface Props {
     changeFrame(frame: number): void;
 }
 
+
+
+
 export default function AnnotationPageComponent(props: Props): JSX.Element {
     const {
         job, fetching, workspace, frameNumber, getJob, closeJob, saveLogs, changeFrame,
     } = props;
     const prevJob = usePrevious(job);
     const prevFetching = usePrevious(fetching);
+
+    const channel = useRef<BroadcastChannel| null>(null);
+    const [isOriginal, setIsOriginal] = useState(true);
+
+    useEffect(() => {
+        channel.current = new BroadcastChannel('tab');
+
+
+        channel.current?.postMessage('another-tab');
+        // note that listener is added after posting the message
+
+        channel.current?.addEventListener('message', (msg) => {
+            if (msg.data === 'another-tab' && isOriginal) {
+                // message received from 2nd tab
+                // reply to all new tabs that the website is already open
+                channel.current?.postMessage('already-open');
+            }
+            if (msg.data === 'already-open') {
+                setIsOriginal(false);
+            }
+        });
+
+        return () => {
+            channel.current?.close();
+            channel.current = null;
+        }
+    }, []);
 
     const history = useHistory();
     useEffect(() => {
@@ -141,6 +171,12 @@ export default function AnnotationPageComponent(props: Props): JSX.Element {
                 subTitle='Please, be sure information you tried to get exist and you have access'
             />
         );
+    }
+
+    if (!isOriginal) {
+        return <Layout>
+            <h2>Another Annotation Page already open in another tab/window.</h2>
+        </Layout>
     }
 
     return (
