@@ -226,6 +226,12 @@ function JobListComponent(props: Props): JSX.Element {
             key: 'duration',
             className: 'cvat-text-color',
         },
+        {
+            title: 'Phase',
+            dataIndex: 'phase',
+            key: 'phase',
+            className: 'cvat-text-color',
+        }
         // {
         //     title: 'Assignee',
         //     dataIndex: 'assignee',
@@ -268,6 +274,7 @@ function JobListComponent(props: Props): JSX.Element {
             started: `${created.format('MMMM Do YYYY HH:MM')}`,
             duration: `${moment.duration(now.diff(created)).humanize()}`,
             assignee: job,
+            phase: job.phase
         });
 
         return acc;
