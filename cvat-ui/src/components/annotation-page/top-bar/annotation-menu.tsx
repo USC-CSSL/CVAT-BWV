@@ -223,7 +223,7 @@ function AnnotationMenuComponent(props: Props & RouteComponentProps): JSX.Elemen
             {jobPhase === core.enums.Phase.PHASE1A && !jobInstance.tempPhase ?
                 <Menu.Item key={Actions.EDIT_PHASE0}>Edit Transcript</Menu.Item> : null}
             {jobPhase === core.enums.Phase.PHASE0 && jobInstance.tempPhase ?
-                <Menu.Item key={Actions.BACK_TO_PHASE1A}>Finish Editing Transcript</Menu.Item> : null}
+                <Menu.Item key={Actions.BACK_TO_PHASE1A}>Save Editid Transcript</Menu.Item> : null}
             {[JobStage.ANNOTATION, JobStage.REVIEW].includes(jobStage) && !jobInstance.temporaryPhase ?
                 <Menu.Item key={Actions.FINISH_JOB}>Finish the job</Menu.Item> : null}
             {jobStage === JobStage.ACCEPTANCE ?
