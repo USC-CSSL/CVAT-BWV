@@ -1573,7 +1573,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         url_path='saveTranscript')
     def saveTranscript(self, request, pk):
         db_job = self.get_object() # call check_object_permissions as well
-        jobid = db_job.id
+        taskid = db_job.task_id
         jobphase = db_job.phase
 
         transcript = request.data['transcript']
@@ -1583,7 +1583,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             print(valid_ser.errors)
             return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
-        with open(os.path.join('/home/django/data', 'data', str(jobid), 'compressed', '0.zip-transcript-'+jobphase+'.json'), 'w') as f:
+        with open(os.path.join('/home/django/data', 'data', str(taskid), 'compressed', '0.zip-transcript-'+jobphase+'.json'), 'w') as f:
             f.write(json.dumps(transcript))
 
         return HttpResponse(status=HTTPStatus.OK)
