@@ -51,7 +51,7 @@ function RightGroup(props: Props): JSX.Element {
                 <Icon component={FullscreenIcon} />
                 Fullscreen
             </Button>
-            <Button
+            {/* <Button
                 type='link'
                 className='cvat-annotation-header-info-button cvat-annotation-header-button'
                 onClick={showStatistics}
@@ -68,7 +68,7 @@ function RightGroup(props: Props): JSX.Element {
             >
                 <Icon component={FilterIcon} />
                 Filters
-            </Button>
+            </Button> */}
             <div>
                 {/* <Select
                     dropdownClassName='cvat-workspace-selector-dropdown'
