@@ -1,6 +1,7 @@
 import { fetchAudioAsync, fetchAudioPreviewAsync } from 'actions/annotation-actions';
 import { changeFrameSpeed } from 'actions/settings-actions';
-import React, { useEffect, useState, useRef } from 'react';
+import { number } from 'prop-types';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {connect} from 'react-redux';
 import { CombinedState } from 'reducers';
 
@@ -73,12 +74,28 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 }
 
 function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
-    const {audioData, audioFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame, fetchAudio, fetchPreview, setFrameSpeed} = props;
+    const {audioData, audioFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame, canvasIsReady, fetchAudio, fetchPreview, setFrameSpeed} = props;
     const [audioSlowDownFactor, setAudioSlowDownFactor] = useState(1);
     useEffect(() => {
         if (!audioData && !audioFetching) {
             fetchAudio();
             fetchPreview();
+        }
+    }, []);
+
+    const audioRateLimTimeout = useRef<null | NodeJS.Timeout>(null)
+    const audioPlaybackRateLimiter = useCallback((play) => {
+        audioRateLimTimeout.current && clearTimeout(audioRateLimTimeout.current);
+        if (!play) {
+            audioRateLimTimeout.current = setTimeout(() => {
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                }
+            }, 200);
+        } else {
+            if (audioRef.current) {
+                audioRef.current.play();
+            }
         }
     }, []);
 
@@ -132,7 +149,7 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         }
 
         if (playing && audioRef.current.paused) {
-            audioRef.current.play();
+            audioPlaybackRateLimiter(true);
         } else if (!playing) {
             const videoDuration = (stopFrame - startFrame) / frameRate;
             const audioDuration = audioRef.current.duration;
@@ -146,12 +163,12 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
     }, [frameNumber]);
 
     useEffect(() => {
-        if (audioRef.current) {
-            if (!playing) {
-                audioRef.current.pause();
-            }
+
+        if (!playing || !canvasIsReady) {
+            audioPlaybackRateLimiter(false);
         }
-    }, [playing])
+
+    }, [playing, canvasIsReady])
 
 
     const audioRef = useRef<HTMLAudioElement>(null);
