@@ -67,6 +67,7 @@ interface StateToProps {
     canvasInstance: Canvas | Canvas3d;
     forceExit: boolean;
     activeControl: ActiveControl;
+    changeTime: null | number;
 }
 
 interface DispatchToProps {
@@ -98,6 +99,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
                     filename: frameFilename,
                     number: frameNumber,
                     delay: frameDelay,
+                    changeTime,
                     fetching: frameFetching,
                 },
             },
@@ -144,6 +146,7 @@ function mapStateToProps(state: CombinedState): StateToProps {
         canvasInstance,
         forceExit,
         activeControl,
+        changeTime
     };
 }
 
@@ -537,6 +540,7 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
             frameFetching,
             playing,
             canvasIsReady,
+            changeTime,
             onSwitchPlay,
             onChangeFrame,
         } = this.props;
@@ -549,6 +553,14 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
                 }
                 if (frameSpeed === FrameSpeed.Fastest && frameNumber + 2 < jobInstance.stopFrame) {
                     framesSkipped = 2;
+                }
+
+                if (changeTime) {
+                    const curTime = new Date().getTime();
+                    const frameTime = (1000 / frameSpeed);
+                    if (curTime > changeTime + frameTime) {
+                        framesSkipped = Math.ceil((curTime - changeTime) / frameTime);
+                    }
                 }
 
                 setTimeout(() => {

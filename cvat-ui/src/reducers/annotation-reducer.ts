@@ -470,6 +470,10 @@ export default (state = defaultState, action: AnyAction): AnnotationState => {
                 ...state,
                 player: {
                     ...state.player,
+                    frame : {
+                        ...state.player.frame,
+                        changeTime: null,
+                    },
                     playing,
                 },
             };
