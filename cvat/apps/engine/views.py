@@ -1573,7 +1573,7 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         url_path='saveTranscript')
     def saveTranscript(self, request, pk):
         db_job = self.get_object() # call check_object_permissions as well
-        taskid = db_job.task_id
+        taskid = db_job.get_task_id()
         jobphase = db_job.phase
 
         transcript = request.data['transcript']
