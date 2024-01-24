@@ -214,6 +214,8 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
     private inputFrameRef: React.RefObject<Input>;
     private autoSaveInterval: number | undefined;
     private unblock: any;
+    private playbackInterval: number | null;
+    private playbackReferenceFrame: number;
 
     constructor(props: Props) {
         super(props);
@@ -222,6 +224,10 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
             prevButtonType: 'regular',
             nextButtonType: 'regular',
         };
+
+        this.playbackInterval = null;
+        this.playbackReferenceFrame = 0;
+
     }
 
     public componentDidMount(): void {
@@ -265,7 +271,19 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
             if (this.autoSaveInterval) window.clearInterval(this.autoSaveInterval);
             this.autoSaveInterval = window.setInterval(this.autoSave.bind(this), autoSaveInterval);
         }
-        this.play();
+
+
+        if (!this.props.playing && this.playbackInterval) {
+            window.clearInterval(this.playbackInterval);
+            this.playbackInterval = null;
+        }
+        else if (this.props.playing && !this.playbackInterval) {
+            this.playbackReferenceFrame = this.props.frameNumber;
+            let count = 0;
+            this.playbackInterval = window.setInterval(() => {
+                this.play(++count);
+            }, Math.ceil(1000 / this.props.frameSpeed));
+        }
     }
 
     public componentWillUnmount(): void {
@@ -306,6 +324,7 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
         } = this.props;
 
         if (playing) {
+
             onSwitchPlay(false);
         } else if (frameNumber < jobInstance.stopFrame) {
             onSwitchPlay(true);
@@ -531,7 +550,7 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
         return undefined;
     };
 
-    private play(): void {
+    private play(frameDiff: number): void {
         const {
             jobInstance,
             frameSpeed,
@@ -555,26 +574,24 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
                     framesSkipped = 2;
                 }
 
-                if (changeTime) {
-                    const curTime = new Date().getTime();
-                    const frameTime = (1000 / frameSpeed);
-                    if (curTime > changeTime + frameTime) {
-                        framesSkipped = Math.ceil((curTime - changeTime) / frameTime);
+                // if (changeTime) {
+                //     const curTime = new Date().getTime();
+                //     const frameTime = (1000 / frameSpeed);
+                //     if (curTime > changeTime + frameTime) {
+                //         framesSkipped = Math.ceil((curTime - changeTime) / frameTime);
+                //     }
+                // }
+                // const curTime = new Date().getTime();
+
+                const { playing: stillPlaying } = this.props;
+                if (stillPlaying) {
+                    if (isAbleToChangeFrame()) {
+                        onChangeFrame(this.playbackReferenceFrame + frameDiff, stillPlaying,  1);
+                    } else if (jobInstance.dimension === DimensionType.DIMENSION_2D) {
+                        onSwitchPlay(false);
                     }
                 }
 
-                setTimeout(() => {
-                    const { playing: stillPlaying } = this.props;
-                    if (stillPlaying) {
-                        if (isAbleToChangeFrame()) {
-                            onChangeFrame(frameNumber + 1 + framesSkipped, stillPlaying, framesSkipped + 1);
-                        } else if (jobInstance.dimension === DimensionType.DIMENSION_2D) {
-                            onSwitchPlay(false);
-                        } else {
-                            setTimeout(() => this.play(), frameDelay);
-                        }
-                    }
-                }, frameDelay);
             } else {
                 onSwitchPlay(false);
             }
