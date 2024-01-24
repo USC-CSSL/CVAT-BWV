@@ -176,7 +176,7 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
         if (audioPreview.length) {
             const offScreenCVS = document.createElement('canvas');
             const offScreenCTX = offScreenCVS.getContext("2d");
-            const mx = Math.max(...audioPreview);
+            const mx = audioPreview.reduce((res,cur) => res < cur ? cur : res , -Infinity);
             offScreenCVS.width =  (stopFrame - startFrame)*MULTIPLIER_WIDTH;
             offScreenCVS.height = 512;
 
