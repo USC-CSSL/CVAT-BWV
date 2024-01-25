@@ -215,7 +215,6 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
     private autoSaveInterval: number | undefined;
     private unblock: any;
     private playbackInterval: number | null;
-    private playbackReferenceFrame: number;
 
     constructor(props: Props) {
         super(props);
@@ -226,7 +225,6 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
         };
 
         this.playbackInterval = null;
-        this.playbackReferenceFrame = 0;
 
     }
 
@@ -277,17 +275,19 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
             window.clearInterval(this.playbackInterval);
             this.playbackInterval = null;
         }
-        else if (this.props.playing && !this.playbackInterval) {
-            this.playbackReferenceFrame = this.props.frameNumber;
+        else if (prevProps.frameSpeed != this.props.frameSpeed || (this.props.playing && !this.playbackInterval)) {
+            this.playbackInterval && window.clearInterval(this.playbackInterval);
+            const playbackReferenceFrame = this.props.frameNumber;
             let count = 0;
             this.playbackInterval = window.setInterval(() => {
-                this.play(++count);
+                this.play(playbackReferenceFrame + ++count);
             }, Math.ceil(1000 / this.props.frameSpeed));
         }
     }
 
     public componentWillUnmount(): void {
         window.clearInterval(this.autoSaveInterval);
+        this.playbackInterval && window.clearInterval(this.playbackInterval);
         window.removeEventListener('beforeunload', this.beforeUnloadCallback);
         this.unblock();
     }
@@ -544,17 +544,18 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
             return confirmationMessage;
         }
 
+        this.playbackInterval && window.clearInterval(this.playbackInterval);
+
         if (forceExit) {
             setForceExitAnnotationFlag(false);
         }
         return undefined;
     };
 
-    private play(frameDiff: number): void {
+    private play(frameNumber: number): void {
         const {
             jobInstance,
             frameSpeed,
-            frameNumber,
             frameDelay,
             frameFetching,
             playing,
@@ -566,13 +567,13 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
 
         if (playing && canvasIsReady && !frameFetching) {
             if (frameNumber < jobInstance.stopFrame) {
-                let framesSkipped = 0;
-                if (frameSpeed === FrameSpeed.Fast && frameNumber + 1 < jobInstance.stopFrame) {
-                    framesSkipped = 1;
-                }
-                if (frameSpeed === FrameSpeed.Fastest && frameNumber + 2 < jobInstance.stopFrame) {
-                    framesSkipped = 2;
-                }
+                // let framesSkipped = 0;
+                // if (frameSpeed === FrameSpeed.Fast && frameNumber + 1 < jobInstance.stopFrame) {
+                //     framesSkipped = 1;
+                // }
+                // if (frameSpeed === FrameSpeed.Fastest && frameNumber + 2 < jobInstance.stopFrame) {
+                //     framesSkipped = 2;
+                // }
 
                 // if (changeTime) {
                 //     const curTime = new Date().getTime();
@@ -584,9 +585,10 @@ class AnnotationTopBarContainer extends React.PureComponent<Props, State> {
                 // const curTime = new Date().getTime();
 
                 const { playing: stillPlaying } = this.props;
+
                 if (stillPlaying) {
                     if (isAbleToChangeFrame()) {
-                        onChangeFrame(this.playbackReferenceFrame + frameDiff, stillPlaying,  1);
+                        onChangeFrame(frameNumber, stillPlaying,  1);
                     } else if (jobInstance.dimension === DimensionType.DIMENSION_2D) {
                         onSwitchPlay(false);
                     }

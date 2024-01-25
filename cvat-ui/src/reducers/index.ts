@@ -774,7 +774,7 @@ export enum GridColor {
 export enum FrameSpeed {
     Fastest = 100,
     Fast = 50,
-    Usual = 25,
+    Usual = 12,
     Slow = 15,
     Slower = 12,
     Slowest = 1,

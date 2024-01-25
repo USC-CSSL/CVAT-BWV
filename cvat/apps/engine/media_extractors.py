@@ -412,9 +412,12 @@ class VideoReader(IMediaReader):
             dimension=dimension,
         )
 
+        self.desired_fps = 12
+        self.guessed_fps = 30
+
     def _has_frame(self, i):
         if i >= self._start:
-            if (i - self._start) % self._step == 0:
+            if (i - self._start) % (self._step if self._step > 1 else (self.guessed_fps // self.desired_fps)) == 0:
                 if self._stop is None or i < self._stop:
                     return True
 
@@ -424,6 +427,8 @@ class VideoReader(IMediaReader):
         frame_num = 0
         for packet in container.demux():
             if packet.stream.type == 'video':
+                if packet.stream.guessed_rate:
+                    self.guessed_fps = packet.stream.guessed_rate
                 for image in packet.decode():
                     frame_num += 1
                     if self._has_frame(frame_num - 1):
@@ -682,7 +687,7 @@ class Mpeg4ChunkWriter(IChunkWriter):
         # translate inversed range [1:100] to [0:51]
         quality = round(51 * (100 - quality) / 99)
         super().__init__(quality)
-        self._output_fps = 25
+        self._output_fps = 15
         self._sample_rate = 44100
         self._audio_codec = 'aac'
         self._samples_per_frame = self._sample_rate // self._output_fps

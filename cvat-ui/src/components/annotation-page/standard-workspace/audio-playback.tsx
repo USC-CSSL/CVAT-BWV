@@ -75,8 +75,12 @@ function mapDispatchToProps(dispatch: any): DispatchToProps {
 
 function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
     const {audioData, audioFetching, playing, frameNumber, frameSpeed, startFrame, stopFrame, canvasIsReady, fetchAudio, fetchPreview, setFrameSpeed} = props;
-    const [audioSlowDownFactor, setAudioSlowDownFactor] = useState(1);
+
+    const trueFrameRate = useRef<number | null>(null);
+    const audioSlowdownFactor = useRef(1);
     useEffect(() => {
+        trueFrameRate.current = null;
+        audioSlowdownFactor.current = 1;
         if (!audioData && !audioFetching) {
             fetchAudio();
             fetchPreview();
@@ -103,7 +107,6 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         if (!audioFetching && audioData) {
             if (audioRef.current) {
                 audioRef.current.src = URL.createObjectURL(new Blob([audioData], {type: 'audio/mp3'}));
-
             }
         }
     }, [audioData, audioFetching]);
@@ -112,6 +115,8 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         if (audioRef.current?.src) {
             audioRef.current.pause();
             URL.revokeObjectURL(audioRef.current.src);
+            trueFrameRate.current = null;
+            audioSlowdownFactor.current = 1;
         }
     }, []);
 
@@ -119,29 +124,33 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         if (!audioRef.current || !audioRef.current.duration) {
             return;
         }
-        const frameRate = (stopFrame - startFrame) / audioRef.current.duration;
-        if (frameSpeed != frameRate) {
-            setFrameSpeed(frameRate);
+        const frameRateExpected = (stopFrame - startFrame) / audioRef.current.duration;
+
+        const frameRateTrue = trueFrameRate.current ? trueFrameRate.current : frameSpeed;
+
+        if (frameRateTrue != frameRateExpected) {
+            trueFrameRate.current = frameRateExpected;
+            setFrameSpeed(frameRateExpected);
         }
         if (frameNumber % 200 === 0) {
             if (playing) {
 
 
-                const videoCurTime = (frameNumber - startFrame) / frameRate;
+                const videoCurTime = (frameNumber - startFrame) / frameRateExpected;
                 const audioCurrentTime = audioRef.current.currentTime;
 
                 if (audioCurrentTime - videoCurTime > 0.1) {
 
                     console.log('video lag', audioCurrentTime - videoCurTime)
-                    setAudioSlowDownFactor(audioSlowDownFactor * 0.98);
-                    audioRef.current.playbackRate = audioSlowDownFactor * 0.98;
+                    audioSlowdownFactor.current = audioSlowdownFactor.current * 0.97;
+                    audioRef.current.playbackRate = audioSlowdownFactor.current;
 
                     audioRef.current.currentTime = videoCurTime;
                 } else if (audioCurrentTime - videoCurTime < -0.1) {
 
                     console.log('audio lag', audioCurrentTime - videoCurTime)
-                    setAudioSlowDownFactor(audioSlowDownFactor * 1.02);
-                    audioRef.current.playbackRate = audioSlowDownFactor * 1.02;
+                    audioSlowdownFactor.current = audioSlowdownFactor.current * 1.03;
+                    audioRef.current.playbackRate = audioSlowdownFactor.current;
 
                     audioRef.current.currentTime = videoCurTime;
                 }
@@ -151,12 +160,8 @@ function AudioPlaybackComponent(props: StateToProps & DispatchToProps) {
         if (playing && audioRef.current.paused) {
             audioPlaybackRateLimiter(true);
         } else if (!playing) {
-            const videoDuration = (stopFrame - startFrame) / frameRate;
-            const audioDuration = audioRef.current.duration;
 
-            audioRef.current.playbackRate = audioDuration / videoDuration * audioSlowDownFactor;
-
-            const videoCurTime = (frameNumber - startFrame) / frameRate;
+            const videoCurTime = (frameNumber - startFrame) / frameRateExpected;
             audioRef.current.currentTime = videoCurTime;
         }
 
