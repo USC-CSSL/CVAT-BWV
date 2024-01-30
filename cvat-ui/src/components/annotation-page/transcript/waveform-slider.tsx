@@ -134,6 +134,7 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
     const [leftBound, setLeftBound] = useState(-1);
     const [rightBound, setRightBound] = useState(-1);
     const [dragging, setDragging] = useState<String | null>(null);
+    const frameToTrascriptSegmentMap = useRef<number[]>([]);
 
 
     useEffect(() => {
@@ -167,7 +168,21 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
 
     useEffect(() => {
         setActivatedIdx(-1);
-    }, [transcriptData])
+        if (transcriptData?.segments?.length) {
+            frameToTrascriptSegmentMap.current = new Array(stopFrame - startFrame + 1).fill(-1);
+            transcriptData.segments.forEach((segment: any, index: number) => {
+                const sgmtStartFrame = startFrame + Math.ceil(segment.start * frameSpeed);
+                const sgmtEndFrame = Math.max(startFrame + Math.ceil(segment.end * frameSpeed), stopFrame);
+                for (let i = sgmtStartFrame; i<=sgmtEndFrame; i++) {
+                    frameToTrascriptSegmentMap.current[i] = index;
+                }
+            })
+
+
+        } else {
+            frameToTrascriptSegmentMap.current = [];
+        }
+    }, [transcriptData, frameSpeed])
 
 
 
@@ -200,13 +215,7 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
 
 
     const sliderWidth = sliderRef.current?.clientWidth || 0;
-    const currentTimeInSeconds = (frameNumber - startFrame) / frameSpeed;
-    let currentIdx = -1;
-    transcriptData &&  transcriptData.segments.forEach((segment: any, index: number) => {
-        if (currentTimeInSeconds >= segment.start && currentTimeInSeconds <= segment.end) {
-            currentIdx = index;
-        }
-    });
+    const currentIdx = frameToTrascriptSegmentMap.current[frameNumber] != null ? frameToTrascriptSegmentMap.current[frameNumber] : -1;
     return (
         <>
 
