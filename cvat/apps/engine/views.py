@@ -1573,7 +1573,6 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
         url_path='saveTranscript')
     def saveTranscript(self, request, pk):
         db_job = self.get_object() # call check_object_permissions as well
-        taskid = db_job.get_task_id()
         jobphase = db_job.phase
 
         transcript = request.data['transcript']
@@ -1583,10 +1582,26 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             print(valid_ser.errors)
             return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
-        with open(os.path.join('/home/django/data', 'data', str(taskid), 'compressed', '0.zip-transcript-'+jobphase+'.json'), 'w') as f:
+        frame_provider = FrameProvider(db_job.segment.task.data, db_job.segment.task.dimension)
+        path = os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED) + '-transcript-'+jobphase+'.json')
+
+        with open(path, 'w') as f:
             f.write(json.dumps(transcript))
 
         return HttpResponse(status=HTTPStatus.OK)
+
+    # @action(detail=True, methods=['GET'], serializer_class=None,
+    #     url_path='getWaveformImage')
+    # def getWaveformImage(self, request, pk):
+    #     db_job = self.get_object() # call check_object_permissions as well
+
+    #     frame_provider = FrameProvider(db_job.segment.task.data, db_job.segment.task.dimension)
+    #     path = os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED) + '-waveform.png')
+
+
+    #     with open(path, 'rb') as f:
+    #         return HttpResponse(f.read(), content_type="image/png")
+
 
 
     @extend_schema(summary='Method provides a meta information about media files which are related with the job',
