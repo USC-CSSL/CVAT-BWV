@@ -10,7 +10,7 @@ import pandas as pd
 
 def get_pandas(result):
   boxes_list = result.boxes.data.tolist()
-  columns = ['xmin', 'ymin', 'xmax', 'ymax', 'confidence']
+  columns = ['xmin', 'ymin', 'xmax', 'ymax', 'confidence', 'class_id']
 
   for i in boxes_list:
     i[:4] = [round(i, 1) for i in i[:4]]
