@@ -611,16 +611,16 @@ class DataChunkGetter:
                 return sendfile(request, path)
             if self.type == 'audio':
 
-                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-encoded.m4a')
+                path = os.path.join(os.path.split(os.path.realpath(frame_provider.get_chunk(self.number, self.quality)))[0] , 'encoded.m4a')
                 return sendfile(request, path)
             if self.type == 'waveform':
-                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-waveformvals')
+                path = os.path.join(os.path.split(os.path.realpath(frame_provider.get_chunk(self.number, self.quality)))[0] , 'waveformvals')
                 data = []
                 with open(path, 'r') as f:
                     data = f.readlines()
                 return HttpResponse(data, content_type='application/json')
             if self.type == 'transcript':
-                path = os.path.realpath(frame_provider.get_chunk(self.number, self.quality) + '-transcript-'+phase+'.json')
+                path = os.path.join(os.path.split(os.path.realpath(frame_provider.get_chunk(self.number, self.quality)))[0] , 'transcript-'+phase+'.json')
                 data = {}
                 with open(path, 'r') as f:
                     data = f.readlines()
@@ -1583,24 +1583,24 @@ class JobViewSet(viewsets.GenericViewSet, mixins.ListModelMixin,
             return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
         frame_provider = FrameProvider(db_job.segment.task.data, db_job.segment.task.dimension)
-        path = os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED) + '-transcript-'+jobphase+'.json')
+        path = os.path.join(os.path.split(os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED)))[0] , 'transcript-'+jobphase+'.json')
 
         with open(path, 'w') as f:
             f.write(json.dumps(transcript))
 
         return HttpResponse(status=HTTPStatus.OK)
 
-    # @action(detail=True, methods=['GET'], serializer_class=None,
-    #     url_path='getWaveformImage')
-    # def getWaveformImage(self, request, pk):
-    #     db_job = self.get_object() # call check_object_permissions as well
+    @action(detail=True, methods=['GET'], serializer_class=None,
+        url_path='getWaveformImage')
+    def getWaveformImage(self, request, pk):
+        db_job = self.get_object() # call check_object_permissions as well
 
-    #     frame_provider = FrameProvider(db_job.segment.task.data, db_job.segment.task.dimension)
-    #     path = os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED) + '-waveform.png')
+        frame_provider = FrameProvider(db_job.segment.task.data, db_job.segment.task.dimension)
+        path = os.path.join(os.path.split(os.path.realpath(frame_provider.get_chunk(0, FrameProvider.Quality.COMPRESSED)))[0], 'waveform.png')
 
 
-    #     with open(path, 'rb') as f:
-    #         return HttpResponse(f.read(), content_type="image/png")
+        with open(path, 'rb') as f:
+            return HttpResponse(f.read(), content_type="image/png")
 
 
 

@@ -733,7 +733,7 @@ class Mpeg4ChunkWriter(IChunkWriter):
 
     def save_audio(self, packets, path):
         output_container, stream = self._create_audio_container(
-            path=path+'-encoded.m4a',
+            path=os.path.join( os.path.split(path)[0], 'encoded.m4a'),
             rate=self._sample_rate,
         )
 
@@ -751,8 +751,36 @@ class Mpeg4ChunkWriter(IChunkWriter):
         for packet in stream.encode():
             output_container.mux(packet)
 
-        with open(path + '-waveformvals', 'w') as f:
+        with open(os.path.join( os.path.split(path)[0], 'waveformvals'), 'w') as f:
             f.write(json.dumps(values))
+
+        import math
+        from PIL import Image, ImageDraw
+        from PIL import ImagePath
+
+        MULTIPLIER_WIDTH = 5
+        GROUP = 10
+        WIDTH = (len(values)//GROUP + 1 if (len(values) % GROUP) != 0 else 0)*MULTIPLIER_WIDTH
+
+        HEIGHT = 512
+        each_size = MULTIPLIER_WIDTH
+        mx = max(values)
+
+        img = Image.new("RGB", [WIDTH, HEIGHT], "#eeeeee")
+        img1 = ImageDraw.Draw(img)
+        j = 0
+        for i in range(0, len(values), GROUP):
+            height = ((sum(map(abs, values[i:min(len(values), i+GROUP)]))/min(GROUP, len(values)-GROUP)) / mx) * (HEIGHT // 2)
+            # print(height)
+            xy = [(j*each_size, HEIGHT//2),
+                    (j * each_size  + each_size // 2, HEIGHT // 2 - height),
+                    (j * each_size  + each_size, HEIGHT // 2),
+                    (j * each_size  + each_size // 2, HEIGHT // 2 + height),]
+            img1.polygon(xy, fill ="#444444")
+            j+=1
+
+        img.save(os.path.join( os.path.split(path)[0], 'waveform.png'))
+
 
         output_container.close()
 

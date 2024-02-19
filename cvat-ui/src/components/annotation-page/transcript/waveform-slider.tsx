@@ -111,9 +111,6 @@ interface Props {
 function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Element {
 
 
-
-    const [imageData, setImageData] = useState('');
-
     const {
         startFrame, stopFrame, frameNumber,
         onSwitchPlay,
@@ -185,35 +182,6 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
     }, [transcriptData, frameSpeed])
 
 
-
-
-    useEffect(() => {
-        if (audioPreview.length) {
-            const offScreenCVS = document.createElement('canvas');
-            const offScreenCTX = offScreenCVS.getContext("2d");
-            const mx = audioPreview.reduce((res,cur) => res < cur ? cur : res , -Infinity);
-            offScreenCVS.width =  (stopFrame - startFrame)*MULTIPLIER_WIDTH;
-            offScreenCVS.height = 512;
-
-            const num = audioPreview.length;
-            const eachSize = offScreenCVS.width / num;
-
-            for (let i = 0; i < num; i++) {
-                const height = (audioPreview[i]) / mx * (offScreenCVS.height / 2);
-                offScreenCTX?.beginPath();
-
-                offScreenCTX?.moveTo(i * eachSize, (offScreenCVS.height/2));
-                offScreenCTX?.lineTo(i * eachSize  + eachSize / 2, (offScreenCVS.height / 2) - height);
-                offScreenCTX?.lineTo(i * eachSize  + eachSize, (offScreenCVS.height / 2));
-                offScreenCTX?.lineTo(i * eachSize  + eachSize / 2, (offScreenCVS.height / 2)  + height);
-                offScreenCTX?.fill();
-            }
-
-            setImageData(offScreenCVS.toDataURL());
-        }
-    }, [audioPreview]);
-
-
     const sliderWidth = sliderRef.current?.clientWidth || 0;
     const currentIdx = frameToTrascriptSegmentMap.current[frameNumber] != null ? frameToTrascriptSegmentMap.current[frameNumber] : -1;
     return (
@@ -222,7 +190,7 @@ function WaveformSlider(props: StateToProps & DispatchToProps & Props): JSX.Elem
             <div style={{width: '100%', margin: 'auto', height: '100%', position: 'relative', backgroundColor: '#eee', overflowX: 'clip'}}>
                 <div style={{position: 'absolute', top: 0, left: '50%', width: '1px', height: '100%', backgroundColor: 'red'}}></div>
                 <div style={{
-                    backgroundImage: `url("${imageData}")`,
+                    backgroundImage: `url("/api/jobs/${jobInstance.id}/getWaveformImage")`,
                     backgroundColor: '#00000000',
                     backgroundSize: `${(stopFrame - startFrame)*MULTIPLIER_WIDTH}px 100%`,
                     backgroundRepeat: 'no-repeat',

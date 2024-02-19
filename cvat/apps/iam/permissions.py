@@ -1243,6 +1243,7 @@ class JobPermission(OpenPolicyAgentPermission):
             ('dataset_export', 'GET'): Scopes.EXPORT_DATASET,
             ('preview', 'GET'): Scopes.VIEW,
             ('saveTranscript', 'POST'): Scopes.UPDATE_ANNOTATIONS,
+            ('getWaveformImage', 'GET'): Scopes.VIEW_ANNOTATIONS,
         }.get((view.action, request.method))
 
         scopes = []
