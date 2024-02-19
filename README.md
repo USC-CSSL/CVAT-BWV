@@ -1,11 +1,21 @@
-
-
 # CVAT-BWV: A Web-Based Video Annotation Platform for Police Body-Worn Video
 
-CVAT-BVW is an interactive video annotation focused on police body worn videos tool and is based on OpenCV's [CVAT](https://github.com/opencv/cvat)  
-As a multi-modal platform, it supports annotations for transcripts, auditory content, and visual entities, all of which are enhanced by AI-assisted annotation tools
+![](./assets/ui-screenshot-annotate-illustrator.png)
+
+## Abstract
+
+We introduce an open-source platform for annotating body-worn video (BWV) footage aimed at enhancing transparency and accountability in policing. Despite the widespread adoption of BWVs in police departments, analyzing the vast amount of footage generated has presented significant challenges. This is primarily due to resource constraints, the sensitive nature of the data, which limits widespread access, and consequently, lack of annotations for training machine learning models. Our platform, called CVAT-BWV, offers a secure, locally hosted annotation environment that integrates several AI tools to assist in annotating multimodal data. With features such as automatic speech recognition, speaker diarization, object detection, and face recognition, CVAT-BWV aims to reduce the manual annotation workload, improve annotation quality, and allow for capturing perspectives from a diverse population of annotators. This tool aims to streamline the collection of annotations and the building of models, enhancing the use of BWV data for oversight and learning purposes to uncover insights into police-civilian interactions.
+
+We have based our framework on [Computer Vision Annotation Tool (CVAT)](https://github.com/opencv/cvat), as it is an open-source annotation software that natively supports object detection and image classification. Moreover, it offers the flexibility of local hosting and the customizability inherent in open-source programs.
+
+## Prerequisites
+
+The only prerequisite for running the platform is to have Docker and Docker Compose installed on your machine. If you don't have Docker installed, you can follow the instructions [here](https://docs.docker.com/get-docker/).
+
+## Getting Started
 
 ### Installation
+
 ```sh
 # download and install nuclio to run inference on the models
 wget https://github.com/nuclio/nuclio/releases/download/1.8.14/nuctl-1.8.14-linux-amd64
@@ -23,52 +33,70 @@ nuctl get functions
 docker compose -f docker-compose.yml -f components/serverless/docker-compose.serverless.yml up -d
 ```
 
-
 ### Creating an Admin user
-Run
+
+You can use the following command to create an admin user. After running the command, you will be prompted to enter a username, email, and password for the admin user.
+
 ```sh
 docker exec -it cvat_server bash -ic 'python3 ~/manage.py createsuperuser'
 ```
-and set the new credentials when prompted.
 
+### Hosting the platform on custom domain / IP
 
-### Hosting on custom domain / IP
-Set this before doing docker compose up
+You can host the platform on a custom domain or IP by setting the `CVAT_HOST` environment variable.
+
 ```sh
 export CVAT_HOST=<YOUR-HOST>
 ```
 
-# UI
-#### Login Screen
-![](./assets/login.png)
+### Task Creation
 
-#### Annotation Screen
-![](./assets/ui-screenshot-annotate-illustrator.png)
+As an admin user, you can create a new task by clicking on the `+` button on the top right of the dashboard.
 
-# Features
-### Audio/Video Annotation
-![](./assets/video-annotation.png)
-Users can draw bounding boxes or use the auto annotation tool to put annotation tags on the video.
-These tags for the purposes of Police Body Worn Video could be `Police Officer`, `Police Officer (Primary)`, `Civilian`, `Police Car`, `Civilian Car`, etc
+<!-- TODO: Put the screenshot here -->
 
-On every new person annotation added, the face recognition model will run automatically to match it with previous tags. It will show an alert popup if it detects a match.
+### Adding diarized transcripts for the task
 
-![](./assets/audio-annotation.png)
+For adding diarized transcripts, please follow the steps below:
+
+<!-- TODO: -->
+
+# Features and Workflow of the Platform
+
+<!-- TODO: Put the workflow image here -->
+
+### 1. Audio/Video Annotation
+
+Annotators can draw bounding boxes or use the auto annotation tool to put annotation tags on the video.
+These tags for the purposes of Police Body Worn Video could be `Police Officer`, `Police Officer (Primary)`, `Civilian`, `Police Car`, `Civilian Car`, etc.
+
+Whenever a new person bounding box is added, the face recognition module will run automatically to match it with previous bounding boxes. It will show an alert popup if it detects a match.
+
 Users can add audio annotations by clicking the dropdown on the top of the video. This reveals the audio annotation speace, where new annotation objects can be added by clicking the `+`.
-### Transcript Annotation
-![](./assets/transcript.png)
-The annotation page displays the (at-first auto-generated) transcript in the Transcript Sidebar.
-Every utterance of the transcript can be edited. A user can:
-1. edit the text of an utternace
-2. change the speaker of the utternace
-3. add an utterance
-4. delete an utterance
 
-Users can map the audio/video annotation tags to the transcript utterances by right-clicking the avatars on the top of each utterace and then selecting the approapriate annotation object.
+<!-- TODO: Change this screenshot -->
+
+![](./assets/video-annotation.png)
+
+<!-- Delete this screenshot and merge it with the upper one![](./assets/audio-annotation.png) -->
+
+### 2. Transcript Annotation
+
+The interactive transcript sidebar shows the (at-first auto-generated) transcripts.
+Every utterance of the transcript can be edited. An annotator can:
+
+1. Edit the text of an utternace
+2. Change the speaker of the utternace
+3. Add an utterance
+4. Delete an utterance
+
+<!-- TODO: Make this more squarish :)) -->
+<img src="./assets/transcript.png" alt="transcript" style="height:500px">
+
+Users can map the audio/video annotation tags to the transcript utterances by right-clicking the avatars on the top of each utterace and then selecting the approapriate annotation object. Once a mapping is applied for one of the utterances, the same mapping is automatically applied to all utterances of that color.
 ![](./assets/annotation-utterance-mapping.png)
-Once a mapping is applied for one of the utterances, the same mapping is automatically applied to all utterances of that color.
 
-### Questionnaire Annotation
+### 3. Questionnaire Annotation
+
+The platform can serve a questionnaire to be answered for the annotation objects created in the previous steps.
 ![](./assets/questionnaire.png)
-The platform can serve a questionnaire to be answered for the annotation tags.
-
