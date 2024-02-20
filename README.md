@@ -8,6 +8,9 @@ We introduce an open-source platform for annotating body-worn video (BWV) footag
 
 We have based our framework on [Computer Vision Annotation Tool (CVAT)](https://github.com/opencv/cvat), as it is an open-source annotation software that natively supports object detection and image classification. Moreover, it offers the flexibility of local hosting and the customizability inherent in open-source programs.
 
+## Demo
+https://www.youtube.com/watch?v=LyfLsG8OQug
+
 ## Prerequisites
 
 The only prerequisite for running the platform is to have Docker and Docker Compose installed on your machine. If you don't have Docker installed, you can follow the instructions [here](https://docs.docker.com/get-docker/).
@@ -52,8 +55,7 @@ export CVAT_HOST=<YOUR-HOST>
 ### Task Creation
 
 As an admin user, you can create a new task by clicking on the `+` button on the top right of the dashboard.
-
-<!-- TODO: Put the screenshot here -->
+![](./assets/create-task.png)
 
 ### Adding diarized transcripts for the task
 
@@ -63,7 +65,7 @@ For adding diarized transcripts, please follow the steps below:
 
 # Features and Workflow of the Platform
 
-<!-- TODO: Put the workflow image here -->
+![](./assets/figure2.png)
 
 ### 1. Audio/Video Annotation
 
@@ -72,13 +74,11 @@ These tags for the purposes of Police Body Worn Video could be `Police Officer`,
 
 Whenever a new person bounding box is added, the face recognition module will run automatically to match it with previous bounding boxes. It will show an alert popup if it detects a match.
 
-Users can add audio annotations by clicking the dropdown on the top of the video. This reveals the audio annotation speace, where new annotation objects can be added by clicking the `+`.
+Users can add audio annotations by clicking the dropdown on the top of the video. This reveals the audio annotation space, where new annotation objects can be added by clicking the `+`.
 
-<!-- TODO: Change this screenshot -->
 
 ![](./assets/video-annotation.png)
 
-<!-- Delete this screenshot and merge it with the upper one![](./assets/audio-annotation.png) -->
 
 ### 2. Transcript Annotation
 
@@ -90,7 +90,6 @@ Every utterance of the transcript can be edited. An annotator can:
 3. Add an utterance
 4. Delete an utterance
 
-<!-- TODO: Make this more squarish :)) -->
 <img src="./assets/transcript.png" alt="transcript" style="height:500px">
 
 Users can map the audio/video annotation tags to the transcript utterances by right-clicking the avatars on the top of each utterace and then selecting the approapriate annotation object. Once a mapping is applied for one of the utterances, the same mapping is automatically applied to all utterances of that color.
